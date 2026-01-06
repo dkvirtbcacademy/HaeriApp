@@ -1,0 +1,50 @@
+//
+//  AppCoordinator.swift
+//  Haeri
+//
+//  Created by kv on 05.01.26.
+//
+
+import Foundation
+import Combine
+
+@MainActor
+final class AppCoordinator: ObservableObject {
+    
+    enum RootState {
+        case authenticated
+        case unauthenticated
+    }
+    
+    @Published private(set) var rootState: RootState = .unauthenticated
+    @Published var loginCoordinator = LoginCoordinator()
+    @Published var mainTabCoordinator = MainTabCoordinator()
+    
+    private let authManager: AuthManager
+    private var cancellables = Set<AnyCancellable>()
+    
+    init(authManager: AuthManager) {
+        self.authManager = authManager
+        self.rootState = authManager.isLoggedIn ? .authenticated : .unauthenticated
+        observeAuthChanges()
+    }
+    
+    private func observeAuthChanges() {
+        authManager.$isLoggedIn
+            .sink { [weak self] isLoggedIn in
+                self?.rootState = isLoggedIn ? .authenticated : .unauthenticated
+            }
+            .store(in: &cancellables)
+    }
+    
+    private func updateRootState() {
+        rootState = authManager.isLoggedIn ? .authenticated : .unauthenticated
+    }
+    
+    func logout() {
+        authManager.logout()
+
+        loginCoordinator = LoginCoordinator()
+        mainTabCoordinator = MainTabCoordinator()
+    }
+}
