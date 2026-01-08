@@ -37,83 +37,63 @@ private struct AdaptiveBackgroundView<Content: View>: View {
     var body: some View {
         content
             .background(
-                LinearGradient(
-                    gradient: Gradient(colors: gradientColors(for: effectiveValue)),
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-                .ignoresSafeArea()
-                .animation(.easeInOut(duration: 0.8), value: effectiveValue)
+                backgroundColor(for: effectiveValue)
+                    .ignoresSafeArea()
+                    .animation(.easeInOut(duration: 0.8), value: effectiveValue)
             )
     }
     
-    private func gradientColors(for value: Int) -> [Color] {
+    private func backgroundColor(for value: Int) -> Color {
         switch value {
         case ..<50:
-            return [Color("Light Gradient 1"), Color("Light Gradient 2")]
+            return Color("Background Light")
         case 50..<100:
-            return [Color("Moderate Gradient 1"), Color("Moderate Gradient 2")]
+            return Color("Background Moderate")
         default:
-            return [Color("Dark Gradient 1"), Color("Dark Gradient 2")]
+            return Color("Background Dark")
         }
     }
 }
 
 extension UIViewController {
     func addAdaptiveBackground(value: Int, animated: Bool = true) {
-        let gradientLayer: CAGradientLayer
+        let colorView: UIView
         
-        if let existingLayer = view.layer.sublayers?.first(where: { $0 is CAGradientLayer }) as? CAGradientLayer {
-            gradientLayer = existingLayer
+        if let existingView = view.subviews.first(where: { $0.tag == 999 }) {
+            colorView = existingView
         } else {
-            gradientLayer = CAGradientLayer()
-            gradientLayer.startPoint = CGPoint(x: 0, y: 0)
-            gradientLayer.endPoint = CGPoint(x: 1, y: 1)
-            view.layer.insertSublayer(gradientLayer, at: 0)
+            colorView = UIView()
+            colorView.tag = 999
+            view.insertSubview(colorView, at: 0)
         }
         
-        gradientLayer.frame = view.bounds
+        colorView.frame = view.bounds
         
-        let newColors = gradientColors(for: value)
+        let newColor = backgroundColor(for: value)
         
         if animated {
-            gradientLayer.removeAnimation(forKey: "colorChange")
-            
-            let animation = CABasicAnimation(keyPath: "colors")
-            animation.fromValue = gradientLayer.colors ?? gradientLayer.colors
-            animation.toValue = newColors
-            animation.duration = 0.8
-            animation.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
-            
-            gradientLayer.colors = newColors
-            
-            gradientLayer.add(animation, forKey: "colorChange")
+            UIView.animate(withDuration: 0.8, delay: 0, options: [.curveEaseInOut], animations: {
+                colorView.backgroundColor = newColor
+            })
         } else {
-            gradientLayer.colors = newColors
+            colorView.backgroundColor = newColor
         }
     }
     
-    func updateGradientFrame() {
-        if let gradientLayer = view.layer.sublayers?.first(where: { $0 is CAGradientLayer }) {
-            gradientLayer.frame = view.bounds
+    func updateBackgroundFrame() {
+        if let colorView = view.subviews.first(where: { $0.tag == 999 }) {
+            colorView.frame = view.bounds
         }
     }
     
-    private func gradientColors(for value: Int) -> [CGColor] {
-        let colorPair: (String, String)
-        
+    private func backgroundColor(for value: Int) -> UIColor {
         switch value {
         case ..<50:
-            colorPair = ("Light Gradient 1", "Light Gradient 2")
+            return UIColor(named: "Background Light") ?? UIColor.systemGreen
         case 50..<100:
-            colorPair = ("Moderate Gradient 1", "Moderate Gradient 2")
+            return UIColor(named: "Background Moderate") ?? UIColor.systemOrange
         default:
-            colorPair = ("Dark Gradient 1", "Dark Gradient 2")
+            return UIColor(named: "Background Dark") ?? UIColor.systemRed
         }
-        
-        return [
-            UIColor(named: colorPair.0)?.cgColor ?? UIColor.systemGray.cgColor,
-            UIColor(named: colorPair.1)?.cgColor ?? UIColor.systemGray.cgColor
-        ]
     }
 }

@@ -10,12 +10,14 @@ import SwiftUI
 struct HomeFlowView: View {
     
     @ObservedObject var coordinator: HomeCoordinator
+    @ObservedObject var airPollutionManager: AirPollutionManager
     @Environment(\.airQuality) var airQuality
     
     var body: some View {
         NavigationStack(path: $coordinator.path) {
             HomePage(
                 coordinator: coordinator,
+                cityData: airPollutionManager.currentCityData
             )
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .navigationDestination(for: Int.self) { id in }
@@ -25,5 +27,10 @@ struct HomeFlowView: View {
 }
 
 #Preview {
-    HomeFlowView(coordinator: HomeCoordinator())
+    HomeFlowView(
+        coordinator: HomeCoordinator(),
+        airPollutionManager: AirPollutionManager(
+            networkManager: NetworkManager()
+        )
+    )
 }

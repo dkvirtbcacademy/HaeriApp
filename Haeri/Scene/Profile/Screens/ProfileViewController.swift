@@ -33,7 +33,7 @@ class ProfileViewController: UIViewController {
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        updateGradientFrame()
+        updateBackgroundFrame()
     }
     
     func updateAirQuality(_ value: Int) {

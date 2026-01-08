@@ -24,5 +24,5 @@ struct CommunityFlowView: View {
 }
 
 #Preview {
-    DashboardFlowView(coordinator: DashboardCoordinator())
+    CommunityFlowView(coordinator: CommunityCoordinator())
 }

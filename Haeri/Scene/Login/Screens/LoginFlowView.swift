@@ -8,13 +8,15 @@
 import SwiftUI
 
 struct LoginFlowView: UIViewControllerRepresentable {
-    @EnvironmentObject var loginCoordinator: LoginCoordinator
-    @EnvironmentObject var authManager: AuthManager
+    @ObservedObject var loginCoordinator: LoginCoordinator
+    @ObservedObject var authManager: AuthManager
+    @ObservedObject var locationManager: LocationManager
     
     func makeUIViewController(context: Context) -> UINavigationController {
         let loginVC = LoginViewController(
             coordinator: loginCoordinator,
-            authManager: authManager
+            authManager: authManager,
+            locationManager: locationManager
         )
         let navigationController = UINavigationController(rootViewController: loginVC)
         

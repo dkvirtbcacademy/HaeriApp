@@ -11,10 +11,11 @@ import Combine
 
 struct MainView: View {
     
-    @ObservedObject private var coordinator: MainTabCoordinator
-    @StateObject private var viewModel: MainViewModel
     
+    @StateObject private var viewModel: MainViewModel
     @StateObject private var airPollutionManager: AirPollutionManager
+    
+    @ObservedObject private var coordinator: MainTabCoordinator
     @ObservedObject private var authManager: AuthManager
     @ObservedObject private var locationManager: LocationManager
     @ObservedObject private var networkManager: NetworkManager
@@ -45,13 +46,16 @@ struct MainView: View {
     var body: some View {
         TabView(selection: $coordinator.selectedTab) {
             
-            HomeFlowView(coordinator: coordinator.homeCoordinator)
+            HomeFlowView(
+                coordinator: coordinator.homeCoordinator,
+                airPollutionManager: airPollutionManager
+            )
                 .tabItem {
                     Label("Home", systemImage: "house")
                 }
                 .tag(MainTabCoordinator.Tab.home)
             
-            DashboardFlowView(coordinator: coordinator.dashboardCoordinator)
+            DashboardFlowView(coordinator: coordinator.dashboardCoordinator, authManager: authManager)
                 .ignoresSafeArea()
                 .tabItem {
                     Label("Dashboard", systemImage: "list.dash.header.rectangle.fill")
@@ -64,7 +68,7 @@ struct MainView: View {
                 }
                 .tag(MainTabCoordinator.Tab.community)
             
-            ProfileFlowView(authManager: authManager, coordinator: coordinator.profileCoordinator)
+            ProfileFlowView(coordinator: coordinator.profileCoordinator, authManager: authManager)
                 .ignoresSafeArea()
                 .tabItem {
                     Label("Profile", systemImage: "person.circle")

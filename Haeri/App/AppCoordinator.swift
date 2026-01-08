@@ -21,10 +21,12 @@ final class AppCoordinator: ObservableObject {
     @Published var mainTabCoordinator = MainTabCoordinator()
     
     private let authManager: AuthManager
+    private let locationManager: LocationManager
     private var cancellables = Set<AnyCancellable>()
     
-    init(authManager: AuthManager) {
+    init(authManager: AuthManager, locationManager: LocationManager) {
         self.authManager = authManager
+        self.locationManager = locationManager
         self.rootState = authManager.isLoggedIn ? .authenticated : .unauthenticated
         observeAuthChanges()
     }
@@ -42,6 +44,7 @@ final class AppCoordinator: ObservableObject {
     }
     
     func logout() {
+        locationManager.clearLocationOnLogout()
         authManager.logout()
 
         loginCoordinator = LoginCoordinator()

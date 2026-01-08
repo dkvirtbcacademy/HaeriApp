@@ -11,25 +11,21 @@ import Combine
 @MainActor
 final class DashboardCoordinator: ObservableObject {
     
-    enum Destination {
-        case details(character: Character)
-    }
+    enum Destination: Hashable {}
     
-    @Published var path = NavigationPath()
+    weak var navigationController: UINavigationController?
     
     func navigate(to destination: Destination) {
-        switch destination {
-        case .details(let character):
-            path.append(character)
-        }
+        guard let navigationController = navigationController else { return }
+        
+        let viewController: UIViewController
     }
     
     func navigateBack() {
-        guard !path.isEmpty else { return }
-        path.removeLast()
+        navigationController?.popViewController(animated: true)
     }
     
     func popToRoot() {
-        path = NavigationPath()
+        navigationController?.popToRootViewController(animated: true)
     }
 }

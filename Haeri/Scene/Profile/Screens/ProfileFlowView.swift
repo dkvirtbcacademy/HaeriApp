@@ -9,7 +9,7 @@ import SwiftUI
 
 struct ProfileFlowView: UIViewControllerRepresentable {
     @ObservedObject var coordinator: ProfileCoordinator
-    @EnvironmentObject var authManager: AuthManager
+    @ObservedObject var authManager: AuthManager
     @Environment(\.airQuality) var airQuality
     
     func makeUIViewController(context: Context) -> UINavigationController {

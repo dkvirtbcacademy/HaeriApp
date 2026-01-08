@@ -36,39 +36,32 @@ enum NetworkError: Error {
     }
 }
 
-struct NetworkAlertItem: Identifiable {
-    let id = UUID()
-    let title: Text
-    let message: Text
-    let dismissButton: Alert.Button
-}
-
 struct NetworkAlertContext {
-    static let wrongStatusCode = NetworkAlertItem(
+    static let wrongStatusCode = AlertItem(
         title: Text("Invalid Status Code"),
         message: Text("The server returned an unexpected status code. Please try again."),
         dismissButton: .default(Text("OK"))
     )
     
-    static let noDataAvailable = NetworkAlertItem(
+    static let noDataAvailable = AlertItem(
         title: Text("No Data"),
         message: Text("No data was received from the server. Please try again."),
         dismissButton: .default(Text("OK"))
     )
     
-    static let decodingError = NetworkAlertItem(
+    static let decodingError = AlertItem(
         title: Text("Data Error"),
         message: Text("Unable to process the server response. Please try again."),
         dismissButton: .default(Text("OK"))
     )
     
-    static let networkError = NetworkAlertItem(
+    static let networkError = AlertItem(
         title: Text("Network Error"),
         message: Text("Unable to connect to the server. Please check your internet connection."),
         dismissButton: .default(Text("OK"))
     )
     
-    static let invalidURL = NetworkAlertItem(
+    static let invalidURL = AlertItem(
         title: Text("Invalid URL"),
         message: Text("The server URL is invalid. Please contact support."),
         dismissButton: .default(Text("OK"))

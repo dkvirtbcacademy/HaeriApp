@@ -7,22 +7,28 @@
 
 import SwiftUI
 
-struct DashboardFlowView: View {
+struct DashboardFlowView: UIViewControllerRepresentable {
     @ObservedObject var coordinator: DashboardCoordinator
+    @ObservedObject var authManager: AuthManager
     @Environment(\.airQuality) var airQuality
     
-    var body: some View {
-        NavigationStack(path: $coordinator.path) {
-            DashboardPage(
-                coordinator: coordinator,
-            )
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .navigationDestination(for: Int.self) { id in }
-            .adaptiveBackground()
+    func makeUIViewController(context: Context) -> UINavigationController {
+        let dashboardVC = DashboardViewController(
+            coordinator: coordinator,
+            authManager: authManager
+        )
+        let navigationController = UINavigationController(rootViewController: dashboardVC)
+        
+        coordinator.navigationController = navigationController
+        
+        dashboardVC.updateAirQuality(airQuality)
+        
+        return navigationController
+    }
+    
+    func updateUIViewController(_ uiViewController: UINavigationController, context: Context) {
+        if let profileVC = uiViewController.viewControllers.first as? ProfileViewController {
+            profileVC.updateAirQuality(airQuality)
         }
     }
-}
-
-#Preview {
-    DashboardFlowView(coordinator: DashboardCoordinator())
 }

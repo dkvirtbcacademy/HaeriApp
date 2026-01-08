@@ -10,9 +10,22 @@
 		189A4DE92F0C05D000B52940 /* Haeri.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Haeri.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		1818B2682F10733B00F327AE /* Exceptions for "Haeri" folder in "Haeri" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 189A4DE82F0C05D000B52940 /* Haeri */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		189A4DEB2F0C05D000B52940 /* Haeri */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				1818B2682F10733B00F327AE /* Exceptions for "Haeri" folder in "Haeri" target */,
+			);
 			path = Haeri;
 			sourceTree = "<group>";
 		};
@@ -256,6 +269,8 @@
 				DEVELOPMENT_TEAM = FQ5UP9AZ3D;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Haeri/Info.plist;
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Show the user location";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -289,6 +304,8 @@
 				DEVELOPMENT_TEAM = FQ5UP9AZ3D;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Haeri/Info.plist;
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Show the user location";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

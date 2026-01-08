@@ -24,5 +24,5 @@ struct CommunityPage: View {
 }
 
 #Preview {
-    DashboardPage(coordinator: DashboardCoordinator())
+    CommunityPage(coordinator: CommunityCoordinator())
 }
