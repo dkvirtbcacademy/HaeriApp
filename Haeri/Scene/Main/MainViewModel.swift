@@ -21,6 +21,7 @@ final class MainViewModel: ObservableObject, AlertHandler {
     private var locationBeforeBackground: CLLocationCoordinate2D?
     
     private let coordinateDecimalPlaces: Int = 2
+    private let defaultLocation = CLLocationCoordinate2D(latitude: 51.5074, longitude: -0.1278)
     
     init(locationManager: LocationManager, airPollutionManager: AirPollutionManager) {
         self.locationManager = locationManager
@@ -31,55 +32,77 @@ final class MainViewModel: ObservableObject, AlertHandler {
         }
         
         observeLocationUpdates()
+        observeAuthorizationStatus()
     }
     
     func appLaunch() {
-        locationManager.requestLocation()
+        handleLocationBasedOnAuthStatus()
     }
     
     func appWentToBg() {
         if let currentLocation = locationManager.userLocation {
             locationBeforeBackground = roundCoordinate(currentLocation)
-            print("App went to background at location: \(locationBeforeBackground!)")
+            print("went to background at location: \(locationBeforeBackground!)")
         }
     }
     
     func appBecameActive() {
         print("App became active, checking location change")
         
-        locationManager.requestLocation()
-        
         Task {
             try? await Task.sleep(nanoseconds: 1_000_000_000)
+            handleLocationBasedOnAuthStatus()
+        }
+    }
+    
+    private func handleLocationBasedOnAuthStatus() {
+        let status = locationManager.authorizationStatus
+        
+        switch status {
+        case .authorizedWhenInUse, .authorizedAlways:
+            locationManager.requestLocation()
             
-            let currentLocation: CLLocationCoordinate2D
-            
-            // If no location available, use London as fallback
-            if let userLocation = locationManager.userLocation {
-                currentLocation = userLocation
-            } else {
-                print("⚠️ No current location available, using London as fallback")
-                currentLocation = CLLocationCoordinate2D(latitude: 51.5074, longitude: -0.1278)
-                // Fetch air quality for London
-                Task {
-                    await updateLocation(roundCoordinate(currentLocation))
-                }
-                return
+        case .denied, .restricted:
+            print("Location access denied/restricted, using default location (London)")
+            Task {
+                await updateLocation(defaultLocation, cityName: "London")
             }
             
-            let roundedCurrent = roundCoordinate(currentLocation)
+        case .notDetermined:
+            break
             
-            if let locationBefore = locationBeforeBackground {
-                if roundedCurrent.latitude == locationBefore.latitude &&
-                    roundedCurrent.longitude == locationBefore.longitude {
-                    print("Location unchanged, skipping refresh")
-                } else {
-                    print("Location changed! Before: \(locationBefore), Now: \(roundedCurrent)")
-                }
-            } else {
-                print("No previous location to compare")
+        @unknown default:
+            print("Unknown authorization status, using default location")
+            Task {
+                await updateLocation(defaultLocation, cityName: "London")
             }
         }
+    }
+    
+    private func observeAuthorizationStatus() {
+        locationManager.$authorizationStatus
+            .removeDuplicates()
+            .dropFirst()
+            .sink { [weak self] status in
+                guard let self = self else { return }
+                
+                print("Authorization status changed to: \(status)")
+                
+                switch status {
+                case .authorizedWhenInUse, .authorizedAlways:
+                    self.locationManager.requestLocation()
+                    
+                case .denied, .restricted:
+                    print("Location denied, fetching default location")
+                    Task {
+                        await self.updateLocation(self.defaultLocation, cityName: "London")
+                    }
+                    
+                default:
+                    break
+                }
+            }
+            .store(in: &cancellables)
     }
     
     private func observeLocationUpdates() {
@@ -96,7 +119,7 @@ final class MainViewModel: ObservableObject, AlertHandler {
             .sink { [weak self] location in
                 guard let self = self else { return }
                 
-                print("Rounded location received: (\(location.latitude), \(location.longitude))")
+                print("rounded location: (\(location.latitude), \(location.longitude))")
                 
                 self.lastProcessedLocation = location
                 
@@ -114,19 +137,25 @@ final class MainViewModel: ObservableObject, AlertHandler {
         return CLLocationCoordinate2D(latitude: roundedLat, longitude: roundedLong)
     }
     
-    private func updateLocation(_ location: CLLocationCoordinate2D) async {
-        print("Fetching air quality for location: \(location)")
-        let cityName = await locationManager.getCityName(from: location) ?? "Current Location"
+    private func updateLocation(_ location: CLLocationCoordinate2D, cityName: String? = nil) async {
+        print("fetching air quality: \(location)")
+        
+        let finalCityName: String
+        if let providedCityName = cityName {
+            finalCityName = providedCityName
+        } else {
+            finalCityName = await locationManager.getCityName(from: location) ?? "Current Location"
+        }
         
         do {
             try await airPollutionManager.fetchNewCity(
                 lat: String(location.latitude),
                 long: String(location.longitude),
-                cityName: cityName
+                cityName: finalCityName
             )
-            print("Air quality data fetched successfully for \(cityName)")
+            print("\(finalCityName) fetched")
         } catch let error as NetworkError {
-            handleNetworkError(error, context: cityName)
+            handleNetworkError(error, context: finalCityName)
         } catch let error as AirPollutionError {
             handleAirPollutionError(error)
         } catch {

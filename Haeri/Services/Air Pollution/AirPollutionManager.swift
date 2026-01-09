@@ -66,9 +66,9 @@ final class AirPollutionManager: ObservableObject, AlertHandler {
         return (first.lat, first.lon)
     }
     
-    func fetchNewCity(lat: String, long: String, cityName: String, currentCity: Bool = false) async throws {
+    func fetchNewCity(lat: String, long: String, cityName: String) async throws {
         if let existingCity = airPollutionData.first(where: { $0.city == cityName }) {
-            if currentCity && currentCityData?.city != existingCity.city {
+            if currentCityData?.city != existingCity.city {
                 currentCityData = existingCity
             }
             return
@@ -83,15 +83,8 @@ final class AirPollutionManager: ObservableObject, AlertHandler {
             response: pollutionResponse
         )
         
-        if currentCity {
-            currentCityData = cityData
-        }
-        
+        currentCityData = cityData
         airPollutionData.append(cityData)
-    }
-    
-    func fetchCurrentCityData() {
-        
     }
     
     func findCity(city: String) async {

@@ -11,7 +11,7 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		1818B2682F10733B00F327AE /* Exceptions for "Haeri" folder in "Haeri" target */ = {
+		1818B2F42F10797200F327AE /* Exceptions for "Haeri" folder in "Haeri" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
@@ -24,7 +24,7 @@
 		189A4DEB2F0C05D000B52940 /* Haeri */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				1818B2682F10733B00F327AE /* Exceptions for "Haeri" folder in "Haeri" target */,
+				1818B2F42F10797200F327AE /* Exceptions for "Haeri" folder in "Haeri" target */,
 			);
 			path = Haeri;
 			sourceTree = "<group>";
