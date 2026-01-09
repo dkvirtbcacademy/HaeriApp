@@ -11,35 +11,22 @@ import Combine
 
 struct MainView: View {
     
-    
-    @StateObject private var viewModel: MainViewModel
-    @StateObject private var airPollutionManager: AirPollutionManager
-    
+    @ObservedObject private var dependencies: AppDependencies
     @ObservedObject private var coordinator: MainTabCoordinator
-    @ObservedObject private var authManager: AuthManager
-    @ObservedObject private var locationManager: LocationManager
-    @ObservedObject private var networkManager: NetworkManager
+    @StateObject private var viewModel: MainViewModel
     
-    @State private var airQualityIndex = 25
     @Environment(\.scenePhase) private var scenePhase
     
     init(
-        authManager: AuthManager,
-        locationManager: LocationManager,
-        networkManager: NetworkManager,
+        dependencies: AppDependencies,
         coordinator: MainTabCoordinator
     ) {
-        self.authManager = authManager
-        self.locationManager = locationManager
-        self.networkManager = networkManager
+        self.dependencies = dependencies
         self.coordinator = coordinator
         
-        let airPollution = AirPollutionManager(networkManager: networkManager)
-        _airPollutionManager = StateObject(wrappedValue: airPollution)
-        
         _viewModel = StateObject(wrappedValue: MainViewModel(
-            locationManager: locationManager,
-            airPollutionManager: airPollution
+            locationManager: dependencies.locationManager,
+            airPollutionManager: dependencies.airPollutionManager
         ))
     }
     
@@ -48,15 +35,18 @@ struct MainView: View {
             
             HomeFlowView(
                 coordinator: coordinator.homeCoordinator,
-                airPollutionManager: airPollutionManager
+                airPollutionManager: dependencies.airPollutionManager
             )
                 .tabItem {
                     Label("Home", systemImage: "house")
                 }
                 .tag(MainTabCoordinator.Tab.home)
             
-            DashboardFlowView(coordinator: coordinator.dashboardCoordinator, authManager: authManager)
-                .ignoresSafeArea()
+            DashboardFlowView(
+                dashboardCoordinator: coordinator.dashboardCoordinator,
+                airPollutionManager: dependencies.airPollutionManager
+            )
+            .ignoresSafeArea()
                 .tabItem {
                     Label("Dashboard", systemImage: "list.dash.header.rectangle.fill")
                 }
@@ -68,15 +58,18 @@ struct MainView: View {
                 }
                 .tag(MainTabCoordinator.Tab.community)
             
-            ProfileFlowView(coordinator: coordinator.profileCoordinator, authManager: authManager)
-                .ignoresSafeArea()
+            ProfileFlowView(
+                coordinator: coordinator.profileCoordinator,
+                authManager: dependencies.authManager
+            )
+            .ignoresSafeArea()
                 .tabItem {
                     Label("Profile", systemImage: "person.circle")
                 }
                 .tag(MainTabCoordinator.Tab.profile)
         }
         .environmentObject(coordinator)
-        .environment(\.airQuality, airQualityIndex)
+        .environment(\.airQuality, dependencies.airPollutionManager.airQualityIndex)
         .alert(item: $viewModel.alertItem) { alertItem in
             Alert(
                 title: alertItem.title,
@@ -85,6 +78,13 @@ struct MainView: View {
             )
         }
         .onAppear {
+            let appearance = UITabBarAppearance()
+            appearance.configureWithOpaqueBackground()
+            appearance.backgroundColor = .systemBackground
+            
+            UITabBar.appearance().standardAppearance = appearance
+            UITabBar.appearance().scrollEdgeAppearance = appearance
+            
             viewModel.appLaunch()
         }
         .onChange(of: scenePhase) { oldPhase, newPhase in
@@ -98,10 +98,9 @@ struct MainView: View {
 }
 
 #Preview {
+    let deps = AppDependencies()
     MainView(
-        authManager: AuthManager(),
-        locationManager: LocationManager(),
-        networkManager: NetworkManager(),
+        dependencies: deps,
         coordinator: MainTabCoordinator()
     )
 }

@@ -8,18 +8,29 @@
 import SwiftUI
 
 struct DashboardFlowView: UIViewControllerRepresentable {
-    @ObservedObject var coordinator: DashboardCoordinator
-    @ObservedObject var authManager: AuthManager
-    @Environment(\.airQuality) var airQuality
+    @ObservedObject private var dashboardCoordinator: DashboardCoordinator
+    @ObservedObject private var airPollutionManager: AirPollutionManager
+    @EnvironmentObject private var coordinator: MainTabCoordinator
+    @Environment(\.airQuality) private var airQuality
+    
+    init(dashboardCoordinator: DashboardCoordinator, airPollutionManager: AirPollutionManager) {
+        self.dashboardCoordinator = dashboardCoordinator
+        self.airPollutionManager = airPollutionManager
+    }
     
     func makeUIViewController(context: Context) -> UINavigationController {
+        let viewModel = DashboardViewModel(
+            coordinator: dashboardCoordinator,
+            homeCoordinator: coordinator.homeCoordinator,
+            airPollutionManager: airPollutionManager
+        )
+        
         let dashboardVC = DashboardViewController(
-            coordinator: coordinator,
-            authManager: authManager
+            viewModel: viewModel
         )
         let navigationController = UINavigationController(rootViewController: dashboardVC)
         
-        coordinator.navigationController = navigationController
+        dashboardCoordinator.navigationController = navigationController
         
         dashboardVC.updateAirQuality(airQuality)
         
@@ -27,8 +38,8 @@ struct DashboardFlowView: UIViewControllerRepresentable {
     }
     
     func updateUIViewController(_ uiViewController: UINavigationController, context: Context) {
-        if let profileVC = uiViewController.viewControllers.first as? ProfileViewController {
-            profileVC.updateAirQuality(airQuality)
+        if let dashboardVC = uiViewController.viewControllers.first as? DashboardViewController {
+            dashboardVC.updateAirQuality(airQuality)
         }
     }
 }

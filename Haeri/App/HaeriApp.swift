@@ -9,19 +9,16 @@ import SwiftUI
 
 @main
 struct HaeriApp: App {
-    @StateObject private var authManager = AuthManager()
-    @StateObject private var locationManager = LocationManager()
-    @StateObject private var networkManager = NetworkManager()
+    @StateObject private var dependencies = AppDependencies()
     @StateObject private var appCoordinator: AppCoordinator
     
-    
     init() {
-        let authManager = AuthManager()
-        let locationManager = LocationManager()
-        
-        _authManager = StateObject(wrappedValue: authManager)
-        _locationManager = StateObject(wrappedValue: locationManager)
-        _appCoordinator = StateObject(wrappedValue: AppCoordinator(authManager: authManager, locationManager: locationManager))
+        let deps = AppDependencies()
+        _dependencies = StateObject(wrappedValue: deps)
+        _appCoordinator = StateObject(wrappedValue: AppCoordinator(
+            authManager: deps.authManager,
+            locationManager: deps.locationManager
+        ))
     }
     
     var body: some Scene {
@@ -30,16 +27,13 @@ struct HaeriApp: App {
                 switch appCoordinator.rootState {
                 case .authenticated:
                     MainView(
-                        authManager: authManager,
-                        locationManager: locationManager,
-                        networkManager: networkManager,
+                        dependencies: dependencies,
                         coordinator: appCoordinator.mainTabCoordinator
                     )
                 case .unauthenticated:
                     LoginFlowView(
-                        loginCoordinator: appCoordinator.loginCoordinator,
-                        authManager: authManager,
-                        locationManager: locationManager
+                        dependencies: dependencies,
+                        loginCoordinator: appCoordinator.loginCoordinator
                     )
                     .ignoresSafeArea()
                     .transition(.opacity)

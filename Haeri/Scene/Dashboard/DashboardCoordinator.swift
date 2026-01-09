@@ -11,7 +11,9 @@ import Combine
 @MainActor
 final class DashboardCoordinator: ObservableObject {
     
-    enum Destination: Hashable {}
+    enum Destination {
+        case cityDetail(CityAirPollution, HomeCoordinator, Bool)
+    }
     
     weak var navigationController: UINavigationController?
     
@@ -19,6 +21,19 @@ final class DashboardCoordinator: ObservableObject {
         guard let navigationController = navigationController else { return }
         
         let viewController: UIViewController
+        
+        switch destination {
+        case .cityDetail(let cityData, let homeCoordinator, let calculateBackground):
+            let homeView = HomePage(
+                coordinator: homeCoordinator,
+                cityData: cityData,
+                calculateBackground: calculateBackground
+            )
+            let hostingController = UIHostingController(rootView: homeView)
+            viewController = hostingController
+        }
+        
+        navigationController.pushViewController(viewController, animated: true)
     }
     
     func navigateBack() {

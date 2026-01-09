@@ -9,31 +9,71 @@ import SwiftUI
 
 struct HomePage: View {
     @StateObject private var viewModel: HomeViewModel
+    private let calculateBackground: Bool
+    @State private var showSheet = false
     
     init(
         coordinator: HomeCoordinator,
-        cityData: CityAirPollution?
+        cityData: CityAirPollution,
+        calculateBackground: Bool = false
     ) {
         _viewModel = StateObject(
-            wrappedValue: HomeViewModel(
-//                coordinator: coordinator,
-            )
+            wrappedValue: HomeViewModel(coordinator: coordinator, cityData: cityData)
         )
+        self.calculateBackground = calculateBackground
     }
     
     var body: some View {
         VStack(spacing: 20) {
-            Text("Home")
-            
-            Text("ჰომე")
-                .font(.firago(.large))
-            
-            Text("ჰომე")
-                .font(.firagoMedium(.xlarge))
-            
-            Text("ჰომე")
+            Text(viewModel.cityData.city)
                 .font(.firagoBold(.xxlarge))
-         }
+            
+            LazyVStack(spacing: 12) {
+                ForEach(viewModel.pollutionDetails) { detail in
+                    HStack {
+                        Text(detail.label)
+                            .font(.firago(.large))
+                        
+                        Spacer()
+                        
+                        Text(detail.value)
+                            .font(.firagoMedium(.large))
+                    }
+                    .padding(.horizontal, 40)
+                }
+            }
+            
+            Button("Show Info") {
+                showSheet.toggle()
+            }
+        }
+        .sheet(isPresented: $showSheet) {
+            Text("Sheet Content")
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(
+            Group {
+                if calculateBackground {
+                    adaptiveBackgroundColor
+                        .ignoresSafeArea()
+                }
+            }
+        )
+    }
+    
+    private var adaptiveBackgroundColor: Color {
+        guard let aqi = viewModel.cityData.response.item?.main.aqi else {
+            return Color.clear
+        }
+        
+        switch aqi {
+        case ..<50:
+            return Color("Background Light")
+        case 50..<100:
+            return Color("Background Moderate")
+        default:
+            return Color("Background Dark")
+        }
     }
 }
 
@@ -50,7 +90,7 @@ struct HomePage: View {
                 list: [
                     AirPollutionResponse.AirPollutionItem(
                         main: AirPollutionResponse.AirPollutionItem.AQI(aqi: 2),
-                        components: AirPollutionResponse.AirPollutionItem.AirComponents(
+                        components: AirPollutionResponse.AirPollutionItem.Components(
                             co: 230.31,
                             no: 0.0,
                             no2: 0.74,
@@ -64,6 +104,7 @@ struct HomePage: View {
                     )
                 ]
             )
-        )
+        ),
+        calculateBackground: true
     )
 }

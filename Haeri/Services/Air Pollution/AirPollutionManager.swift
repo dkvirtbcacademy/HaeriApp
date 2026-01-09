@@ -16,6 +16,7 @@ final class AirPollutionManager: ObservableObject, AlertHandler {
     @Published var currentCityData: CityAirPollution?
     @Published var searchResults: [GeoResponse] = []
     @Published var alertItem: AlertItem?
+    @Published var airQualityIndex = 25
     @Published var isLoading = false
     
     private let networkManager: NetworkManager
@@ -66,7 +67,7 @@ final class AirPollutionManager: ObservableObject, AlertHandler {
         return (first.lat, first.lon)
     }
     
-    func fetchNewCity(lat: String, long: String, cityName: String) async throws {
+    func fetchNewCity(lat: String, long: String, cityName: String, homeCity: Bool = false) async throws {
         if let existingCity = airPollutionData.first(where: { $0.city == cityName }) {
             if currentCityData?.city != existingCity.city {
                 currentCityData = existingCity
@@ -83,7 +84,11 @@ final class AirPollutionManager: ObservableObject, AlertHandler {
             response: pollutionResponse
         )
         
-        currentCityData = cityData
+        if homeCity {
+            currentCityData = cityData
+            airQualityIndex = currentCityData?.response.list.first?.main.aqi ?? 25
+        }
+        
         airPollutionData.append(cityData)
     }
     

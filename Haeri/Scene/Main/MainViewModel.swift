@@ -151,7 +151,8 @@ final class MainViewModel: ObservableObject, AlertHandler {
             try await airPollutionManager.fetchNewCity(
                 lat: String(location.latitude),
                 long: String(location.longitude),
-                cityName: finalCityName
+                cityName: finalCityName,
+                homeCity: true
             )
             print("\(finalCityName) fetched")
         } catch let error as NetworkError {

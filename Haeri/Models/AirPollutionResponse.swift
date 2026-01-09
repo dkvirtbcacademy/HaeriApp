@@ -28,6 +28,10 @@ struct AirPollutionResponse: Codable {
     let coord: Coord
     let list: [AirPollutionItem]
     
+    var item: AirPollutionItem? {
+        list.first
+    }
+    
     struct Coord: Codable {
         let lat: Double
         let lon: Double
@@ -35,14 +39,14 @@ struct AirPollutionResponse: Codable {
     
     struct AirPollutionItem: Codable {
         let main: AQI
-        let components: AirComponents
+        let components: Components
         let dt: Int
         
         struct AQI: Codable {
             let aqi: Int
         }
         
-        struct AirComponents: Codable {
+        struct Components: Codable {
             let co: Double
             let no: Double
             let no2: Double

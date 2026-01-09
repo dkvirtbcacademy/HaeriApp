@@ -15,10 +15,16 @@ struct HomeFlowView: View {
     
     var body: some View {
         NavigationStack(path: $coordinator.path) {
-            HomePage(
-                coordinator: coordinator,
-                cityData: airPollutionManager.currentCityData
-            )
+            Group {
+                if let cityData = airPollutionManager.currentCityData {
+                    HomePage(
+                        coordinator: coordinator,
+                        cityData: cityData
+                    )
+                } else {
+                    LoadingView(label: "დაელოდეთ ინფორმაცია იტვირთება...")
+                }
+            }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .navigationDestination(for: Int.self) { id in }
             .adaptiveBackground()
