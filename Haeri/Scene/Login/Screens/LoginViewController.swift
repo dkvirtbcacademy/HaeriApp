@@ -13,8 +13,8 @@ class LoginViewController: UIViewController {
     private var cancellables = Set<AnyCancellable>()
     private let button = UikitButton(label: "დაწყება")
     
-    private let stepOne = StepOne()
-    private let stepTwo = StepTwo()
+    private let stepOne = LoginStepOne()
+    private let stepTwo = LoginStepTwo()
     
     private lazy var progressSteps = ProgressSteps(steps: viewModel.maxSteps)
     
@@ -48,6 +48,8 @@ class LoginViewController: UIViewController {
         
         setupUI()
         setupActions()
+        
+        setupKeyboardHandling()
     }
     
     private func setupUI() {
@@ -126,7 +128,7 @@ class LoginViewController: UIViewController {
             }
             .store(in: &cancellables)
     }
-
+    
     private func updateStepView(for currentStep: Int) {
         let newStepView: UIView
         
@@ -138,7 +140,7 @@ class LoginViewController: UIViewController {
         default:
             return
         }
-    
+        
         let shouldAnimate = !stepContainer.subviews.isEmpty
         showStep(newStepView, animated: shouldAnimate)
     }

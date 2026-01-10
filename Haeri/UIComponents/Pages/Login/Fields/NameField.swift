@@ -58,7 +58,7 @@ class NameField: UIStackView {
         textField.attributedPlaceholder = NSAttributedString(
             string: placeholder,
             attributes: [
-                .foregroundColor: UIColor(named: "TextColor")?.cgColor ?? UIColor.white,
+                .foregroundColor: UIColor(named: "TextColor") ?? UIColor.white,
                 .font: UIFont.firago(.xsmall)
             ]
         )

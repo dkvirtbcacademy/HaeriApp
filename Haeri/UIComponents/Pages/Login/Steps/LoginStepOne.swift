@@ -1,5 +1,5 @@
 //
-//  StepOne.swift
+//  LoginStepOne.swift
 //  Haeri
 //
 //  Created by kv on 10.01.26.
@@ -7,7 +7,7 @@
 
 import UIKit
 
-class StepOne: UIView {
+class LoginStepOne: UIView {
     
     private let posterView: UIImageView = {
         let poster = UIImageView()

@@ -1,5 +1,5 @@
 //
-//  StepTwo.swift
+//  LoginStepTwo.swift
 //  Haeri
 //
 //  Created by kv on 10.01.26.
@@ -7,7 +7,7 @@
 
 import UIKit
 
-class StepTwo: UIView {
+class LoginStepTwo: UIView {
     
     var registerTapped: (() -> Void)?
     
