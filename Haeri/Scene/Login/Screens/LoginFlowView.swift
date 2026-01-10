@@ -12,11 +12,15 @@ struct LoginFlowView: UIViewControllerRepresentable {
     @ObservedObject var loginCoordinator: LoginCoordinator
     
     func makeUIViewController(context: Context) -> UINavigationController {
-        let loginVC = LoginViewController(
+        let viewModel = LoginViewModel(
             coordinator: loginCoordinator,
             authManager: dependencies.authManager,
             locationManager: dependencies.locationManager
         )
+        let loginVC = LoginViewController(
+            viewModel:viewModel
+        )
+        
         let navigationController = UINavigationController(rootViewController: loginVC)
         
         let appearance = UINavigationBarAppearance()

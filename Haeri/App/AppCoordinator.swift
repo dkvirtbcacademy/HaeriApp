@@ -17,7 +17,7 @@ final class AppCoordinator: ObservableObject {
     }
     
     @Published private(set) var rootState: RootState = .unauthenticated
-    @Published var loginCoordinator = LoginCoordinator()
+    @Published var loginCoordinator: LoginCoordinator
     @Published var mainTabCoordinator = MainTabCoordinator()
     
     private let authManager: AuthManager
@@ -27,6 +27,10 @@ final class AppCoordinator: ObservableObject {
     init(authManager: AuthManager, locationManager: LocationManager) {
         self.authManager = authManager
         self.locationManager = locationManager
+        self.loginCoordinator = LoginCoordinator(
+            authManager: authManager,
+            locationManager: locationManager
+        )
         self.rootState = authManager.isLoggedIn ? .authenticated : .unauthenticated
         observeAuthChanges()
     }
@@ -39,15 +43,14 @@ final class AppCoordinator: ObservableObject {
             .store(in: &cancellables)
     }
     
-    private func updateRootState() {
-        rootState = authManager.isLoggedIn ? .authenticated : .unauthenticated
-    }
-    
     func logout() {
         locationManager.clearLocationOnLogout()
         authManager.logout()
-
-        loginCoordinator = LoginCoordinator()
+        
+        loginCoordinator = LoginCoordinator(
+            authManager: authManager,
+            locationManager: locationManager
+        )
         mainTabCoordinator = MainTabCoordinator()
     }
 }

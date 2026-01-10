@@ -12,6 +12,7 @@ import UIKit
 enum FontSize {
     case small
     case xsmall
+    case xxsmall
     case medium
     case xmedium
     case large
@@ -25,10 +26,12 @@ enum FontSize {
             return 10
         case .xsmall:
             return 14
-        case .medium:
+        case .xxsmall:
             return 16
-        case .xmedium:
+        case .medium:
             return 18
+        case .xmedium:
+            return 21
         case .large:
             return 24
         case .xlarge:

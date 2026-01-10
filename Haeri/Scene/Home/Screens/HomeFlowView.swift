@@ -22,7 +22,7 @@ struct HomeFlowView: View {
                         cityData: cityData
                     )
                 } else {
-                    LoadingView(label: "დაელოდეთ ინფორმაცია იტვირთება...")
+                    SwiftUILoadingView(label: "დაელოდეთ ინფორმაცია იტვირთება...")
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)

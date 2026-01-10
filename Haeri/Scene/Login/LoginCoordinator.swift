@@ -10,29 +10,37 @@ import UIKit
 @MainActor
 final class LoginCoordinator: ObservableObject {
     
-    enum Destination: Hashable {
+    enum Destination {
         case register
-        case forgotPassword
-        case emailVerification(email: String)
     }
     
     weak var navigationController: UINavigationController?
     
+    private let authManager: AuthManager
+    private let locationManager: LocationManager
+    
+    init(authManager: AuthManager, locationManager: LocationManager) {
+        self.authManager = authManager
+        self.locationManager = locationManager
+    }
+    
     func navigate(to destination: Destination) {
         guard let navigationController = navigationController else { return }
+        navigationController.setNavigationBarHidden(true, animated: false)
         
         let viewController: UIViewController
         
-//        switch destination {
-//        case .register:
-//            viewController = RegisterViewController(coordinator: self)
-//        case .forgotPassword:
-//            viewController = ForgotPasswordViewController(coordinator: self)
-//        case .emailVerification(let email):
-//            viewController = EmailVerificationViewController(email: email, coordinator: self)
-//        }
-//        
-//        navigationController.pushViewController(viewController, animated: true)
+        switch destination {
+        case .register:
+            let viewModel = RegisterViewModel(
+                coordinator: self,
+                authManager: authManager,
+                locationManager: locationManager
+            )
+            viewController = RegisterViewController(viewModel: viewModel)
+        }
+        
+        navigationController.pushViewController(viewController, animated: true)
     }
     
     func navigateBack() {

@@ -1,5 +1,5 @@
 //
-//  LoadingView.swift
+//  SwiftUILoadingView.swift
 //  Haeri
 //
 //  Created by kv on 09.01.26.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct LoadingView: View {
+struct SwiftUILoadingView: View {
     let label: String
     var body: some View {
         VStack(spacing: 16) {
@@ -22,5 +22,5 @@ struct LoadingView: View {
 }
 
 #Preview {
-    LoadingView(label: "დაელოდეთ ინფორმაცია იტვირთება...")
+    SwiftUILoadingView(label: "დაელოდეთ ინფორმაცია იტვირთება...")
 }
