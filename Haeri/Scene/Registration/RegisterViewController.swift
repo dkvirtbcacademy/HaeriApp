@@ -16,7 +16,7 @@ class RegisterViewController: UIViewController {
     private lazy var progressSteps = ProgressSteps(steps: viewModel.maxSteps)
     
     private let stepOne = RegistrationStepOne()
-    private let stepTwo = RegistrationStepTwo()
+    private lazy var stepTwo = RegistrationStepTwo(userCategories: viewModel.userCategories)
     
     private let stepContainer: UIView = {
         let view = UIView()
