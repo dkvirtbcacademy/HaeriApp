@@ -9,7 +9,7 @@ import UIKit
 
 extension UIView {
     func applyGlassmorphism(
-        style: UIBlurEffect.Style = .systemThinMaterial,
+        style: UIBlurEffect.Style = .systemThinMaterialLight,
         tintColor: UIColor? = nil,
         cornerRadius: CGFloat = 16,
         borderWidth: CGFloat = 0.5,
@@ -24,6 +24,9 @@ extension UIView {
         blurView.clipsToBounds = true
         blurView.tag = 9999 // Tag for easy identification and removal
         
+        // Force light mode for the blur view
+        blurView.overrideUserInterfaceStyle = .light
+        
         insertSubview(blurView, at: 0)
         
         NSLayoutConstraint.activate([
@@ -33,7 +36,6 @@ extension UIView {
             blurView.bottomAnchor.constraint(equalTo: bottomAnchor)
         ])
         
-        // Apply tint color if provided
         if let tintColor = tintColor {
             backgroundColor = tintColor
         }
@@ -45,7 +47,6 @@ extension UIView {
         layer.borderColor = borderColor.cgColor
     }
     
-    /// Removes the glassmorphism effect from the view
     func removeGlassmorphism() {
         subviews.first(where: { $0.tag == 9999 })?.removeFromSuperview()
         layer.borderWidth = 0
@@ -58,7 +59,7 @@ extension UIView {
     /// Apply a light glass effect
     func applyLightGlass(cornerRadius: CGFloat = 16) {
         applyGlassmorphism(
-            style: .systemUltraThinMaterial,
+            style: .systemUltraThinMaterialLight,
             tintColor: UIColor.white.withAlphaComponent(0.1),
             cornerRadius: cornerRadius
         )
@@ -67,7 +68,7 @@ extension UIView {
     /// Apply a medium glass effect
     func applyMediumGlass(cornerRadius: CGFloat = 16) {
         applyGlassmorphism(
-            style: .systemThinMaterial,
+            style: .systemThinMaterialLight,
             tintColor: UIColor(named: "TextColor")?.withAlphaComponent(0.2),
             cornerRadius: cornerRadius
         )
@@ -76,7 +77,7 @@ extension UIView {
     /// Apply a heavy glass effect
     func applyHeavyGlass(cornerRadius: CGFloat = 16) {
         applyGlassmorphism(
-            style: .systemMaterial,
+            style: .systemMaterialLight,
             tintColor: UIColor(named: "TextColor")?.withAlphaComponent(0.3),
             cornerRadius: cornerRadius,
             borderWidth: 1.0
@@ -86,7 +87,7 @@ extension UIView {
     /// Apply a dark glass effect
     func applyDarkGlass(cornerRadius: CGFloat = 16) {
         applyGlassmorphism(
-            style: .systemThickMaterial,
+            style: .systemThickMaterialLight,
             tintColor: UIColor.black.withAlphaComponent(0.3),
             cornerRadius: cornerRadius,
             borderWidth: 0.5,
