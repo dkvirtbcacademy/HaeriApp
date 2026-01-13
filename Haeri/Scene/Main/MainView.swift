@@ -16,6 +16,7 @@ struct MainView: View {
     @StateObject private var viewModel: MainViewModel
     
     @Environment(\.scenePhase) private var scenePhase
+    @State private var airQualityIndex = 25
     
     init(
         dependencies: AppDependencies,
@@ -69,13 +70,16 @@ struct MainView: View {
                 .tag(MainTabCoordinator.Tab.profile)
         }
         .environmentObject(coordinator)
-        .environment(\.airQuality, dependencies.airPollutionManager.airQualityIndex)
+        .environment(\.airQuality, airQualityIndex)
         .alert(item: $viewModel.alertItem) { alertItem in
             Alert(
                 title: alertItem.title,
                 message: alertItem.message,
                 dismissButton: alertItem.dismissButton
             )
+        }
+        .onReceive(dependencies.airPollutionManager.$airQualityIndex) { newValue in
+            airQualityIndex = newValue
         }
         .onAppear {
             let appearance = UITabBarAppearance()
@@ -86,6 +90,11 @@ struct MainView: View {
             UITabBar.appearance().scrollEdgeAppearance = appearance
             
             viewModel.appLaunch()
+            
+//            Task { @MainActor in
+//                try await Task.sleep(nanoseconds: 1_500_000_000)
+//                self.dependencies.airPollutionManager.airQualityIndex = 70
+//            }
         }
         .onChange(of: scenePhase) { oldPhase, newPhase in
             if newPhase == .background || newPhase == .inactive {

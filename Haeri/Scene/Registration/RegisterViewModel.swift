@@ -20,14 +20,6 @@ final class RegisterViewModel: ObservableObject {
     
     let maxSteps = 2
     
-    let userCategories = [
-        UserCategoryModel(label: "მშობელი", iconName: "parent"),
-        UserCategoryModel(label: "რესპირატორული დაავადების მქონდე", iconName: "respiratory issues"),
-        UserCategoryModel(label: "სპორტსმენი / გარე სივრცეში მომუშავე", iconName: "human outside"),
-        UserCategoryModel(label: "ხანდაზმული", iconName: "elderly"),
-        UserCategoryModel(label: "აქტივისტი / მოქალაქე", iconName: "activist"),
-    ]
-    
     init(
         coordinator: LoginCoordinator,
         authManager: AuthManager,
@@ -36,6 +28,10 @@ final class RegisterViewModel: ObservableObject {
         self.coordinator = coordinator
         self.authManager = authManager
         self.locationManager = locationManager
+    }
+    
+    func getUserCategories() -> [UserCategoryModel] {
+        authManager.userCategories
     }
     
     func handleButtonTap() {

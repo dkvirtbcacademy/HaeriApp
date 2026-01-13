@@ -13,11 +13,16 @@ final class AirPollutionManager: ObservableObject, AlertHandler {
     
     @Published private var cities = ["Tbilisi", "Rustavi"]
     @Published var airPollutionData: [CityAirPollution] = []
-    @Published var currentCityData: CityAirPollution?
+    @Published var airQualityIndex = 25
     @Published var searchResults: [GeoResponse] = []
     @Published var alertItem: AlertItem?
-    @Published var airQualityIndex = 25
     @Published var isLoading = false
+    
+    @Published var currentCityData: CityAirPollution? {
+        didSet {
+            updateAirQualityIndex()
+        }
+    }
     
     private let networkManager: NetworkManager
     private let apiKey = "0d42305cce9b217d3a28f376eb166e2d"
@@ -26,6 +31,12 @@ final class AirPollutionManager: ObservableObject, AlertHandler {
     
     init(networkManager: NetworkManager) {
         self.networkManager = networkManager
+    }
+    
+    private func updateAirQualityIndex() {
+        if let aqi = currentCityData?.response.list.first?.main.aqi {
+            airQualityIndex = aqi
+        }
     }
     
     func fetchChoosenCitiesData() async {
@@ -71,6 +82,7 @@ final class AirPollutionManager: ObservableObject, AlertHandler {
         if let existingCity = airPollutionData.first(where: { $0.city == cityName }) {
             if currentCityData?.city != existingCity.city {
                 currentCityData = existingCity
+                // airQualityIndex will be updated by didSet
             }
             return
         }
@@ -86,7 +98,6 @@ final class AirPollutionManager: ObservableObject, AlertHandler {
         
         if homeCity {
             currentCityData = cityData
-            airQualityIndex = currentCityData?.response.list.first?.main.aqi ?? 25
         }
         
         airPollutionData.append(cityData)
