@@ -80,24 +80,12 @@ class LoginStepTwo: UIView {
         setLoginStackView()
     }
     
-    
     private func setupActions() {
         setupKeyboardDismissal()
         
         goToRegisterView.registerTapped = { [weak self] in
             self?.registerTapped?()
         }
-    }
-    
-    private func setupKeyboardDismissal() {
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
-        tapGesture.cancelsTouchesInView = false
-        tapGesture.delegate = self
-        addGestureRecognizer(tapGesture)
-    }
-    
-    @objc private func dismissKeyboard() {
-        endEditing(true)
     }
     
     private func setTitleLabel() {
@@ -135,11 +123,5 @@ class LoginStepTwo: UIView {
         NSLayoutConstraint.activate([
             uikitGoogleButton.heightAnchor.constraint(equalToConstant: 50)
         ])
-    }
-}
-
-extension LoginStepTwo: UIGestureRecognizerDelegate {
-    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
-        return !(touch.view is UITextField)
     }
 }

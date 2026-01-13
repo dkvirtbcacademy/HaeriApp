@@ -69,14 +69,4 @@ class RegistrationStepOne: UIView {
     private func setupActions() {
         setupKeyboardDismissal()
     }
-    
-    private func setupKeyboardDismissal() {
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
-        tapGesture.cancelsTouchesInView = false
-        addGestureRecognizer(tapGesture)
-    }
-    
-    @objc private func dismissKeyboard() {
-        endEditing(true)
-    }
 }

@@ -65,6 +65,8 @@ class ChangeNameViewController: UIViewController {
     }
     
     private func setActions() {
+        setupKeyboardHandling()
+        
         header.onBackTapped = { [weak self] in
             self?.viewModel.coordinator.navigateBack()
         }
