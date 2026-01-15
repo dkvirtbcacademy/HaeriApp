@@ -22,9 +22,8 @@ extension UIView {
         blurView.translatesAutoresizingMaskIntoConstraints = false
         blurView.layer.cornerRadius = cornerRadius
         blurView.clipsToBounds = true
-        blurView.tag = 9999 // Tag for easy identification and removal
+        blurView.tag = 9999
         
-        // Force light mode for the blur view
         blurView.overrideUserInterfaceStyle = .light
         
         insertSubview(blurView, at: 0)
@@ -40,7 +39,6 @@ extension UIView {
             backgroundColor = tintColor
         }
         
-        // Apply corner radius and border
         layer.cornerRadius = cornerRadius
         clipsToBounds = true
         layer.borderWidth = borderWidth
@@ -53,10 +51,7 @@ extension UIView {
     }
 }
 
-// MARK: - Preset Styles
 extension UIView {
-    
-    /// Apply a light glass effect
     func applyLightGlass(cornerRadius: CGFloat = 16) {
         applyGlassmorphism(
             style: .systemUltraThinMaterialLight,
@@ -65,7 +60,6 @@ extension UIView {
         )
     }
     
-    /// Apply a medium glass effect
     func applyMediumGlass(cornerRadius: CGFloat = 16) {
         applyGlassmorphism(
             style: .systemThinMaterialLight,
@@ -74,7 +68,6 @@ extension UIView {
         )
     }
     
-    /// Apply a heavy glass effect
     func applyHeavyGlass(cornerRadius: CGFloat = 16) {
         applyGlassmorphism(
             style: .systemMaterialLight,
@@ -84,7 +77,6 @@ extension UIView {
         )
     }
     
-    /// Apply a dark glass effect
     func applyDarkGlass(cornerRadius: CGFloat = 16) {
         applyGlassmorphism(
             style: .systemThickMaterialLight,

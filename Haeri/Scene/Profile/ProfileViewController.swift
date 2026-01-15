@@ -15,7 +15,7 @@ class ProfileViewController: UIViewController {
      
     private lazy var titleLabel: UILabel = {
         let label = UILabel()
-        label.text = "გამარჯობა, \(viewModel.authManager.userName)"
+        label.text = "გამარჯობა, \(viewModel.authManager.userName ?? "User")"
         label.font = .firagoBold(.xmedium)
         label.textColor = UIColor(named: "TextColor")
         label.numberOfLines = 0
@@ -35,7 +35,7 @@ class ProfileViewController: UIViewController {
 
     private lazy var userIcon: UIImageView = {
         let imageView = UIImageView()
-        imageView.image = UIImage(named: viewModel.authManager.userAvatar)
+        imageView.image = UIImage(named: viewModel.authManager.userAvatar ?? "Avatar 1")
         imageView.tintColor = UIColor(named: "DarkText")
         imageView.contentMode = .scaleAspectFit
         imageView.translatesAutoresizingMaskIntoConstraints = false
@@ -77,13 +77,13 @@ class ProfileViewController: UIViewController {
     private func observeUserChanges() {
         viewModel.authManager.$userName
             .sink { [weak self] newName in
-                self?.titleLabel.text = "გამარჯობა, \(newName)"
+                self?.titleLabel.text = "გამარჯობა, \(newName ?? "User")"
             }
             .store(in: &cancellables)
         
         viewModel.authManager.$userAvatar
             .sink { [weak self] newAvatar in
-                self?.userIcon.image = UIImage(named: newAvatar)
+                self?.userIcon.image = UIImage(named: newAvatar ?? "Avatar 1")
             }
             .store(in: &cancellables)
     }
@@ -124,6 +124,7 @@ class ProfileViewController: UIViewController {
             titleLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             titleLabel.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             titleLabel.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            titleLabel.heightAnchor.constraint(equalToConstant: 60)
         ])
     }
     
@@ -168,7 +169,6 @@ class ProfileViewController: UIViewController {
             manageAccount.topAnchor.constraint(equalTo: iconFrame.bottomAnchor, constant: 60),
             manageAccount.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
             manageAccount.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
-            manageAccount.bottomAnchor.constraint(equalTo: button.topAnchor, constant: -60)
         ])
     }
 }

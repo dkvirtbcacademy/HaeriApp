@@ -53,7 +53,11 @@ struct MainView: View {
                 }
                 .tag(MainTabCoordinator.Tab.dashboard)
             
-            CommunityFlowView(coordinator: coordinator.communityCoordinator)
+            CommunityFlowView(
+                coordinator: coordinator.communityCoordinator,
+                communityService: dependencies.communityService,
+                authManager: dependencies.authManager
+            )
                 .tabItem {
                     Label("Community", systemImage: "person.3.fill")
                 }
@@ -88,6 +92,7 @@ struct MainView: View {
             
             UITabBar.appearance().standardAppearance = appearance
             UITabBar.appearance().scrollEdgeAppearance = appearance
+            UITabBar.appearance().overrideUserInterfaceStyle = .light
             
             viewModel.appLaunch()
             

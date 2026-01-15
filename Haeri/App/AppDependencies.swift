@@ -13,6 +13,7 @@ class AppDependencies: ObservableObject {
     let locationManager: LocationManager
     let networkManager: NetworkManager
     let airPollutionManager: AirPollutionManager
+    let communityService: CommunityService
     let coordinator: MainTabCoordinator
     
     init() {
@@ -20,6 +21,7 @@ class AppDependencies: ObservableObject {
         self.locationManager = LocationManager()
         self.networkManager = NetworkManager()
         self.airPollutionManager = AirPollutionManager(networkManager: networkManager)
+        self.communityService = CommunityService(authManager: authManager, networkManager: networkManager)
         self.coordinator = MainTabCoordinator()
     }
 }

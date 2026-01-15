@@ -8,7 +8,6 @@
 import SwiftUI
 import UIKit
 
-// Shared font size enum
 enum FontSize {
     case small
     case xsmall
@@ -44,11 +43,10 @@ enum FontSize {
     }
 }
 
-// Shared font names
 private enum FontName {
     static let regular = "FiraGO-Regular"
-    static let medium = "FiraGO-Medium"
-    static let bold = "FiraGO-SemiBold"
+    static let medium = "FiraGO-SemiBold"
+    static let bold = "FiraGO-Bold"
 }
 
 extension Font {

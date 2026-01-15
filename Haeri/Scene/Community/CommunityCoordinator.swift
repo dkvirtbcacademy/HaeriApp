@@ -11,17 +11,15 @@ import Combine
 @MainActor
 final class CommunityCoordinator: ObservableObject {
     
-    enum Destination {
-        case details(character: Character)
+    enum Route: Hashable {
+        case details(postId: Int)
+        case addPost
     }
     
     @Published var path = NavigationPath()
     
-    func navigate(to destination: Destination) {
-        switch destination {
-        case .details(let character):
-            path.append(character)
-        }
+    func navigate(to route: Route) {
+        path.append(route)
     }
     
     func navigateBack() {

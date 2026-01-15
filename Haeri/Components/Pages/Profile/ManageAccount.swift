@@ -173,6 +173,7 @@ class ManageAccount: UIView {
             buttonStackView.topAnchor.constraint(equalTo: border.bottomAnchor, constant: 10),
             buttonStackView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20),
             buttonStackView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20),
+            buttonStackView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -20)
         ])
     }
 }
