@@ -13,7 +13,7 @@ final class AirPollutionManager: ObservableObject, AlertHandler {
     
     @Published private var cities = ["Tbilisi", "Rustavi"]
     @Published var airPollutionData: [CityAirPollution] = []
-    @Published var airQualityIndex = 25
+    @Published var airQualityIndex = 1
     @Published var searchResults: [GeoResponse] = []
     @Published var alertItem: AlertItem?
     @Published var isLoading = false

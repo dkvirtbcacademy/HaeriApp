@@ -16,7 +16,7 @@ struct MainView: View {
     @StateObject private var viewModel: MainViewModel
     
     @Environment(\.scenePhase) private var scenePhase
-    @State private var airQualityIndex = 25
+    @State private var airQualityIndex: Int
     
     init(
         dependencies: AppDependencies,
@@ -24,6 +24,8 @@ struct MainView: View {
     ) {
         self.dependencies = dependencies
         self.coordinator = coordinator
+        
+        _airQualityIndex = State(initialValue: dependencies.airPollutionManager.airQualityIndex)
         
         _viewModel = StateObject(wrappedValue: MainViewModel(
             locationManager: dependencies.locationManager,
@@ -98,7 +100,7 @@ struct MainView: View {
             
 //            Task { @MainActor in
 //                try await Task.sleep(nanoseconds: 1_500_000_000)
-//                self.dependencies.airPollutionManager.airQualityIndex = 70
+//                self.dependencies.airPollutionManager.airQualityIndex = 3
 //            }
         }
         .onChange(of: scenePhase) { oldPhase, newPhase in

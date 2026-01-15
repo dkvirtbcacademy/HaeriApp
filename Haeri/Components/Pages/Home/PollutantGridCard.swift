@@ -32,6 +32,7 @@ struct PollutantGridCard: View {
                 Text(detail.category)
                     .font(.firagoMedium(.xsmall))
                     .foregroundColor(.text)
+                    .lineLimit(0)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 5)
                     .background(
@@ -63,7 +64,7 @@ struct PollutantGridCard: View {
         type: .aqi,
         value: 2,
         formattedValue: "2",
-        category: "ზომიერი",
+        category: "არაჯანსაღი მგრძნობიარე ასფასფასასფასფასფას",
         color: "Yellow",
         healthImplications: "ჰაერის ხარისხი მისაღებია; თუმცა, ზოგიერთი დამაბინძურებელი შეიძლება იყოს ზომიერი საფრთხე ძალიან მცირე რაოდენობის ადამიანებისთვის.",
         imageName: "cloud-good",

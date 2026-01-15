@@ -9,7 +9,7 @@ import SwiftUI
 import UIKit
 
 private struct AirQualityKey: EnvironmentKey {
-    static let defaultValue: Int = 25
+    static let defaultValue: Int = 1
 }
 
 extension EnvironmentValues {

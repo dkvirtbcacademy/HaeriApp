@@ -10,10 +10,26 @@ import Combine
 import SwiftUI
 
 class DashboardViewController: UIViewController {
-
+    
     private let viewModel: DashboardViewModel
-    private var airQualityValue: Int = 25
+    private var airQualityValue: Int = 1
     private var cancellables = Set<AnyCancellable>()
+    
+    private let headerView: UIView = {
+        let view = UIView()
+        view.applyMediumGlass(cornerRadius: 0)
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+    
+    private let headerLabel: UILabel = {
+        let label = UILabel()
+        label.font = .firagoMedium(.xxsmall)
+        label.textColor = .darkText
+        label.text = "ჰაერის დაბინძურება"
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
     
     private lazy var tableView: UITableView = {
         let table = UITableView(frame: .zero, style: .plain)
@@ -50,8 +66,8 @@ class DashboardViewController: UIViewController {
         bindViewModel()
         fetchData()
         
-         edgesForExtendedLayout = .all
-         extendedLayoutIncludesOpaqueBars = true
+        edgesForExtendedLayout = .all
+        extendedLayoutIncludesOpaqueBars = true
     }
     
     override func viewDidLayoutSubviews() {
@@ -65,17 +81,43 @@ class DashboardViewController: UIViewController {
     }
     
     private func setupUI() {
-        navigationItem.title = "Air Quality"
-        
-        view.addSubview(tableView)
-        view.addSubview(activityIndicator)
+        setHeaderView()
+        setTableView()
+        setActivityIndicator()
+    }
+    
+    private func setHeaderView() {
+        headerView.addSubview(headerLabel)
+        view.addSubview(headerView)
         
         NSLayoutConstraint.activate([
-            tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            headerView.topAnchor.constraint(equalTo: view.topAnchor),
+            headerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            headerView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            headerView.heightAnchor.constraint(equalToConstant: 120),
+            
+            headerLabel.centerXAnchor.constraint(equalTo: headerView.centerXAnchor),
+            headerLabel.bottomAnchor.constraint(equalTo: headerView.bottomAnchor, constant: -20)
+        ])
+    }
+    
+    private func setTableView() {
+        view.addSubview(tableView)
+        
+        tableView.contentInset = UIEdgeInsets(top: 20, left: 0, bottom: 0, right: 0)
+        
+        NSLayoutConstraint.activate([
+            tableView.topAnchor.constraint(equalTo: headerView.bottomAnchor),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
-            
+        ])
+    }
+    
+    private func setActivityIndicator() {
+        view.addSubview(activityIndicator)
+        
+        NSLayoutConstraint.activate([
             activityIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             activityIndicator.centerYAnchor.constraint(equalTo: view.centerYAnchor)
         ])

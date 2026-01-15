@@ -88,9 +88,9 @@ struct HomePage: View {
         }
         
         switch aqi {
-        case ..<50:
+        case ..<3:
             return Color("Background Light")
-        case 50..<100:
+        case 3..<4:
             return Color("Background Moderate")
         default:
             return Color("Background Dark")
