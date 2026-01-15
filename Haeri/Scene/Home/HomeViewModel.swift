@@ -17,18 +17,17 @@ final class HomeViewModel: ObservableObject {
         self.cityData = cityData
     }
     
-    var pollutionDetails: [PollutionDetail] {
+    func getPollutantDetails() -> [PollutantDetail] {
         guard let item = cityData.response.item else { return [] }
-        
-        return [
-            PollutionDetail(label: "AQI", value: "\(item.main.aqi)"),
-            PollutionDetail(label: "PM2.5", value: String(format: "%.2f", item.components.pm2_5)),
-            PollutionDetail(label: "PM10", value: String(format: "%.2f", item.components.pm10)),
-            PollutionDetail(label: "CO", value: String(format: "%.2f", item.components.co)),
-            PollutionDetail(label: "NO₂", value: String(format: "%.2f", item.components.no2)),
-            PollutionDetail(label: "O₃", value: String(format: "%.2f", item.components.o3)),
-            PollutionDetail(label: "SO₂", value: String(format: "%.2f", item.components.so2)),
-            PollutionDetail(label: "NH₃", value: String(format: "%.2f", item.components.nh3))
-        ]
+        let types: [PollutantType] = [.pm25, .pm10, .co, .no2, .o3, .so2]
+        return types.map { item.getPollutantDetail(for: $0) }
+    }
+    
+    var aqiDetail: PollutantDetail? {
+        cityData.response.item?.getPollutantDetail(for: .aqi)
+    }
+    
+    var displayCityName: String {
+        cityData.localeName ?? cityData.city
     }
 }

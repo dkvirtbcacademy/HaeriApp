@@ -45,9 +45,9 @@ private struct AdaptiveBackgroundView<Content: View>: View {
     
     private func backgroundColor(for value: Int) -> Color {
         switch value {
-        case ..<50:
+        case ..<3:
             return Color("Background Light")
-        case 50..<100:
+        case 3..<4:
             return Color("Background Moderate")
         default:
             return Color("Background Dark")
@@ -88,9 +88,9 @@ extension UIViewController {
     
     private func backgroundColor(for value: Int) -> UIColor {
         switch value {
-        case ..<50:
+        case ..<3:
             return UIColor(named: "Background Light") ?? UIColor.systemGreen
-        case 50..<100:
+        case 3..<4:
             return UIColor(named: "Background Moderate") ?? UIColor.systemOrange
         default:
             return UIColor(named: "Background Dark") ?? UIColor.systemRed

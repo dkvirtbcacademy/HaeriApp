@@ -15,20 +15,20 @@ struct PostCard: View {
             HStack {
                 Text(post.author.name)
                     .font(.firago(.xsmall))
-                    .foregroundColor(.darkText)
+                    .foregroundColor(.secondaryDarkText)
                 Spacer()
                 Text(post.formattedDate)
                     .font(.firago(.xsmall))
-                    .foregroundColor(.darkText)
+                    .foregroundColor(.secondaryDarkText)
             }
             
             Text(post.title)
                 .font(.firagoMedium(.xmedium))
-                .foregroundColor(.darkText)
+                .foregroundColor(.darkText.opacity(0.9))
             
             Text(post.content)
                 .font(.firago(.xxsmall))
-                .foregroundColor(.darkText)
+                .foregroundColor(.secondaryDarkText)
                 .lineLimit(2)
             
             HStack {

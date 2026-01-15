@@ -10,7 +10,7 @@ import SwiftUI
 struct HomePage: View {
     @StateObject private var viewModel: HomeViewModel
     private let calculateBackground: Bool
-    @State private var showSheet = false
+    @State private var selectedPollutant: PollutantDetail?
     
     init(
         coordinator: HomeCoordinator,
@@ -24,31 +24,52 @@ struct HomePage: View {
     }
     
     var body: some View {
-        VStack(spacing: 20) {
-            Text(viewModel.cityData.city)
-                .font(.firagoBold(.xxlarge))
-            
-            LazyVStack(spacing: 12) {
-                ForEach(viewModel.pollutionDetails) { detail in
-                    HStack {
-                        Text(detail.label)
-                            .font(.firago(.large))
+        ScrollView {
+            VStack(spacing: 20) {
+                Text(viewModel.displayCityName)
+                    .font(.firagoBold(.xlarge))
+                    .foregroundColor(.text)
+                    .padding(.top)
+                
+                if let aqiDetail = viewModel.aqiDetail {
+                    AQICard(aqiDetail: aqiDetail)
+                        .padding(.horizontal)
+                    
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("დამაბინძურებლები:")
+                            .font(.firagoMedium(.medium))
+                            .foregroundColor(.text)
                         
-                        Spacer()
-                        
-                        Text(detail.value)
-                            .font(.firagoMedium(.large))
+                        LazyVGrid(columns: [
+                            GridItem(.flexible()),
+                            GridItem(.flexible())
+                        ], spacing: 12) {
+                            ForEach(viewModel.getPollutantDetails()) { detail in
+                                PollutantGridCard(detail: detail)
+                            }
+                        }
                     }
-                    .padding(.horizontal, 40)
+                    .padding()
+                    
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("რეკომენდაციები:")
+                            .font(.firagoMedium(.medium))
+                            .foregroundColor(.text)
+                        
+                        Text("asf asf asf asf af awfafas, majkafaskjasfas f a as fas fasfafs")
+                            .font(.firago(.xxsmall))
+                            .foregroundColor(.secondaryDarkText)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .glassEffect(.roundedRectangle(radius: 16))
+                    }
+                    .padding(.horizontal)
+                    .padding(.bottom)
                 }
             }
-            
-            Button("Show Info") {
-                showSheet.toggle()
-            }
         }
-        .sheet(isPresented: $showSheet) {
-            Text("Sheet Content")
+        .sheet(item: $selectedPollutant) { pollutant in
+            PollutantDetailSheet(pollutantDetail: pollutant)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(
@@ -82,6 +103,7 @@ struct HomePage: View {
         coordinator: HomeCoordinator(),
         cityData: CityAirPollution(
             city: "Rustavi",
+            localeName: "რუსთავი",
             response: AirPollutionResponse(
                 coord: AirPollutionResponse.Coord(
                     lat: 41.5489,
@@ -98,7 +120,6 @@ struct HomePage: View {
                             so2: 0.64,
                             pm2_5: 3.41,
                             pm10: 3.68,
-                            nh3: 0.47
                         ),
                         dt: 1609459200
                     )

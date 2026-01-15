@@ -34,7 +34,7 @@ enum FontSize {
         case .large:
             return 24
         case .xlarge:
-            return 30
+            return 36
         case .xxlarge:
             return 64
         case .custom(let size):

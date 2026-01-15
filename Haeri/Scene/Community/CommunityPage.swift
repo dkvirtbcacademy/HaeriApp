@@ -100,12 +100,10 @@ struct CommunityPage: View {
         }
         .padding(.horizontal, 6)
         .frame(width: 200, height: 50)
-        .background(.ultraThinMaterial)
-        .clipShape(Capsule())
+        .glassEffect(.capsule)
         .offset(y: showButton ? 0 : 100)
         .opacity(showButton ? 1 : 0)
         .padding(.bottom, 10)
-        .preferredColorScheme(.light)
     }
 }
 

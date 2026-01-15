@@ -49,7 +49,8 @@ final class AirPollutionManager: ObservableObject, AlertHandler {
                     try await fetchNewCity(
                         lat: String(coord.lat),
                         long: String(coord.lon),
-                        cityName: city
+                        cityName: city,
+                        localeName: coord.localeName
                     )
                 }
             } catch let error as AirPollutionError {
@@ -62,7 +63,7 @@ final class AirPollutionManager: ObservableObject, AlertHandler {
         }
     }
     
-    func fetchCoordinates(city: String) async throws -> (lat: Double, lon: Double)? {
+    func fetchCoordinates(city: String) async throws -> (lat: Double, lon: Double, localeName: String?)? {
         let urlString = "\(geoURL)/direct?q=\(city)&limit=1&appid=\(apiKey)"
         
         guard let encodedString = urlString.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) else {
@@ -75,14 +76,13 @@ final class AirPollutionManager: ObservableObject, AlertHandler {
             throw AirPollutionError.coordinatesNotFound(cityName: city)
         }
         
-        return (first.lat, first.lon)
+        return (first.lat, first.lon, first.local_names?.ka)
     }
     
-    func fetchNewCity(lat: String, long: String, cityName: String, homeCity: Bool = false) async throws {
+    func fetchNewCity(lat: String, long: String, cityName: String, localeName: String? = nil, homeCity: Bool = false) async throws {
         if let existingCity = airPollutionData.first(where: { $0.city == cityName }) {
             if currentCityData?.city != existingCity.city {
                 currentCityData = existingCity
-                // airQualityIndex will be updated by didSet
             }
             return
         }
@@ -93,6 +93,7 @@ final class AirPollutionManager: ObservableObject, AlertHandler {
         
         let cityData = CityAirPollution(
             city: cityName,
+            localeName: localeName,
             response: pollutionResponse
         )
         
@@ -134,10 +135,13 @@ final class AirPollutionManager: ObservableObject, AlertHandler {
             cities.append(city)
             
             do {
+                let localeName = try await fetchCoordinates(city: city)?.localeName
+                
                 try await fetchNewCity(
                     lat: String(lat),
                     long: String(lon),
-                    cityName: city
+                    cityName: city,
+                    localeName: localeName
                 )
             } catch let error as NetworkError {
                 handleNetworkError(error, context: city)

@@ -74,7 +74,7 @@ struct PostDetailsPage: View {
                     .foregroundStyle(.darkText)
                 Text(post.formattedDate)
                     .font(.firago(.xxsmall))
-                    .foregroundStyle(.darkText)
+                    .foregroundColor(.secondaryDarkText)
             }
             
             Spacer()
@@ -101,7 +101,7 @@ struct PostDetailsPage: View {
             
             Text(post.content)
                 .font(.firago(.medium))
-                .foregroundStyle(.darkText)
+                .foregroundStyle(.darkText.opacity(0.9))
         }
         
         HStack(spacing: 20) {
@@ -146,7 +146,7 @@ struct PostDetailsPage: View {
         VStack(alignment: .leading, spacing: 16) {
             Text("კომენტარები:")
                 .font(.firagoMedium(.medium))
-                .foregroundStyle(.darkText)
+                .foregroundStyle(.darkText.opacity(0.9))
             
             ForEach(post.comments) { comment in
                 HStack(alignment: .top, spacing: 12) {
@@ -162,7 +162,7 @@ struct PostDetailsPage: View {
                         
                         Text(comment.content)
                             .font(.firago(.xxsmall))
-                            .foregroundStyle(.darkText)
+                            .foregroundStyle(.darkText.opacity(0.9))
                     }
                 }
             }
