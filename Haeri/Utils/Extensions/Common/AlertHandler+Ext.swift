@@ -49,4 +49,27 @@ extension AlertHandler {
             alertItem = AirPollutionAlertContent.cityNotFound(cityName: cityName)
         }
     }
+    
+    func handleAIRecomendationError(_ error: AIRecomendationError) {
+        switch error {
+        case .invalidURL:
+            alertItem = AIRecomendationAlertContext.invalidURL
+        case .encodingError:
+            alertItem = AIRecomendationAlertContext.encodingError
+        case .invalidResponse:
+            alertItem = AIRecomendationAlertContext.invalidResponse
+        case .invalidRequest:
+            alertItem = AIRecomendationAlertContext.invalidRequest
+        case .authenticationError:
+            alertItem = AIRecomendationAlertContext.authenticationError
+        case .rateLimitError:
+            alertItem = AIRecomendationAlertContext.rateLimitError
+        case .serverError:
+            alertItem = AIRecomendationAlertContext.serverError
+        case .decodingError:
+            alertItem = AIRecomendationAlertContext.decodingError
+        case .emptyResponse:
+            alertItem = AIRecomendationAlertContext.emptyResponse
+        }
+    }
 }

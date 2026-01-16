@@ -2,12 +2,13 @@
 //  HomeViewModel.swift
 //  Haeri
 //
-//  Created by kv on 05.01.26.
+//  Updated to use Groq API (FREE: 14,400 requests/day)
 //
 
 import Foundation
 import Combine
 
+@MainActor
 final class HomeViewModel: ObservableObject {
     let cityData: CityAirPollution
     private let coordinator: HomeCoordinator

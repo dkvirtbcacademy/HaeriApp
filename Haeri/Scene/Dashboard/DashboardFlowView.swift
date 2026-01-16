@@ -10,19 +10,26 @@ import SwiftUI
 struct DashboardFlowView: UIViewControllerRepresentable {
     @ObservedObject private var dashboardCoordinator: DashboardCoordinator
     @ObservedObject private var airPollutionManager: AirPollutionManager
+    @ObservedObject private var aiRecommendationManager: AIRecomendationManager
     @EnvironmentObject private var coordinator: MainTabCoordinator
     @Environment(\.airQuality) private var airQuality
     
-    init(dashboardCoordinator: DashboardCoordinator, airPollutionManager: AirPollutionManager) {
+    init(
+        dashboardCoordinator: DashboardCoordinator,
+        airPollutionManager: AirPollutionManager,
+        aiRecommendationManager: AIRecomendationManager,
+    ) {
         self.dashboardCoordinator = dashboardCoordinator
         self.airPollutionManager = airPollutionManager
+        self.aiRecommendationManager = aiRecommendationManager
     }
     
     func makeUIViewController(context: Context) -> UINavigationController {
         let viewModel = DashboardViewModel(
             coordinator: dashboardCoordinator,
             homeCoordinator: coordinator.homeCoordinator,
-            airPollutionManager: airPollutionManager
+            airPollutionManager: airPollutionManager,
+            aiRecommendationManager: aiRecommendationManager
         )
         
         let dashboardVC = DashboardViewController(

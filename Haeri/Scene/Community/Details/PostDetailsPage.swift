@@ -46,6 +46,7 @@ struct PostDetailsPage: View {
                 .padding(.horizontal)
             }
             .dismissKeyboardOnDrag()
+            .dismissKeyboardOnTap()
             
             SwiftUIPageHeader(pageName: "პოსტი") {
                 viewModel.navigateBack()

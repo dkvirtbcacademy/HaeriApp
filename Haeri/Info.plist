@@ -2,6 +2,14 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>AI_API_KEY</key>
+	<string>$(AI_API_KEY)</string>
+	<key>POLLUTION_API_KEY</key>
+	<string>$(POLLUTION_API_KEY)</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict/>
+	</array>
 	<key>UIAppFonts</key>
 	<array>
 		<string>firago-latin-700-normal.ttf</string>

@@ -15,6 +15,7 @@ class AppDependencies: ObservableObject {
     let userDefaultsManager: UserDefaultsManager
     let airPollutionManager: AirPollutionManager
     let communityService: CommunityService
+    let aiRecommendationManager: AIRecomendationManager
     let coordinator: MainTabCoordinator
     
     init() {
@@ -30,6 +31,12 @@ class AppDependencies: ObservableObject {
             authManager: authManager,
             networkManager: networkManager
         )
+        
+        self.aiRecommendationManager = AIRecomendationManager(
+            networkManager: networkManager,
+            authManager: authManager
+        )
+        
         self.coordinator = MainTabCoordinator()
     }
 }

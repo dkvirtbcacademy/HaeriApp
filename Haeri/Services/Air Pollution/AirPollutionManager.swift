@@ -11,7 +11,7 @@ import Combine
 @MainActor
 final class AirPollutionManager: ObservableObject, AlertHandler {
     
-    @Published private(set) var cities = ["Tbilisi", "Rustavi"] {
+    @Published private(set) var cities = ["Tbilisi", "Rustavi", "London"] {
         didSet {
             userDefaultsManager.saveCities(cities)
         }
@@ -32,7 +32,7 @@ final class AirPollutionManager: ObservableObject, AlertHandler {
     private let userDefaultsManager: UserDefaultsManager
     private let networkManager: NetworkManager
     
-    private let apiKey = "0d42305cce9b217d3a28f376eb166e2d"
+    private let apiKey = Secrets.pollutionApiKey
     private let baseURL = "https://api.openweathermap.org/data/2.5/air_pollution"
     private let geoURL = "https://api.openweathermap.org/geo/1.0"
     

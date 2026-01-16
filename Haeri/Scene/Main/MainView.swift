@@ -38,7 +38,8 @@ struct MainView: View {
             
             HomeFlowView(
                 coordinator: coordinator.homeCoordinator,
-                airPollutionManager: dependencies.airPollutionManager
+                airPollutionManager: dependencies.airPollutionManager,
+                aiRecommendationManager: dependencies.aiRecommendationManager,
             )
                 .tabItem {
                     Label("Home", systemImage: "house")
@@ -47,7 +48,8 @@ struct MainView: View {
             
             DashboardFlowView(
                 dashboardCoordinator: coordinator.dashboardCoordinator,
-                airPollutionManager: dependencies.airPollutionManager
+                airPollutionManager: dependencies.airPollutionManager,
+                aiRecommendationManager: dependencies.aiRecommendationManager,
             )
             .ignoresSafeArea()
                 .tabItem {
@@ -97,11 +99,6 @@ struct MainView: View {
             UITabBar.appearance().overrideUserInterfaceStyle = .light
             
             viewModel.appLaunch()
-            
-//            Task { @MainActor in
-//                try await Task.sleep(nanoseconds: 1_500_000_000)
-//                self.dependencies.airPollutionManager.airQualityIndex = 3
-//            }
         }
         .onChange(of: scenePhase) { oldPhase, newPhase in
             if newPhase == .background || newPhase == .inactive {

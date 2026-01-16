@@ -141,10 +141,20 @@ final class MainViewModel: ObservableObject, AlertHandler {
         print("fetching air quality: \(location)")
         
         let finalCityName: String
+        let localeName: String?
+        
         if let providedCityName = cityName {
             finalCityName = providedCityName
+            localeName = nil
         } else {
             finalCityName = await locationManager.getCityName(from: location) ?? "Current Location"
+            
+            do {
+                let coordResult = try await airPollutionManager.fetchCoordinates(city: finalCityName)
+                localeName = coordResult?.localeName
+            } catch {
+                localeName = nil
+            }
         }
         
         do {
@@ -152,6 +162,7 @@ final class MainViewModel: ObservableObject, AlertHandler {
                 lat: String(location.latitude),
                 long: String(location.longitude),
                 cityName: finalCityName,
+                localeName: localeName,
                 homeCity: true
             )
             print("\(finalCityName) fetched")

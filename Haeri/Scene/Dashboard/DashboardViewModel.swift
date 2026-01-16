@@ -16,13 +16,19 @@ final class DashboardViewModel: ObservableObject {
     private let coordinator: DashboardCoordinator
     private let homeCoordinator: HomeCoordinator
     private let airPollutionManager: AirPollutionManager
+    private let aiRecommendationManager: AIRecomendationManager
     private var cancellables = Set<AnyCancellable>()
     
-    init(coordinator: DashboardCoordinator, homeCoordinator: HomeCoordinator, airPollutionManager: AirPollutionManager) {
+    init(
+        coordinator: DashboardCoordinator,
+        homeCoordinator: HomeCoordinator,
+        airPollutionManager: AirPollutionManager,
+        aiRecommendationManager: AIRecomendationManager
+    ) {
         self.coordinator = coordinator
         self.homeCoordinator = homeCoordinator
         self.airPollutionManager = airPollutionManager
-        
+        self.aiRecommendationManager = aiRecommendationManager
         observeAirPollutionData()
     }
     
@@ -61,7 +67,14 @@ final class DashboardViewModel: ObservableObject {
     }
     
     func navigateToCityDetail(cityData: CityAirPollution, backgroudColor: String) {
-        coordinator.navigate(to: .cityDetail(cityData, homeCoordinator, backgroudColor))
+        coordinator.navigate(
+                to: .cityDetail(
+                    cityData,
+                    homeCoordinator,
+                    aiRecommendationManager,
+                    backgroudColor
+                )
+            )
     }
     
     func navigateToAddCity(delegate: AddCityViewControllerDelegate) {

@@ -11,6 +11,7 @@ struct HomeFlowView: View {
     
     @ObservedObject var coordinator: HomeCoordinator
     @ObservedObject var airPollutionManager: AirPollutionManager
+    @ObservedObject var aiRecommendationManager: AIRecomendationManager
     @Environment(\.airQuality) var airQuality
     
     var body: some View {
@@ -19,7 +20,8 @@ struct HomeFlowView: View {
                 if let cityData = airPollutionManager.currentCityData {
                     HomePage(
                         coordinator: coordinator,
-                        cityData: cityData
+                        cityData: cityData,
+                        aiRecommendationManager: aiRecommendationManager,
                     )
                 } else {
                     SwiftUILoadingView(label: "დაელოდეთ ინფორმაცია იტვირთება...")
@@ -36,7 +38,12 @@ struct HomeFlowView: View {
     HomeFlowView(
         coordinator: HomeCoordinator(),
         airPollutionManager: AirPollutionManager(
-            networkManager: NetworkManager(), userDefaultsManager: UserDefaultsManager()
-        )
+            networkManager: NetworkManager(),
+            userDefaultsManager: UserDefaultsManager()
+        ),
+        aiRecommendationManager: AIRecomendationManager(
+            networkManager: NetworkManager(),
+            authManager: AuthManager()
+        ),
     )
 }

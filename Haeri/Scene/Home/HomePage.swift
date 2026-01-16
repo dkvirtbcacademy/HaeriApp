@@ -9,18 +9,24 @@ import SwiftUI
 
 struct HomePage: View {
     @StateObject private var viewModel: HomeViewModel
+    @ObservedObject private var aiRecommendationManager: AIRecomendationManager
     private let backgroudColor: String?
+    
     @State private var selectedPollutant: PollutantDetail?
+    @State private var hasLoadedInitialRecommendation = false
     
     init(
         coordinator: HomeCoordinator,
         cityData: CityAirPollution,
+        aiRecommendationManager: AIRecomendationManager,
         backgroudColor: String? = nil
     ) {
+        self.backgroudColor = backgroudColor
+        self.aiRecommendationManager = aiRecommendationManager
+        
         _viewModel = StateObject(
             wrappedValue: HomeViewModel(coordinator: coordinator, cityData: cityData)
         )
-        self.backgroudColor = backgroudColor
     }
     
     var body: some View {
@@ -34,64 +40,58 @@ struct HomePage: View {
                 if let aqiDetail = viewModel.aqiDetail {
                     AQICard(aqiDetail: aqiDetail)
                         .padding(.horizontal)
+                }
+                
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("დამაბინძურებლები:")
+                        .font(.firagoMedium(.medium))
+                        .foregroundColor(.text)
                     
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("დამაბინძურებლები:")
-                            .font(.firagoMedium(.medium))
-                            .foregroundColor(.text)
-                        
-                        LazyVGrid(columns: [
-                            GridItem(.flexible()),
-                            GridItem(.flexible())
-                        ], spacing: 12) {
-                            ForEach(viewModel.getPollutantDetails()) { detail in
-                                PollutantGridCard(detail: detail)
-                            }
+                    LazyVGrid(columns: [
+                        GridItem(.flexible()),
+                        GridItem(.flexible())
+                    ], spacing: 12) {
+                        ForEach(viewModel.getPollutantDetails()) { detail in
+                            PollutantGridCard(detail: detail)
                         }
                     }
-                    .padding()
-                    
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("რეკომენდაციები:")
-                            .font(.firagoMedium(.medium))
-                            .foregroundColor(.text)
-                        
-                        Text("asf asf asf asf af awfafas, majkafaskjasfas f a as fas fasfafs")
-                            .font(.firago(.xxsmall))
-                            .foregroundColor(.secondaryDarkText)
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                            .glassEffect(.roundedRectangle(radius: 16))
-                    }
-                    .padding(.horizontal)
-                    .padding(.bottom)
                 }
+                .padding()
+                
+                
+                AIRecomendations(
+                    aiRecommendationManager: aiRecommendationManager,
+                    cityData: viewModel.cityData
+                )
+                
             }
         }
         .sheet(item: $selectedPollutant) { pollutant in
             PollutantDetailSheet(pollutantDetail: pollutant)
         }
+        .alert(item: $aiRecommendationManager.alertItem) { alertItem in
+            Alert(
+                title: alertItem.title,
+                message: alertItem.message,
+                dismissButton: alertItem.dismissButton
+            )
+        }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(
             backgroudColor.map { Color($0) } ?? Color.clear
         )
-    }
-    
-    private var adaptiveBackgroundColor: Color {
-        guard let aqi = viewModel.cityData.response.item?.main.aqi else {
-            return Color.clear
-        }
-        
-        switch aqi {
-        case ..<2:
-            return Color("Background Light")
-        case 2..<4:
-            return Color("Background Moderate")
-        default:
-            return Color("Background Dark")
+        .onAppear {
+            if !hasLoadedInitialRecommendation {
+                hasLoadedInitialRecommendation = true
+                Task {
+                    await aiRecommendationManager.generateAIRecommendation(for: viewModel.cityData)
+                }
+            }
         }
     }
 }
+
+
 
 #Preview {
     HomePage(
@@ -114,12 +114,16 @@ struct HomePage: View {
                             o3: 68.66,
                             so2: 0.64,
                             pm2_5: 3.41,
-                            pm10: 3.68,
+                            pm10: 3.68
                         ),
                         dt: 1609459200
                     )
                 ]
             )
+        ),
+        aiRecommendationManager: AIRecomendationManager(
+            networkManager: NetworkManager(),
+            authManager: AuthManager()
         ),
         backgroudColor: "Orange"
     )
