@@ -9,12 +9,12 @@ import UIKit
 
 class UikitButton: UIButton {
 
-    init(label: String) {
+    init(label: String, fontColor: String = "Green") {
         super.init(frame: .zero)
         
         setTitle(label, for: .normal)
         titleLabel?.font = .firagoMedium(.xmedium)
-        setTitleColor(UIColor(named: "Background Light"), for: .normal)
+        setTitleColor(UIColor(named: fontColor), for: .normal)
         layer.cornerRadius = 25
         backgroundColor = UIColor(named: "TextColor")
         

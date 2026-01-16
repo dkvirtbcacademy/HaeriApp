@@ -87,3 +87,17 @@ extension UIView {
         )
     }
 }
+
+extension UIButton {
+    func applyGlassEffect() {
+        let blurEffect = UIBlurEffect(style: .systemUltraThinMaterialLight)
+        let blurView = UIVisualEffectView(effect: blurEffect)
+        blurView.frame = bounds
+        blurView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        blurView.isUserInteractionEnabled = false
+        blurView.layer.cornerRadius = layer.cornerRadius
+        blurView.clipsToBounds = true
+        
+        insertSubview(blurView, at: 0)
+    }
+}

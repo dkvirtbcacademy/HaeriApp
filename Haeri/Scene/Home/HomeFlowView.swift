@@ -36,7 +36,7 @@ struct HomeFlowView: View {
     HomeFlowView(
         coordinator: HomeCoordinator(),
         airPollutionManager: AirPollutionManager(
-            networkManager: NetworkManager()
+            networkManager: NetworkManager(), userDefaultsManager: UserDefaultsManager()
         )
     )
 }

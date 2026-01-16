@@ -9,14 +9,15 @@ import SwiftUI
 
 struct SwiftUIButton: View {
     let label: String
-    let action: () -> Void
     var isDisabled: Bool = false
+    var fontColor: String = "Green"
+    let action: () -> Void
     
     var body: some View {
         Button(action: action) {
             Text(label)
                 .font(.firagoMedium(.xmedium))
-                .foregroundStyle(isDisabled ? Color.text.opacity(0.5) : Color("Background Light"))
+                .foregroundStyle(isDisabled ? Color.text.opacity(0.5) : Color(fontColor))
                 .frame(maxWidth: .infinity)
                 .frame(height: 50)
                 .background(

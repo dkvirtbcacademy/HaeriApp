@@ -121,7 +121,7 @@ final class CommunityService: ObservableObject {
             email: "dato@mail.com",
             password: "123456",
             savedPosts: [1, 4],
-            likedPosts: [1, 2, 5, 7]
+            likedPosts: [1, 2, 5, 7],
         )
         
         let user2 = UserModel(
@@ -131,7 +131,7 @@ final class CommunityService: ObservableObject {
             email: "nino@mail.com",
             password: "123456",
             savedPosts: [2, 6],
-            likedPosts: [1, 3, 6]
+            likedPosts: [1, 3, 6],
         )
         
         let user3 = UserModel(
@@ -141,7 +141,7 @@ final class CommunityService: ObservableObject {
             email: "gio@mail.com",
             password: "123456",
             savedPosts: [3],
-            likedPosts: [1, 2, 3, 4, 8]
+            likedPosts: [1, 2, 3, 4, 8],
         )
         
         let user4 = UserModel(
@@ -151,7 +151,7 @@ final class CommunityService: ObservableObject {
             email: "mariam@mail.com",
             password: "123456",
             savedPosts: [5, 7],
-            likedPosts: [2, 4, 6]
+            likedPosts: [2, 4, 6],
         )
         
         let user5 = UserModel(
@@ -161,7 +161,7 @@ final class CommunityService: ObservableObject {
             email: "luka@mail.com",
             password: "123456",
             savedPosts: [8],
-            likedPosts: [1, 5, 7, 9]
+            likedPosts: [1, 5, 7, 9],
         )
         
         let now = Date()

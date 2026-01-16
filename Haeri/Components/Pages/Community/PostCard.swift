@@ -60,7 +60,7 @@ struct PostCard: View {
                 email: "dato@mail.com",
                 password: "123456",
                 savedPosts: [1],
-                likedPosts: [1]
+                likedPosts: [1],
             ),
             title: "Air quality in Rustavi",
             content: "Air feels much cleaner today compared to last week. The AQI readings show significant improvement.",
@@ -75,7 +75,7 @@ struct PostCard: View {
                         email: "nino@mail.com",
                         password: "123456",
                         savedPosts: [],
-                        likedPosts: [1]
+                        likedPosts: [1],
                     ),
                     content: "Yes! I checked AQI and it's much better 🌤️"
                 )

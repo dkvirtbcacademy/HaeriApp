@@ -76,34 +76,19 @@ struct CommunityPage: View {
             
             VStack {
                 Spacer()
-                addPostButton
+                AddCityButton(
+                    isVisible: showButton,
+                    label: "დაამატე პოსტი"
+                ) {
+                    viewModel.navigateToAddPost()
+                }
+                .padding(.bottom, 10)
             }
         }
     }
     
     private var headerHeight: CGFloat {
         140
-    }
-    
-    var addPostButton: some View {
-        Button {
-            viewModel.navigateToAddPost()
-        } label: {
-            HStack {
-                Image(systemName: "plus")
-                    .font(.firago(.large))
-                    .foregroundColor(.darkText)
-                Text("დაამატე პოსტი")
-                    .font(.firago(.medium))
-                    .foregroundColor(.darkText)
-            }
-        }
-        .padding(.horizontal, 6)
-        .frame(width: 200, height: 50)
-        .glassEffect(.capsule)
-        .offset(y: showButton ? 0 : 100)
-        .opacity(showButton ? 1 : 0)
-        .padding(.bottom, 10)
     }
 }
 

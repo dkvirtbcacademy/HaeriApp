@@ -38,11 +38,33 @@ final class DashboardViewModel: ObservableObject {
         await airPollutionManager.fetchChoosenCitiesData()
     }
     
+    func findCity(name: String) async {
+        await airPollutionManager.findCity(city: name)
+    }
+    
+    func getSearchResults() -> [GeoResponse] {
+        airPollutionManager.searchResults
+    }
+    
+    func addCity(_ city: GeoResponse) async {
+        await airPollutionManager.addChoosenCity(
+            city: city.name,
+            lat: city.lat,
+            lon: city.lon
+        )
+    }
+    
     func removeCity(at index: Int) {
-        airPollutionManager.removeChoosenCity(index: index)
+        guard index < cities.count else { return }
+        let cityName = cities[index].city
+        airPollutionManager.removeChoosenCity(cityName: cityName)
     }
     
     func navigateToCityDetail(cityData: CityAirPollution, backgroudColor: String) {
         coordinator.navigate(to: .cityDetail(cityData, homeCoordinator, backgroudColor))
+    }
+    
+    func navigateToAddCity(delegate: AddCityViewControllerDelegate) {
+        coordinator.navigate(to: .addCity(self, delegate))
     }
 }

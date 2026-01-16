@@ -13,6 +13,7 @@ final class DashboardCoordinator: ObservableObject {
     
     enum Destination {
         case cityDetail(CityAirPollution, HomeCoordinator, String)
+        case addCity(DashboardViewModel, AddCityViewControllerDelegate)
     }
     
     weak var navigationController: UINavigationController?
@@ -31,6 +32,21 @@ final class DashboardCoordinator: ObservableObject {
             )
             let hostingController = UIHostingController(rootView: homeView)
             viewController = hostingController
+            
+        case .addCity(let viewModel, let delegate):
+            let addCityVC = AddCityViewController(viewModel: viewModel)
+            addCityVC.delegate = delegate
+            
+            let navController = UINavigationController(rootViewController: addCityVC)
+            
+            if let sheet = navController.sheetPresentationController {
+                sheet.detents = [.medium(), .large()]
+                sheet.prefersGrabberVisible = true
+                sheet.preferredCornerRadius = 20
+            }
+            
+            navigationController.present(navController, animated: true)
+            return
         }
         
         navigationController.pushViewController(viewController, animated: true)

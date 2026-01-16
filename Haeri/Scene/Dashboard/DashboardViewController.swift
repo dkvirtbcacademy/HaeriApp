@@ -15,6 +15,9 @@ class DashboardViewController: UIViewController {
     private var airQualityValue: Int = 1
     private var cancellables = Set<AnyCancellable>()
     
+    private var lastScrollOffset: CGFloat = 0
+    private var isButtonVisible: Bool = true
+    
     private let headerView: UIView = {
         let view = UIView()
         view.applyMediumGlass(cornerRadius: 0)
@@ -47,6 +50,19 @@ class DashboardViewController: UIViewController {
         indicator.translatesAutoresizingMaskIntoConstraints = false
         indicator.hidesWhenStopped = true
         return indicator
+    }()
+    
+    private lazy var addCityButtonHostingController: UIHostingController<AddCityButton> = {
+        let button = AddCityButton(
+            isVisible: isButtonVisible,
+            label: "დაამატე ქალაქი"
+        ) { [weak self] in
+            self?.presentAddCitySheet()
+        }
+        let hostingController = UIHostingController(rootView: button)
+        hostingController.view.backgroundColor = .clear
+        hostingController.view.translatesAutoresizingMaskIntoConstraints = false
+        return hostingController
     }()
     
     init(viewModel: DashboardViewModel) {
@@ -84,6 +100,7 @@ class DashboardViewController: UIViewController {
         setHeaderView()
         setTableView()
         setActivityIndicator()
+        setupAddCityButton()
     }
     
     private func setHeaderView() {
@@ -110,7 +127,7 @@ class DashboardViewController: UIViewController {
             tableView.topAnchor.constraint(equalTo: headerView.bottomAnchor),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            tableView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
         ])
     }
     
@@ -121,6 +138,33 @@ class DashboardViewController: UIViewController {
             activityIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             activityIndicator.centerYAnchor.constraint(equalTo: view.centerYAnchor)
         ])
+    }
+    
+    private func setupAddCityButton() {
+        addChild(addCityButtonHostingController)
+        view.addSubview(addCityButtonHostingController.view)
+        addCityButtonHostingController.didMove(toParent: self)
+        
+        NSLayoutConstraint.activate([
+            addCityButtonHostingController.view.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            addCityButtonHostingController.view.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            addCityButtonHostingController.view.widthAnchor.constraint(equalToConstant: 220),
+            addCityButtonHostingController.view.heightAnchor.constraint(equalToConstant: 70)
+        ])
+    }
+    
+    private func presentAddCitySheet() {
+        viewModel.navigateToAddCity(delegate: self)
+    }
+    
+    private func updateButtonVisibility(_ isVisible: Bool) {
+        let button = AddCityButton(
+            isVisible: isVisible,
+            label: "დაამატე ქალაქი"
+        ) { [weak self] in
+            self?.presentAddCitySheet()
+        }
+        addCityButtonHostingController.rootView = button
     }
     
     private func bindViewModel() {
@@ -186,6 +230,30 @@ extension DashboardViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
             viewModel.removeCity(at: indexPath.row)
+        }
+    }
+    
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        let currentOffset = scrollView.contentOffset.y
+        let diff = currentOffset - lastScrollOffset
+        
+        if diff > 5 && isButtonVisible && currentOffset > 50 {
+            isButtonVisible = false
+            updateButtonVisibility(false)
+        }
+        else if (diff < -5 || currentOffset < 30) && !isButtonVisible {
+            isButtonVisible = true
+            updateButtonVisibility(true)
+        }
+        
+        lastScrollOffset = currentOffset
+    }
+}
+
+extension DashboardViewController: AddCityViewControllerDelegate {
+    func didSelectCity(_ city: GeoResponse) {
+        Task {
+            await viewModel.addCity(city)
         }
     }
 }
