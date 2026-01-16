@@ -9,18 +9,18 @@ import SwiftUI
 
 struct HomePage: View {
     @StateObject private var viewModel: HomeViewModel
-    private let calculateBackground: Bool
+    private let backgroudColor: String?
     @State private var selectedPollutant: PollutantDetail?
     
     init(
         coordinator: HomeCoordinator,
         cityData: CityAirPollution,
-        calculateBackground: Bool = false
+        backgroudColor: String? = nil
     ) {
         _viewModel = StateObject(
             wrappedValue: HomeViewModel(coordinator: coordinator, cityData: cityData)
         )
-        self.calculateBackground = calculateBackground
+        self.backgroudColor = backgroudColor
     }
     
     var body: some View {
@@ -73,12 +73,7 @@ struct HomePage: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(
-            Group {
-                if calculateBackground {
-                    adaptiveBackgroundColor
-                        .ignoresSafeArea()
-                }
-            }
+            backgroudColor.map { Color($0) } ?? Color.clear
         )
     }
     
@@ -88,9 +83,9 @@ struct HomePage: View {
         }
         
         switch aqi {
-        case ..<3:
+        case ..<2:
             return Color("Background Light")
-        case 3..<4:
+        case 2..<4:
             return Color("Background Moderate")
         default:
             return Color("Background Dark")
@@ -126,6 +121,6 @@ struct HomePage: View {
                 ]
             )
         ),
-        calculateBackground: true
+        backgroudColor: "Orange"
     )
 }

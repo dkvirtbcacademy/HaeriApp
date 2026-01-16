@@ -36,6 +36,7 @@ final class AirPollutionManager: ObservableObject, AlertHandler {
     private func updateAirQualityIndex() {
         if let aqi = currentCityData?.response.list.first?.main.aqi {
             airQualityIndex = aqi
+            print(aqi)
         }
     }
     
@@ -81,7 +82,7 @@ final class AirPollutionManager: ObservableObject, AlertHandler {
     
     func fetchNewCity(lat: String, long: String, cityName: String, localeName: String? = nil, homeCity: Bool = false) async throws {
         if let existingCity = airPollutionData.first(where: { $0.city == cityName }) {
-            if currentCityData?.city != existingCity.city {
+            if homeCity && currentCityData?.city != existingCity.city {
                 currentCityData = existingCity
             }
             return

@@ -42,7 +42,7 @@ final class DashboardViewModel: ObservableObject {
         airPollutionManager.removeChoosenCity(index: index)
     }
     
-    func navigateToCityDetail(cityData: CityAirPollution, calculateBackground: Bool) {
-        coordinator.navigate(to: .cityDetail(cityData, homeCoordinator, calculateBackground))
+    func navigateToCityDetail(cityData: CityAirPollution, backgroudColor: String) {
+        coordinator.navigate(to: .cityDetail(cityData, homeCoordinator, backgroudColor))
     }
 }

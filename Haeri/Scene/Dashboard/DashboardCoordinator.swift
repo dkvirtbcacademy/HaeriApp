@@ -12,7 +12,7 @@ import Combine
 final class DashboardCoordinator: ObservableObject {
     
     enum Destination {
-        case cityDetail(CityAirPollution, HomeCoordinator, Bool)
+        case cityDetail(CityAirPollution, HomeCoordinator, String)
     }
     
     weak var navigationController: UINavigationController?
@@ -23,11 +23,11 @@ final class DashboardCoordinator: ObservableObject {
         let viewController: UIViewController
         
         switch destination {
-        case .cityDetail(let cityData, let homeCoordinator, let calculateBackground):
+        case .cityDetail(let cityData, let homeCoordinator, let backgroudColor):
             let homeView = HomePage(
                 coordinator: homeCoordinator,
                 cityData: cityData,
-                calculateBackground: calculateBackground
+                backgroudColor: backgroudColor
             )
             let hostingController = UIHostingController(rootView: homeView)
             viewController = hostingController

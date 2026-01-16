@@ -26,7 +26,7 @@ class DashboardViewController: UIViewController {
         let label = UILabel()
         label.font = .firagoMedium(.xxsmall)
         label.textColor = .darkText
-        label.text = "ჰაერის დაბინძურება"
+        label.text = "ჰაერის ხარისხი"
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
@@ -176,7 +176,7 @@ extension DashboardViewController: UITableViewDelegate {
         
         let cityData = viewModel.cities[indexPath.row]
         
-        viewModel.navigateToCityDetail(cityData: cityData, calculateBackground: true)
+        viewModel.navigateToCityDetail(cityData: cityData, backgroudColor: cityData.response.item?.aqiCategory.color ?? "Green")
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {

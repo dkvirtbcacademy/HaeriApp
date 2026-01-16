@@ -42,15 +42,32 @@ private struct AdaptiveBackgroundView<Content: View>: View {
                     .animation(.easeInOut(duration: 0.8), value: effectiveValue)
             )
     }
+//    
+//    private func backgroundColor(for value: Int) -> Color {
+//        switch value {
+//        case ..<3:
+//            return Color("Background Light")
+//        case 3..<4:
+//            return Color("Background Moderate")
+//        default:
+//            return Color("Background Dark")
+//        }
+//    }
     
     private func backgroundColor(for value: Int) -> Color {
         switch value {
-        case ..<3:
-            return Color("Background Light")
-        case 3..<4:
-            return Color("Background Moderate")
+        case 1:
+            return Color("Green")
+        case 2:
+            return Color("Yellow")
+        case 3:
+            return Color("Orange")
+        case 4:
+            return Color("Red")
+        case 5:
+            return Color("Purple")
         default:
-            return Color("Background Dark")
+            return Color("Maroon")
         }
     }
 }
@@ -86,14 +103,31 @@ extension UIViewController {
         }
     }
     
+//    private func backgroundColor(for value: Int) -> UIColor {
+//        switch value {
+//        case ..<3:
+//            return UIColor(named: "Background Light") ?? UIColor.systemGreen
+//        case 3..<4:
+//            return UIColor(named: "Background Moderate") ?? UIColor.systemOrange
+//        default:
+//            return UIColor(named: "Background Dark") ?? UIColor.systemRed
+//        }
+//    }
+    
     private func backgroundColor(for value: Int) -> UIColor {
         switch value {
-        case ..<3:
-            return UIColor(named: "Background Light") ?? UIColor.systemGreen
-        case 3..<4:
-            return UIColor(named: "Background Moderate") ?? UIColor.systemOrange
+        case 1:
+            return UIColor(named: "Green") ?? UIColor.systemGreen
+        case 2:
+            return UIColor(named: "Yellow") ?? UIColor.systemYellow
+        case 3:
+            return UIColor(named: "Orange") ?? UIColor.systemOrange
+        case 4:
+            return UIColor(named: "Red") ?? UIColor.systemRed
+        case 5:
+            return UIColor(named: "Purple") ?? UIColor.systemPurple
         default:
-            return UIColor(named: "Background Dark") ?? UIColor.systemRed
+            return UIColor(named: "Maroon") ?? UIColor.systemRed
         }
     }
 }
