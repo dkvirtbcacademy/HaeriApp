@@ -121,7 +121,7 @@ class DashboardViewController: UIViewController {
     private func setTableView() {
         view.addSubview(tableView)
         
-        tableView.contentInset = UIEdgeInsets(top: 20, left: 0, bottom: 0, right: 0)
+        tableView.contentInset = UIEdgeInsets(top: 20, left: 0, bottom: 60, right: 0)
         
         NSLayoutConstraint.activate([
             tableView.topAnchor.constraint(equalTo: headerView.bottomAnchor),
