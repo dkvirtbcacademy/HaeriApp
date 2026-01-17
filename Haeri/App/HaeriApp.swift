@@ -11,6 +11,7 @@ import SwiftUI
 struct HaeriApp: App {
     @StateObject private var dependencies = AppDependencies()
     @StateObject private var appCoordinator: AppCoordinator
+    @State private var showLaunchScreen = true
     
     init() {
         let deps = AppDependencies()
@@ -23,24 +24,38 @@ struct HaeriApp: App {
     
     var body: some Scene {
         WindowGroup {
-            Group {
-                switch appCoordinator.rootState {
-                case .authenticated:
-                    MainView(
-                        dependencies: dependencies,
-                        coordinator: appCoordinator.mainTabCoordinator
-                    )
-                    .transition(.opacity)
-                case .unauthenticated:
-                    LoginFlowView(
-                        dependencies: dependencies,
-                        loginCoordinator: appCoordinator.loginCoordinator
-                    )
-                    .ignoresSafeArea()
-                    .transition(.opacity)
+            ZStack {
+                Group {
+                    switch appCoordinator.rootState {
+                    case .authenticated:
+                        MainView(
+                            dependencies: dependencies,
+                            coordinator: appCoordinator.mainTabCoordinator
+                        )
+                        .transition(.opacity)
+                    case .unauthenticated:
+                        LoginFlowView(
+                            dependencies: dependencies,
+                            loginCoordinator: appCoordinator.loginCoordinator
+                        )
+                        .ignoresSafeArea()
+                        .transition(.opacity)
+                    }
+                }
+                .animation(.easeInOut(duration: 0.3), value: appCoordinator.rootState)
+                
+                if showLaunchScreen {
+                    LaunchScreen()
+                        .transition(.opacity)
+                        .zIndex(1)
                 }
             }
-            .animation(.easeInOut(duration: 0.3), value: appCoordinator.rootState)
+            .animation(.easeOut(duration: 0.5), value: showLaunchScreen)
+            .onAppear {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+                    showLaunchScreen = false
+                }
+            }
         }
     }
 }
