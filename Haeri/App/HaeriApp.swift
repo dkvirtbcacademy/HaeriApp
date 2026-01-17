@@ -30,6 +30,7 @@ struct HaeriApp: App {
                         dependencies: dependencies,
                         coordinator: appCoordinator.mainTabCoordinator
                     )
+                    .transition(.opacity)
                 case .unauthenticated:
                     LoginFlowView(
                         dependencies: dependencies,

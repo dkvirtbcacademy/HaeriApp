@@ -10,7 +10,7 @@ import SwiftUI
 struct SwiftUIButton: View {
     let label: String
     var isDisabled: Bool = false
-    var fontColor: String = "Green"
+    var fontColor: String = "Green Air"
     let action: () -> Void
     
     var body: some View {

@@ -131,7 +131,7 @@ class CityAirPollutionCell: UITableViewCell {
         NSLayoutConstraint.activate([
             leftStack.leadingAnchor.constraint(equalTo: trapezoidView.leadingAnchor, constant: 20),
             leftStack.bottomAnchor.constraint(equalTo: infoStack.topAnchor, constant: -4),
-        
+            
             infoStack.leadingAnchor.constraint(equalTo: leftStack.leadingAnchor),
             infoStack.bottomAnchor.constraint(equalTo: trapezoidView.bottomAnchor, constant: -20),
             infoStack.trailingAnchor.constraint(lessThanOrEqualTo: trapezoidView.centerXAnchor),
@@ -147,7 +147,7 @@ class CityAirPollutionCell: UITableViewCell {
             iconImageView.widthAnchor.constraint(equalToConstant: 120),
             iconImageView.heightAnchor.constraint(equalToConstant: 120),
         ])
-            
+        
     }
     
     private func setPollutantBadge() {
@@ -166,37 +166,49 @@ class CityAirPollutionCell: UITableViewCell {
         let aqi = item.main.aqi
         let category = item.aqiCategory
         
+        let color = UIColor(named: category.color)?.withAlphaComponent(0.6) ?? .white.withAlphaComponent(0.6)
+        trapezoidView.fillColor = color
+        
         aqiLabel.text = "\(aqi)"
         statusLabel.text = category.description
         cityLabel.text = cityData.localeName ?? cityData.city
         iconImageView.image = UIImage(named: category.imageName)
-        trapezoidView.fillColor = UIColor(named: category.color)?.withAlphaComponent(0.6) ?? .white.withAlphaComponent(0.6)
+        
+        trapezoidView.setNeedsLayout()
+        trapezoidView.layoutIfNeeded()
     }
     
     
     override func prepareForReuse() {
         super.prepareForReuse()
+        
         aqiLabel.text = nil
         statusLabel.text = nil
         cityLabel.text = nil
         iconImageView.image = nil
+        trapezoidView.fillColor = .clear
     }
 }
 
 class TrapezoidView: UIView {
     
-    var fillColor: UIColor = .systemGreen {
+    var fillColor: UIColor = .clear {
         didSet {
+            CATransaction.begin()
+            CATransaction.setDisableActions(true)
             shapeLayer.fillColor = fillColor.cgColor
+            CATransaction.commit()
         }
     }
     
     private let shapeLayer = CAShapeLayer()
+    private var lastBounds: CGRect = .zero
     
     override init(frame: CGRect) {
         super.init(frame: frame)
         backgroundColor = .clear
         layer.addSublayer(shapeLayer)
+        shapeLayer.fillColor = fillColor.cgColor
     }
     
     required init?(coder: NSCoder) {
@@ -205,12 +217,17 @@ class TrapezoidView: UIView {
     
     override func layoutSubviews() {
         super.layoutSubviews()
-        updatePath()
+        if bounds != lastBounds {
+            lastBounds = bounds
+            updatePath()
+        }
     }
     
     private func updatePath() {
         let width = bounds.width
         let height = bounds.height
+        
+        guard width > 0 && height > 0 else { return }
         
         let path = UIBezierPath()
         
@@ -273,8 +290,10 @@ class TrapezoidView: UIView {
         path.addLine(to: CGPoint(x: 0, y: 0.37965 * height))
         path.close()
         
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
         shapeLayer.path = path.cgPath
-        shapeLayer.fillColor = fillColor.cgColor
+        CATransaction.commit()
         
         let maskLayer = CAShapeLayer()
         maskLayer.path = path.cgPath

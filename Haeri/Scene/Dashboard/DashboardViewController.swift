@@ -171,7 +171,14 @@ class DashboardViewController: UIViewController {
         viewModel.$cities
             .receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
-                self?.tableView.reloadData()
+                guard let self = self else { return }
+                
+                CATransaction.begin()
+                CATransaction.setDisableActions(true)
+                UIView.performWithoutAnimation {
+                    self.tableView.reloadData()
+                }
+                CATransaction.commit()
             }
             .store(in: &cancellables)
         
@@ -220,7 +227,7 @@ extension DashboardViewController: UITableViewDelegate {
         
         let cityData = viewModel.cities[indexPath.row]
         
-        viewModel.navigateToCityDetail(cityData: cityData, backgroudColor: cityData.response.item?.aqiCategory.color ?? "Green")
+        viewModel.navigateToCityDetail(cityData: cityData, backgroudColor: cityData.response.item?.aqiCategory.color ?? "Green Air")
     }
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {

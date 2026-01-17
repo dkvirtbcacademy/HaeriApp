@@ -9,6 +9,7 @@ import SwiftUI
 
 struct AQICard: View {
     let aqiDetail: PollutantDetail
+    let onInfoTapped: () -> Void
     @State private var showingDetail = false
     
     var body: some View {
@@ -53,31 +54,32 @@ struct AQICard: View {
             .padding(30)
             .glassEffect(.roundedRectangle(radius: 16))
             
-            Button {
-                showingDetail = true
-            } label: {
+            Button(action: onInfoTapped) {
                 Image(systemName: "info.circle")
                     .font(.firago(.medium))
                     .foregroundColor(.secondaryDarkText)
             }
             .padding(20)
         }
-        .sheet(isPresented: $showingDetail) {
-            PollutantDetailSheet(pollutantDetail: aqiDetail)
-        }
     }
 }
 
 #Preview {
-    AQICard(aqiDetail: PollutantDetail(
-        type: .aqi,
-        value: 2,
-        formattedValue: "2",
-        category: "ზომიერი",
-        color: "Yellow",
-        healthImplications: "ჰაერის ხარისხი მისაღებია; თუმცა, ზოგიერთი დამაბინძურებელი შეიძლება იყოს ზომიერი საფრთხე ძალიან მცირე რაოდენობის ადამიანებისთვის.",
-        imageName: "cloud-good",
-        maxValue: 5
-    ))
+    AQICard(
+        aqiDetail: PollutantDetail(
+            type: .aqi,
+            value: 2,
+            formattedValue: "2",
+            category: "ზომიერი",
+            color: "Yellow Air",
+            healthImplications: "ჰაერის ხარისხი მისაღებია; თუმცა, ზოგიერთი დამაბინძურებელი შეიძლება იყოს ზომიერი საფრთხე ძალიან მცირე რაოდენობის ადამიანებისთვის.",
+            imageName: "cloud-good",
+            maxValue: 5
+        ),
+        onInfoTapped: {
+            print(
+                "Info tapped"
+            )
+        })
     .padding()
 }

@@ -82,12 +82,12 @@ extension AirPollutionResponse.AirPollutionItem {
         
         var color: String {
             switch self {
-            case .good: return "Green"
-            case .moderate: return "Yellow"
-            case .unhealthyForSensitive: return "Orange"
-            case .unhealthy: return "Red"
-            case .veryUnhealthy: return "Purple"
-            case .hazardous: return "Maroon"
+            case .good: return "Green Air"
+            case .moderate: return "Yellow Air"
+            case .unhealthyForSensitive: return "Orange Air"
+            case .unhealthy: return "Red Air"
+            case .veryUnhealthy: return "Purple Air"
+            case .hazardous: return "Maroon Air"
             }
         }
         
@@ -145,12 +145,12 @@ extension AirPollutionResponse.AirPollutionItem {
          
         var color: String {
             switch self {
-            case .good: return "Green"
-            case .moderate: return "Yellow"
-            case .unhealthyForSensitive: return "Orange"
-            case .unhealthy: return "Red"
-            case .veryUnhealthy: return "Purple"
-            case .hazardous: return "Maroon"
+            case .good: return "Green Air"
+            case .moderate: return "Yellow Air"
+            case .unhealthyForSensitive: return "Orange Air"
+            case .unhealthy: return "Red Air"
+            case .veryUnhealthy: return "Purple Air"
+            case .hazardous: return "Maroon Air"
             }
         }
         
@@ -208,12 +208,12 @@ extension AirPollutionResponse.AirPollutionItem {
         
         var color: String {
             switch self {
-            case .good: return "Green"
-            case .moderate: return "Yellow"
-            case .unhealthyForSensitive: return "Orange"
-            case .unhealthy: return "Red"
-            case .veryUnhealthy: return "Purple"
-            case .hazardous: return "Maroon"
+            case .good: return "Green Air"
+            case .moderate: return "Yellow Air"
+            case .unhealthyForSensitive: return "Orange Air"
+            case .unhealthy: return "Red Air"
+            case .veryUnhealthy: return "Purple Air"
+            case .hazardous: return "Maroon Air"
             }
         }
         
@@ -271,12 +271,12 @@ extension AirPollutionResponse.AirPollutionItem {
         
         var color: String {
             switch self {
-            case .good: return "Green"
-            case .moderate: return "Yellow"
-            case .unhealthyForSensitive: return "Orange"
-            case .unhealthy: return "Red"
-            case .veryUnhealthy: return "Purple"
-            case .hazardous: return "Maroon"
+            case .good: return "Green Air"
+            case .moderate: return "Yellow Air"
+            case .unhealthyForSensitive: return "Orange Air"
+            case .unhealthy: return "Red Air"
+            case .veryUnhealthy: return "Purple Air"
+            case .hazardous: return "Maroon Air"
             }
         }
         
@@ -334,12 +334,12 @@ extension AirPollutionResponse.AirPollutionItem {
         
         var color: String {
             switch self {
-            case .good: return "Green"
-            case .moderate: return "Yellow"
-            case .unhealthyForSensitive: return "Orange"
-            case .unhealthy: return "Red"
-            case .veryUnhealthy: return "Purple"
-            case .hazardous: return "Maroon"
+            case .good: return "Green Air"
+            case .moderate: return "Yellow Air"
+            case .unhealthyForSensitive: return "Orange Air"
+            case .unhealthy: return "Red Air"
+            case .veryUnhealthy: return "Purple Air"
+            case .hazardous: return "Maroon Air"
             }
         }
         
@@ -397,12 +397,12 @@ extension AirPollutionResponse.AirPollutionItem {
         
         var color: String {
             switch self {
-            case .good: return "Green"
-            case .moderate: return "Yellow"
-            case .unhealthyForSensitive: return "Orange"
-            case .unhealthy: return "Red"
-            case .veryUnhealthy: return "Purple"
-            case .hazardous: return "Maroon"
+            case .good: return "Green Air"
+            case .moderate: return "Yellow Air"
+            case .unhealthyForSensitive: return "Orange Air"
+            case .unhealthy: return "Red Air"
+            case .veryUnhealthy: return "Purple Air"
+            case .hazardous: return "Maroon Air"
             }
         }
         
@@ -460,12 +460,12 @@ extension AirPollutionResponse.AirPollutionItem {
         
         var color: String {
             switch self {
-            case .good: return "Green"
-            case .moderate: return "Yellow"
-            case .unhealthyForSensitive: return "Orange"
-            case .unhealthy: return "Red"
-            case .veryUnhealthy: return "Purple"
-            case .hazardous: return "Maroon"
+            case .good: return "Green Air"
+            case .moderate: return "Yellow Air"
+            case .unhealthyForSensitive: return "Orange Air"
+            case .unhealthy: return "Red Air"
+            case .veryUnhealthy: return "Purple Air"
+            case .hazardous: return "Maroon Air"
             }
         }
         

@@ -35,47 +35,46 @@ struct MainView: View {
     
     var body: some View {
         TabView(selection: $coordinator.selectedTab) {
-            
             HomeFlowView(
                 coordinator: coordinator.homeCoordinator,
                 airPollutionManager: dependencies.airPollutionManager,
-                aiRecommendationManager: dependencies.aiRecommendationManager,
+                aiRecommendationManager: dependencies.aiRecommendationManager
             )
-                .tabItem {
-                    Label("Home", systemImage: "house")
-                }
-                .tag(MainTabCoordinator.Tab.home)
+            .tabItem {
+                Label("Home", systemImage: "house")
+            }
+            .tag(MainTabCoordinator.Tab.home)
             
             DashboardFlowView(
                 dashboardCoordinator: coordinator.dashboardCoordinator,
                 airPollutionManager: dependencies.airPollutionManager,
-                aiRecommendationManager: dependencies.aiRecommendationManager,
+                aiRecommendationManager: dependencies.aiRecommendationManager
             )
             .ignoresSafeArea()
-                .tabItem {
-                    Label("Dashboard", systemImage: "list.dash.header.rectangle.fill")
-                }
-                .tag(MainTabCoordinator.Tab.dashboard)
+            .tabItem {
+                Label("Dashboard", systemImage: "list.dash.header.rectangle.fill")
+            }
+            .tag(MainTabCoordinator.Tab.dashboard)
             
             CommunityFlowView(
                 coordinator: coordinator.communityCoordinator,
                 communityService: dependencies.communityService,
                 authManager: dependencies.authManager
             )
-                .tabItem {
-                    Label("Community", systemImage: "person.3.fill")
-                }
-                .tag(MainTabCoordinator.Tab.community)
+            .tabItem {
+                Label("Community", systemImage: "person.3.fill")
+            }
+            .tag(MainTabCoordinator.Tab.community)
             
             ProfileFlowView(
                 coordinator: coordinator.profileCoordinator,
                 authManager: dependencies.authManager
             )
             .ignoresSafeArea()
-                .tabItem {
-                    Label("Profile", systemImage: "person.circle")
-                }
-                .tag(MainTabCoordinator.Tab.profile)
+            .tabItem {
+                Label("Profile", systemImage: "person.circle")
+            }
+            .tag(MainTabCoordinator.Tab.profile)
         }
         .environmentObject(coordinator)
         .environment(\.airQuality, airQualityIndex)
@@ -90,22 +89,32 @@ struct MainView: View {
             airQualityIndex = newValue
         }
         .onAppear {
-            let appearance = UITabBarAppearance()
-            appearance.configureWithOpaqueBackground()
-            appearance.backgroundColor = .systemBackground
-            
-            UITabBar.appearance().standardAppearance = appearance
-            UITabBar.appearance().scrollEdgeAppearance = appearance
-            UITabBar.appearance().overrideUserInterfaceStyle = .light
-            
+            configureTabBarAppearance()
             viewModel.appLaunch()
         }
-        .onChange(of: scenePhase) { oldPhase, newPhase in
-            if newPhase == .background || newPhase == .inactive {
-                viewModel.appWentToBg()
-            } else if newPhase == .active {
-                viewModel.appBecameActive()
-            }
+        .onChange(of: scenePhase) { _, newPhase in
+            handleScenePhaseChange(newPhase)
+        }
+    }
+    
+    private func configureTabBarAppearance() {
+        let appearance = UITabBarAppearance()
+        appearance.configureWithOpaqueBackground()
+        appearance.backgroundColor = .systemBackground
+        
+        UITabBar.appearance().standardAppearance = appearance
+        UITabBar.appearance().scrollEdgeAppearance = appearance
+        UITabBar.appearance().overrideUserInterfaceStyle = .light
+    }
+    
+    private func handleScenePhaseChange(_ phase: ScenePhase) {
+        switch phase {
+        case .background, .inactive:
+            viewModel.appWentToBg()
+        case .active:
+            viewModel.appBecameActive()
+        @unknown default:
+            break
         }
     }
 }

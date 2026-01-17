@@ -13,7 +13,7 @@ struct HomePage: View {
     private let backgroudColor: String?
     
     @State private var selectedPollutant: PollutantDetail?
-    @State private var hasLoadedInitialRecommendation = false
+    @State private var initialRecomendationLoaded = false
     
     init(
         coordinator: HomeCoordinator,
@@ -38,8 +38,12 @@ struct HomePage: View {
                     .padding(.top)
                 
                 if let aqiDetail = viewModel.aqiDetail {
-                    AQICard(aqiDetail: aqiDetail)
-                        .padding(.horizontal)
+                    AQICard(
+                        aqiDetail: aqiDetail,
+                        onInfoTapped: {
+                            selectedPollutant = aqiDetail
+                        })
+                    .padding(.horizontal)
                 }
                 
                 VStack(alignment: .leading, spacing: 12) {
@@ -52,7 +56,11 @@ struct HomePage: View {
                         GridItem(.flexible())
                     ], spacing: 12) {
                         ForEach(viewModel.getPollutantDetails()) { detail in
-                            PollutantGridCard(detail: detail)
+                            PollutantGridCard(
+                                detail: detail,
+                                onInfoTapped: {
+                                    selectedPollutant = detail
+                                })
                         }
                     }
                 }
@@ -81,8 +89,8 @@ struct HomePage: View {
             backgroudColor.map { Color($0) } ?? Color.clear
         )
         .onAppear {
-            if !hasLoadedInitialRecommendation {
-                hasLoadedInitialRecommendation = true
+            if !initialRecomendationLoaded {
+                initialRecomendationLoaded = true
                 Task {
                     await aiRecommendationManager.generateAIRecommendation(for: viewModel.cityData)
                 }
@@ -125,6 +133,6 @@ struct HomePage: View {
             networkManager: NetworkManager(),
             authManager: AuthManager()
         ),
-        backgroudColor: "Orange"
+        backgroudColor: "Orange Air"
     )
 }

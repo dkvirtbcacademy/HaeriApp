@@ -28,7 +28,6 @@ struct AddPostPage: View {
         ZStack(alignment: .top) {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
-                    // Add spacing for header
                     Color.clear.frame(height: 60)
                     
                     VStack(alignment: .leading, spacing: 8) {

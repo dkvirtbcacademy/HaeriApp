@@ -9,7 +9,7 @@ import SwiftUI
 
 struct PollutantGridCard: View {
     let detail: PollutantDetail
-    @State private var showingDetail = false
+    let onInfoTapped: () -> Void
     
     var body: some View {
         ZStack(alignment: .topTrailing) {
@@ -44,31 +44,33 @@ struct PollutantGridCard: View {
             .padding(30)
             .glassEffect(.roundedRectangle(radius: 16))
             
-            Button {
-                showingDetail = true
-            } label: {
+            Button(action: onInfoTapped) {
                 Image(systemName: "info.circle")
                     .font(.firago(.medium))
                     .foregroundColor(.secondaryDarkText)
             }
             .padding(12)
         }
-        .sheet(isPresented: $showingDetail) {
-            PollutantDetailSheet(pollutantDetail: detail)
-        }
     }
 }
 
 #Preview {
-    PollutantGridCard(detail: PollutantDetail(
-        type: .aqi,
-        value: 2,
-        formattedValue: "2",
-        category: "არაჯანსაღი მგრძნობიარე ასფასფასასფასფასფას",
-        color: "Yellow",
-        healthImplications: "ჰაერის ხარისხი მისაღებია; თუმცა, ზოგიერთი დამაბინძურებელი შეიძლება იყოს ზომიერი საფრთხე ძალიან მცირე რაოდენობის ადამიანებისთვის.",
-        imageName: "cloud-good",
-        maxValue: 5
-    ))
+    PollutantGridCard(
+        detail: PollutantDetail(
+            type: .aqi,
+            value: 2,
+            formattedValue: "2",
+            category: "არაჯანსაღი მგრძნობიარე ასფასფასასფასფასფას",
+            color: "Yellow Air",
+            healthImplications: "ჰაერის ხარისხი მისაღებია; თუმცა, ზოგიერთი დამაბინძურებელი შეიძლება იყოს ზომიერი საფრთხე ძალიან მცირე რაოდენობის ადამიანებისთვის.",
+            imageName: "cloud-good",
+            maxValue: 5
+        ),
+        onInfoTapped: {
+            print(
+                "Info tapped"
+            )
+        }
+    )
     .padding()
 }

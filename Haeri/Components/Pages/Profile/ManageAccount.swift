@@ -17,80 +17,73 @@ class ManageAccount: UIView {
     
     private let titleLabel: UILabel = {
         let label = UILabel()
-        label.text = "მართე ექაუნთი:"
+        label.text = "მართე ექაუნთი"
         label.font = .firagoBold(.medium)
         label.textColor = UIColor(named: "DarkText")
-        label.numberOfLines = 0
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
     
-    private let border: UIView = {
-        let view = UIView()
-        view.backgroundColor = UIColor(named: "PlaceholderColor")
-        view.translatesAutoresizingMaskIntoConstraints = false
-        return view
+    private let subtitleLabel: UILabel = {
+        let label = UILabel()
+        label.text = "შეცვალე შენი ანგარიშის პარამეტრები"
+        label.font = .firago(.small)
+        label.textColor = UIColor(named: "SecondaryDarkText")
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
     }()
     
-    private let buttonStackView: UIStackView = {
+    private let containerStackView: UIStackView = {
         let stackview = UIStackView()
         stackview.axis = .vertical
-        stackview.spacing = 2
+        stackview.spacing = 4
         stackview.distribution = .fill
-        stackview.alignment = .leading
         stackview.translatesAutoresizingMaskIntoConstraints = false
         return stackview
     }()
     
-    private let changeNameButton: UIButton = {
-        let button = UIButton()
-        button.setTitle("შეცვალე სახელი", for: .normal)
-        button.titleLabel?.font = .firago(.medium)
-        button.setTitleColor(UIColor(named: "ButtonBlue"), for: .normal)
-        button.translatesAutoresizingMaskIntoConstraints = false
-        return button
+    private lazy var changeNameCard = createActionCard(
+        icon: "person.circle.fill",
+        title: "სახელის შეცვლა",
+        subtitle: "განაახლე სახელი"
+    )
+    
+    private lazy var changePasswordCard = createActionCard(
+        icon: "lock.shield.fill",
+        title: "პაროლის შეცვლა",
+        subtitle: "უსაფრთხოების გაძლიერება"
+    )
+    
+    private lazy var changeAvatarCard = createActionCard(
+        icon: "photo.circle.fill",
+        title: "ავატარის შეცვლა",
+        subtitle: "შეცვალე პროფილის სურათი"
+    )
+    
+    private lazy var changeCategoryCard = createActionCard(
+        icon: "tag.circle.fill",
+        title: "კატეგორიის შეცვლა",
+        subtitle: "აირჩიე შენთვის სასურველი კატეგორია"
+    )
+    
+    private let separatorView: UIView = {
+        let view = UIView()
+        view.backgroundColor = UIColor(named: "SecondaryDarkText")?.withAlphaComponent(0.3)
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
     }()
     
-    private let changePasswordButton: UIButton = {
-        let button = UIButton()
-        button.setTitle("შეცვალე პაროლი", for: .normal)
-        button.titleLabel?.font = .firago(.medium)
-        button.setTitleColor(UIColor(named: "ButtonBlue"), for: .normal)
-        button.translatesAutoresizingMaskIntoConstraints = false
-        return button
-    }()
-    
-    private let changeAvatarButton: UIButton = {
-        let button = UIButton()
-        button.setTitle("შეცვალე ავატარი", for: .normal)
-        button.titleLabel?.font = .firago(.medium)
-        button.setTitleColor(UIColor(named: "ButtonBlue"), for: .normal)
-        button.translatesAutoresizingMaskIntoConstraints = false
-        return button
-    }()
-    
-    private let changeCategoryButton: UIButton = {
-        let button = UIButton()
-        button.setTitle("შეცვალე კატეგორია", for: .normal)
-        button.titleLabel?.font = .firago(.medium)
-        button.setTitleColor(UIColor(named: "ButtonBlue"), for: .normal)
-        button.translatesAutoresizingMaskIntoConstraints = false
-        return button
-    }()
-    
-    private let RemoveAccountButton: UIButton = {
-        let button = UIButton()
-        button.setTitle("ექაუნთის გაუქმება", for: .normal)
-        button.titleLabel?.font = .firago(.medium)
-        button.setTitleColor(UIColor(named: "LogoutRed"), for: .normal)
-        button.translatesAutoresizingMaskIntoConstraints = false
-        return button
-    }()
+    private lazy var removeAccountCard = createActionCard(
+        icon: "trash.circle.fill",
+        title: "ანგარიშის წაშლა",
+        subtitle: "სამუდამოდ წაშალე შენი ანგარიში",
+        isDestructive: true
+    )
 
     override init(frame: CGRect) {
         super.init(frame: frame)
         
-        layer.cornerRadius = 16
+        layer.cornerRadius = 20
         clipsToBounds = true
         
         applyMediumGlass()
@@ -103,40 +96,81 @@ class ManageAccount: UIView {
     }
     
     private func setupUI() {
-        setTitle()
-        setStackView()
+        setHeader()
+        setContainer()
+        setSeparator()
+    }
+    
+    private func setHeader() {
+        addSubview(titleLabel)
+        addSubview(subtitleLabel)
+        
+        NSLayoutConstraint.activate([
+            titleLabel.topAnchor.constraint(equalTo: topAnchor, constant: 24),
+            titleLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 24),
+            titleLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -24),
+            
+            subtitleLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 4),
+            subtitleLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 24),
+            subtitleLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -24)
+        ])
+    }
+    
+    private func setContainer() {
+        addSubview(containerStackView)
+        
+        containerStackView.addArrangedSubview(changeNameCard)
+        containerStackView.addArrangedSubview(changePasswordCard)
+        containerStackView.addArrangedSubview(changeAvatarCard)
+        containerStackView.addArrangedSubview(changeCategoryCard)
+        
+        NSLayoutConstraint.activate([
+            containerStackView.topAnchor.constraint(equalTo: subtitleLabel.bottomAnchor, constant: 15),
+            containerStackView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20),
+            containerStackView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20),
+            containerStackView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -24)
+        ])
+    }
+    
+    private func setSeparator() {
+        containerStackView.addArrangedSubview(separatorView)
+        containerStackView.addArrangedSubview(removeAccountCard)
+        
+        NSLayoutConstraint.activate([
+            separatorView.heightAnchor.constraint(equalToConstant: 1)
+        ])
     }
     
     private func setActions() {
-        changeNameButton.addAction(
+        changeNameCard.button.addAction(
             UIAction { [weak self] _ in
                 self?.changeNameTapped?()
             },
             for: .touchUpInside
         )
         
-        changePasswordButton.addAction(
+        changePasswordCard.button.addAction(
             UIAction { [weak self] _ in
                 self?.changePasswordTapped?()
             },
             for: .touchUpInside
         )
         
-        changeAvatarButton.addAction(
+        changeAvatarCard.button.addAction(
             UIAction { [weak self] _ in
                 self?.changeAvatarTapped?()
             },
             for: .touchUpInside
         )
         
-        changeCategoryButton.addAction(
+        changeCategoryCard.button.addAction(
             UIAction { [weak self] _ in
                 self?.changeCategoryTapped?()
             },
             for: .touchUpInside
         )
         
-        RemoveAccountButton.addAction(
+        removeAccountCard.button.addAction(
             UIAction { [weak self] _ in
                 self?.removeAccountTapped?()
             },
@@ -144,36 +178,14 @@ class ManageAccount: UIView {
         )
     }
     
-    private func setTitle() {
-        addSubview(titleLabel)
-        addSubview(border)
-        
-        NSLayoutConstraint.activate([
-            titleLabel.topAnchor.constraint(equalTo: topAnchor, constant: 20),
-            titleLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20),
-            titleLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20),
-            
-            border.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 10),
-            border.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20),
-            border.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20),
-            border.heightAnchor.constraint(equalToConstant: 1)
-        ])
-    }
-    
-    private func setStackView() {
-        addSubview(buttonStackView)
-        
-        buttonStackView.addArrangedSubview(changeNameButton)
-        buttonStackView.addArrangedSubview(changePasswordButton)
-        buttonStackView.addArrangedSubview(changeAvatarButton)
-        buttonStackView.addArrangedSubview(changeCategoryButton)
-        buttonStackView.addArrangedSubview(RemoveAccountButton)
-        
-        NSLayoutConstraint.activate([
-            buttonStackView.topAnchor.constraint(equalTo: border.bottomAnchor, constant: 10),
-            buttonStackView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20),
-            buttonStackView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20),
-            buttonStackView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -20)
-        ])
+    private func createActionCard(icon: String, title: String, subtitle: String, isDestructive: Bool = false) -> ActionCardView {
+        let card = ActionCardView(
+            icon: icon,
+            title: title,
+            subtitle: subtitle,
+            isDestructive: isDestructive
+        )
+        card.translatesAutoresizingMaskIntoConstraints = false
+        return card
     }
 }

@@ -57,17 +57,17 @@ private struct AdaptiveBackgroundView<Content: View>: View {
     private func backgroundColor(for value: Int) -> Color {
         switch value {
         case 1:
-            return Color("Green")
+            return Color("Green Air")
         case 2:
-            return Color("Yellow")
+            return Color("Yellow Air")
         case 3:
-            return Color("Orange")
+            return Color("Orange Air")
         case 4:
-            return Color("Red")
+            return Color("Red Air")
         case 5:
-            return Color("Purple")
+            return Color("Purple Air")
         default:
-            return Color("Maroon")
+            return Color("Maroon Air")
         }
     }
 }
@@ -117,17 +117,17 @@ extension UIViewController {
     private func backgroundColor(for value: Int) -> UIColor {
         switch value {
         case 1:
-            return UIColor(named: "Green") ?? UIColor.systemGreen
+            return UIColor(named: "Green Air") ?? UIColor.systemGreen
         case 2:
-            return UIColor(named: "Yellow") ?? UIColor.systemYellow
+            return UIColor(named: "Yellow Air") ?? UIColor.systemYellow
         case 3:
-            return UIColor(named: "Orange") ?? UIColor.systemOrange
+            return UIColor(named: "Orange Air") ?? UIColor.systemOrange
         case 4:
-            return UIColor(named: "Red") ?? UIColor.systemRed
+            return UIColor(named: "Red Air") ?? UIColor.systemRed
         case 5:
-            return UIColor(named: "Purple") ?? UIColor.systemPurple
+            return UIColor(named: "Purple Air") ?? UIColor.systemPurple
         default:
-            return UIColor(named: "Maroon") ?? UIColor.systemRed
+            return UIColor(named: "Maroon Air") ?? UIColor.systemRed
         }
     }
 }

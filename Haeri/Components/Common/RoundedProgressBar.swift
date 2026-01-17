@@ -60,5 +60,5 @@ struct RoundedProgressBar: View {
     }
 }
 #Preview {
-    RoundedProgressBar(progress: 60, color: "Green")
+    RoundedProgressBar(progress: 60, color: "Green Air")
 }

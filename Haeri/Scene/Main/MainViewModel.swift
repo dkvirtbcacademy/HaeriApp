@@ -132,9 +132,10 @@ final class MainViewModel: ObservableObject, AlertHandler {
     
     private func roundCoordinate(_ coordinate: CLLocationCoordinate2D) -> CLLocationCoordinate2D {
         let multiplier = pow(10.0, Double(coordinateDecimalPlaces))
-        let roundedLat = round(coordinate.latitude * multiplier) / multiplier
-        let roundedLong = round(coordinate.longitude * multiplier) / multiplier
-        return CLLocationCoordinate2D(latitude: roundedLat, longitude: roundedLong)
+        return CLLocationCoordinate2D(
+            latitude: round(coordinate.latitude * multiplier) / multiplier,
+            longitude: round(coordinate.longitude * multiplier) / multiplier
+        )
     }
     
     private func updateLocation(_ location: CLLocationCoordinate2D, cityName: String? = nil) async {
@@ -148,13 +149,7 @@ final class MainViewModel: ObservableObject, AlertHandler {
             localeName = nil
         } else {
             finalCityName = await locationManager.getCityName(from: location) ?? "Current Location"
-            
-            do {
-                let coordResult = try await airPollutionManager.fetchCoordinates(city: finalCityName)
-                localeName = coordResult?.localeName
-            } catch {
-                localeName = nil
-            }
+            localeName = try? await airPollutionManager.fetchCoordinates(city: finalCityName)?.localeName
         }
         
         do {

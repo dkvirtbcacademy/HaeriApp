@@ -36,33 +36,9 @@ struct CommunityPage: View {
                     }
                 }
                 .padding(.horizontal)
-                .padding(.top, headerHeight)
+                .padding(.top, 140)
                 .padding(.bottom, 100)
-                .background(
-                    GeometryReader { geometry -> Color in
-                        let offset = geometry.frame(in: .named("scrollView"))
-                            .minY
-                        
-                        DispatchQueue.main.async {
-                            let diff = offset - scrollOffset
-                            
-                            if diff < -5 && showButton && offset < -50 {
-                                withAnimation(.easeInOut(duration: 0.3)) {
-                                    showButton = false
-                                }
-                            } else if (diff > 5 || offset > -30) && !showButton
-                            {
-                                withAnimation(.easeInOut(duration: 0.3)) {
-                                    showButton = true
-                                }
-                            }
-                            
-                            scrollOffset = offset
-                        }
-                        
-                        return Color.clear
-                    }
-                )
+                .background(scrollOffsetReader)
             }
             .coordinateSpace(name: "scrollView")
             
@@ -87,8 +63,40 @@ struct CommunityPage: View {
         }
     }
     
-    private var headerHeight: CGFloat {
-        140
+    private var scrollOffsetReader: some View {
+        GeometryReader { geometry in
+            Color.clear
+                .preference(
+                    key: ScrollOffsetPreferenceKey.self,
+                    value: geometry.frame(in: .named("scrollView")).minY
+                )
+        }
+        .onPreferenceChange(ScrollOffsetPreferenceKey.self) { offset in
+            handleScroll(newOffset: offset)
+        }
+    }
+    
+    private func handleScroll(newOffset: CGFloat) {
+        let diff = newOffset - scrollOffset
+        
+        if diff < -5 && showButton && newOffset < -50 {
+            withAnimation(.easeInOut(duration: 0.3)) {
+                showButton = false
+            }
+        } else if (diff > 5 || newOffset > -30) && !showButton {
+            withAnimation(.easeInOut(duration: 0.3)) {
+                showButton = true
+            }
+        }
+        
+        scrollOffset = newOffset
+    }
+}
+
+struct ScrollOffsetPreferenceKey: PreferenceKey {
+    static var defaultValue: CGFloat = 0
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value = nextValue()
     }
 }
 
@@ -100,5 +108,5 @@ struct CommunityPage: View {
             networkManager: NetworkManager()
         )
     )
-    .preferredColorScheme(.dark)
+    .preferredColorScheme(.light)
 }

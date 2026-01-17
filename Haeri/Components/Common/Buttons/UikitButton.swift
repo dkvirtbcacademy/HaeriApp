@@ -9,7 +9,7 @@ import UIKit
 
 class UikitButton: UIButton {
 
-    init(label: String, fontColor: String = "Green") {
+    init(label: String, fontColor: String = "Green Air") {
         super.init(frame: .zero)
         
         setTitle(label, for: .normal)

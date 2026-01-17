@@ -207,7 +207,7 @@ struct InfoSection<Content: View>: View {
         value: 2,
         formattedValue: "2",
         category: "ზომიერი",
-        color: "Yellow",
+        color: "Yellow Air",
         healthImplications: "ჰაერის ხარისხი მისაღებია; თუმცა, ზოგიერთი დამაბინძურებელი შეიძლება იყოს ზომიერი საფრთხე ძალიან მცირე რაოდენობის ადამიანებისთვის.",
         imageName: "cloud-good",
         maxValue: 5

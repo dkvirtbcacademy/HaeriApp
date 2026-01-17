@@ -75,12 +75,12 @@ struct AirQualityStandards {
             description: "PM2.5 არის წვრილი ნაწილაკები, რომლებიც 2.5 მიკრომეტრზე ნაკლებია. ისინი შეიძლება ღრმად შეაღწიონ ფილტვებში და სისხლის ნაკადში, რაც იწვევს სერიოზულ ჯანმრთელობის პრობლემებს.",
             unit: "μg/m³",
             ranges: [
-                .init(min: 0, max: 12, category: "კარგი", color: "Green", parentSymbol: "PM2.5"),
-                .init(min: 12.1, max: 35.4, category: "ზომიერი", color: "Yellow", parentSymbol: "PM2.5"),
-                .init(min: 35.5, max: 55.4, category: "არაჯანსაღი მგრძნობიარე ჯგუფებისთვის", color: "Orange", parentSymbol: "PM2.5"),
-                .init(min: 55.5, max: 150.4, category: "არაჯანსაღი", color: "Red", parentSymbol: "PM2.5"),
-                .init(min: 150.5, max: 250.4, category: "ძალიან არაჯანსაღი", color: "Purple", parentSymbol: "PM2.5"),
-                .init(min: 250.5, max: nil, category: "საშიში", color: "Maroon", parentSymbol: "PM2.5")
+                .init(min: 0, max: 12, category: "კარგი", color: "GreenAir", parentSymbol: "PM2.5"),
+                .init(min: 12.1, max: 35.4, category: "ზომიერი", color: "Yellow Air", parentSymbol: "PM2.5"),
+                .init(min: 35.5, max: 55.4, category: "არაჯანსაღი მგრძნობიარე ჯგუფებისთვის", color: "Orange Air", parentSymbol: "PM2.5"),
+                .init(min: 55.5, max: 150.4, category: "არაჯანსაღი", color: "Red Air", parentSymbol: "PM2.5"),
+                .init(min: 150.5, max: 250.4, category: "ძალიან არაჯანსაღი", color: "Purple Air", parentSymbol: "PM2.5"),
+                .init(min: 250.5, max: nil, category: "საშიში", color: "Maroon Air", parentSymbol: "PM2.5")
             ]
         ),
         
@@ -90,12 +90,12 @@ struct AirQualityStandards {
             description: "PM10 არის უხეში ნაწილაკები, რომლებიც 10 მიკრომეტრზე ნაკლებია. ისინი შეიძლება გაღიზიანონ თვალები, ცხვირი და ყელი, და გამოიწვიონ რესპირატორული პრობლემები.",
             unit: "μg/m³",
             ranges: [
-                .init(min: 0, max: 54, category: "კარგი", color: "Green", parentSymbol: "PM10"),
-                .init(min: 55, max: 154, category: "ზომიერი", color: "Yellow", parentSymbol: "PM10"),
-                .init(min: 155, max: 254, category: "არაჯანსაღი მგრძნობიარე ჯგუფებისთვის", color: "Orange", parentSymbol: "PM10"),
-                .init(min: 255, max: 354, category: "არაჯანსაღი", color: "Red", parentSymbol: "PM10"),
-                .init(min: 355, max: 424, category: "ძალიან არაჯანსაღი", color: "Purple", parentSymbol: "PM10"),
-                .init(min: 425, max: nil, category: "საშიში", color: "Maroon", parentSymbol: "PM10")
+                .init(min: 0, max: 54, category: "კარგი", color: "Green Air", parentSymbol: "PM10"),
+                .init(min: 55, max: 154, category: "ზომიერი", color: "Yellow Air", parentSymbol: "PM10"),
+                .init(min: 155, max: 254, category: "არაჯანსაღი მგრძნობიარე ჯგუფებისთვის", color: "Orange Air", parentSymbol: "PM10"),
+                .init(min: 255, max: 354, category: "არაჯანსაღი", color: "Red Air", parentSymbol: "PM10"),
+                .init(min: 355, max: 424, category: "ძალიან არაჯანსაღი", color: "Purple Air", parentSymbol: "PM10"),
+                .init(min: 425, max: nil, category: "საშიში", color: "Maroon Air", parentSymbol: "PM10")
             ]
         ),
         
@@ -105,12 +105,12 @@ struct AirQualityStandards {
             description: "ოზონი არის გაზი, რომელიც იქმნება მზის სინათლისა და დამაბინძურებლების რეაქციის შედეგად. მაღალ დონეზე იწვევს სუნთქვის პრობლემებს და ასთმის გამწვავებას.",
             unit: "μg/m³",
             ranges: [
-                .init(min: 0, max: 54, category: "კარგი", color: "Green", parentSymbol: "O₃"),
-                .init(min: 55, max: 70, category: "ზომიერი", color: "Yellow", parentSymbol: "O₃"),
-                .init(min: 71, max: 85, category: "არაჯანსაღი მგრძნობიარე ჯგუფებისთვის", color: "Orange", parentSymbol: "O₃"),
-                .init(min: 86, max: 105, category: "არაჯანსაღი", color: "Red", parentSymbol: "O₃"),
-                .init(min: 106, max: 200, category: "ძალიან არაჯანსაღი", color: "Purple", parentSymbol: "O₃"),
-                .init(min: 201, max: nil, category: "საშიში", color: "Maroon", parentSymbol: "O₃")
+                .init(min: 0, max: 54, category: "კარგი", color: "Green Air", parentSymbol: "O₃"),
+                .init(min: 55, max: 70, category: "ზომიერი", color: "Yellow Air", parentSymbol: "O₃"),
+                .init(min: 71, max: 85, category: "არაჯანსაღი მგრძნობიარე ჯგუფებისთვის", color: "Orange Air", parentSymbol: "O₃"),
+                .init(min: 86, max: 105, category: "არაჯანსაღი", color: "Red Air", parentSymbol: "O₃"),
+                .init(min: 106, max: 200, category: "ძალიან არაჯანსაღი", color: "Purple Air", parentSymbol: "O₃"),
+                .init(min: 201, max: nil, category: "საშიში", color: "Maroon Air", parentSymbol: "O₃")
             ]
         ),
         
@@ -120,12 +120,12 @@ struct AirQualityStandards {
             description: "აზოტის დიოქსიდი წარმოიქმნება საწვავის წვის დროს. იწვევს რესპირატორული სისტემის გაღიზიანებას და ასთმის გამწვავებას.",
             unit: "μg/m³",
             ranges: [
-                .init(min: 0, max: 53, category: "კარგი", color: "Green", parentSymbol: "NO₂"),
-                .init(min: 54, max: 100, category: "ზომიერი", color: "Yellow", parentSymbol: "NO₂"),
-                .init(min: 101, max: 360, category: "არაჯანსაღი მგრძნობიარე ჯგუფებისთვის", color: "Orange", parentSymbol: "NO₂"),
-                .init(min: 361, max: 649, category: "არაჯანსაღი", color: "Red", parentSymbol: "NO₂"),
-                .init(min: 650, max: 1249, category: "ძალიან არაჯანსაღი", color: "Purple", parentSymbol: "NO₂"),
-                .init(min: 1250, max: nil, category: "საშიში", color: "Maroon", parentSymbol: "NO₂")
+                .init(min: 0, max: 53, category: "კარგი", color: "Green Air", parentSymbol: "NO₂"),
+                .init(min: 54, max: 100, category: "ზომიერი", color: "Yellow Air", parentSymbol: "NO₂"),
+                .init(min: 101, max: 360, category: "არაჯანსაღი მგრძნობიარე ჯგუფებისთვის", color: "Orange Air", parentSymbol: "NO₂"),
+                .init(min: 361, max: 649, category: "არაჯანსაღი", color: "Red Air", parentSymbol: "NO₂"),
+                .init(min: 650, max: 1249, category: "ძალიან არაჯანსაღი", color: "Purple Air", parentSymbol: "NO₂"),
+                .init(min: 1250, max: nil, category: "საშიში", color: "Maroon Air", parentSymbol: "NO₂")
             ]
         ),
         
@@ -135,12 +135,12 @@ struct AirQualityStandards {
             description: "გოგირდის დიოქსიდი გამოიყოფა გოგირდშემცველი საწვავის წვის დროს. იწვევს სუნთქვის პრობლემებს, განსაკუთრებით ასთმით დაავადებულებში.",
             unit: "μg/m³",
             ranges: [
-                .init(min: 0, max: 35, category: "კარგი", color: "Green", parentSymbol: "SO₂"),
-                .init(min: 36, max: 75, category: "ზომიერი", color: "Yellow", parentSymbol: "SO₂"),
-                .init(min: 76, max: 185, category: "არაჯანსაღი მგრძნობიარე ჯგუფებისთვის", color: "Orange", parentSymbol: "SO₂"),
-                .init(min: 186, max: 304, category: "არაჯანსაღი", color: "Red", parentSymbol: "SO₂"),
-                .init(min: 305, max: 604, category: "ძალიან არაჯანსაღი", color: "Purple", parentSymbol: "SO₂"),
-                .init(min: 605, max: nil, category: "საშიში", color: "Maroon", parentSymbol: "SO₂")
+                .init(min: 0, max: 35, category: "კარგი", color: "Green Air", parentSymbol: "SO₂"),
+                .init(min: 36, max: 75, category: "ზომიერი", color: "Yellow Air", parentSymbol: "SO₂"),
+                .init(min: 76, max: 185, category: "არაჯანსაღი მგრძნობიარე ჯგუფებისთვის", color: "Orange Air", parentSymbol: "SO₂"),
+                .init(min: 186, max: 304, category: "არაჯანსაღი", color: "Red Air", parentSymbol: "SO₂"),
+                .init(min: 305, max: 604, category: "ძალიან არაჯანსაღი", color: "Purple Air", parentSymbol: "SO₂"),
+                .init(min: 605, max: nil, category: "საშიში", color: "Maroon Air", parentSymbol: "SO₂")
             ]
         ),
         
@@ -150,12 +150,12 @@ struct AirQualityStandards {
             description: "ნახშირბადის მონოქსიდი არის უფერო, უსუნო გაზი, რომელიც წარმოიქმნება არასრული წვის დროს. აფერხებს ჟანგბადის მიწოდებას ორგანიზმში.",
             unit: "mg/m³",
             ranges: [
-                .init(min: 0, max: 4.4, category: "კარგი", color: "Green", parentSymbol: "CO"),
-                .init(min: 4.5, max: 9.4, category: "ზომიერი", color: "Yellow", parentSymbol: "CO"),
-                .init(min: 9.5, max: 12.4, category: "არაჯანსაღი მგრძნობიარე ჯგუფებისთვის", color: "Orange", parentSymbol: "CO"),
-                .init(min: 12.5, max: 15.4, category: "არაჯანსაღი", color: "Red", parentSymbol: "CO"),
-                .init(min: 15.5, max: 30.4, category: "ძალიან არაჯანსაღი", color: "Purple", parentSymbol: "CO"),
-                .init(min: 30.5, max: nil, category: "საშიში", color: "Maroon", parentSymbol: "CO")
+                .init(min: 0, max: 4.4, category: "კარგი", color: "Green Air", parentSymbol: "CO"),
+                .init(min: 4.5, max: 9.4, category: "ზომიერი", color: "Yellow Air", parentSymbol: "CO"),
+                .init(min: 9.5, max: 12.4, category: "არაჯანსაღი მგრძნობიარე ჯგუფებისთვის", color: "Orange Air", parentSymbol: "CO"),
+                .init(min: 12.5, max: 15.4, category: "არაჯანსაღი", color: "Red Air", parentSymbol: "CO"),
+                .init(min: 15.5, max: 30.4, category: "ძალიან არაჯანსაღი", color: "Purple Air", parentSymbol: "CO"),
+                .init(min: 30.5, max: nil, category: "საშიში", color: "Maroon Air", parentSymbol: "CO")
             ]
         ),
         
@@ -165,12 +165,12 @@ struct AirQualityStandards {
             description: "ამიაკი არის გაზი მძაფრი სუნით, რომელიც ძირითადად წარმოიქმნება სოფლის მეურნეობიდან. მაღალ კონცენტრაციაში იწვევს თვალებისა და რესპირატორული სისტემის გაღიზიანებას.",
             unit: "μg/m³",
             ranges: [
-                .init(min: 0, max: 200, category: "კარგი", color: "Green", parentSymbol: "NH₃"),
-                .init(min: 201, max: 400, category: "ზომიერი", color: "Yellow", parentSymbol: "NH₃"),
-                .init(min: 401, max: 800, category: "არაჯანსაღი მგრძნობიარე ჯგუფებისთვის", color: "Orange", parentSymbol: "NH₃"),
-                .init(min: 801, max: 1200, category: "არაჯანსაღი", color: "Red", parentSymbol: "NH₃"),
-                .init(min: 1201, max: 1800, category: "ძალიან არაჯანსაღი", color: "Purple", parentSymbol: "NH₃"),
-                .init(min: 1801, max: nil, category: "საშიში", color: "Maroon", parentSymbol: "NH₃")
+                .init(min: 0, max: 200, category: "კარგი", color: "Green Air", parentSymbol: "NH₃"),
+                .init(min: 201, max: 400, category: "ზომიერი", color: "Yellow Air", parentSymbol: "NH₃"),
+                .init(min: 401, max: 800, category: "არაჯანსაღი მგრძნობიარე ჯგუფებისთვის", color: "Orange Air", parentSymbol: "NH₃"),
+                .init(min: 801, max: 1200, category: "არაჯანსაღი", color: "Red Air", parentSymbol: "NH₃"),
+                .init(min: 1201, max: 1800, category: "ძალიან არაჯანსაღი", color: "Purple Air", parentSymbol: "NH₃"),
+                .init(min: 1801, max: nil, category: "საშიში", color: "Maroon Air", parentSymbol: "NH₃")
             ]
         )
     ]
@@ -181,12 +181,12 @@ struct AirQualityStandards {
         description: "AQI (Air Quality Index) არის ჰაერის ხარისხის საერთო მაჩვენებელი, რომელიც ითვალისწინებს ყველა დამაბინძურებელს და აფასებს მათ საერთო გავლენას ჯანმრთელობაზე.",
         unit: "",
         ranges: [
-            .init(min: 1, max: 1, category: "კარგი", color: "Green", parentSymbol: "AQI"),
-            .init(min: 2, max: 2, category: "ზომიერი", color: "Yellow", parentSymbol: "AQI"),
-            .init(min: 3, max: 3, category: "არაჯანსაღი მგრძნობიარე ჯგუფებისთვის", color: "Orange", parentSymbol: "AQI"),
-            .init(min: 4, max: 4, category: "არაჯანსაღი", color: "Red", parentSymbol: "AQI"),
-            .init(min: 5, max: 5, category: "ძალიან არაჯანსაღი", color: "Purple", parentSymbol: "AQI"),
-            .init(min: 6, max: nil, category: "საშიში", color: "Maroon", parentSymbol: "AQI")
+            .init(min: 1, max: 1, category: "კარგი", color: "Green Air", parentSymbol: "AQI"),
+            .init(min: 2, max: 2, category: "ზომიერი", color: "Yellow Air", parentSymbol: "AQI"),
+            .init(min: 3, max: 3, category: "არაჯანსაღი მგრძნობიარე ჯგუფებისთვის", color: "Orange Air", parentSymbol: "AQI"),
+            .init(min: 4, max: 4, category: "არაჯანსაღი", color: "Red Air", parentSymbol: "AQI"),
+            .init(min: 5, max: 5, category: "ძალიან არაჯანსაღი", color: "Purple Air", parentSymbol: "AQI"),
+            .init(min: 6, max: nil, category: "საშიში", color: "Maroon Air", parentSymbol: "AQI")
         ]
     )
 }
