@@ -30,6 +30,12 @@ final class AIRecomendationManager: ObservableObject, AlertHandler {
         self.authManager = authManager
     }
     
+    func clearRecommendation() {
+        aiRecommendation = nil
+        currentCityData = nil
+        isLoadingRecommendation = false
+    }
+    
     func generateAIRecommendation(for cityData: CityAirPollution) async {
         self.currentCityData = cityData
         

@@ -71,14 +71,15 @@ struct AIRecomendations: View {
     }
     
     private var placeholderView: some View {
-        VStack(alignment: .center, spacing: 12) {
+        VStack(alignment: .center, spacing: 15) {
             Image(systemName: "sparkles")
                 .font(.firago(.xsmall))
                 .foregroundColor(.blue)
             
-            Text("დააწკაპუნეთ რეკომენდაციების მისაღებად")
+            Text("დააწკაპუნეთ პერსონალიზებული რეკომენდაციების მისაღებად")
                 .font(.firago(.xxsmall))
                 .foregroundColor(.secondaryDarkText)
+                .multilineTextAlignment(.center)
             
             Button("გენერირება") {
                 Task {

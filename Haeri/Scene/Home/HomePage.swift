@@ -88,14 +88,17 @@ struct HomePage: View {
         .background(
             backgroudColor.map { Color($0) } ?? Color.clear
         )
-        .onAppear {
-            if !initialRecomendationLoaded {
-                initialRecomendationLoaded = true
-                Task {
-                    await aiRecommendationManager.generateAIRecommendation(for: viewModel.cityData)
-                }
-            }
+        .onDisappear {
+            aiRecommendationManager.clearRecommendation()
         }
+        //        .onAppear {
+        //            if !initialRecomendationLoaded {
+        //                initialRecomendationLoaded = true
+        //                Task {
+        //                    await aiRecommendationManager.generateAIRecommendation(for: viewModel.cityData)
+        //                }
+        //            }
+        //        }
     }
 }
 
