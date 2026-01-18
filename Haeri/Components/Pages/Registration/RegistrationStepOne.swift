@@ -9,22 +9,22 @@ import UIKit
 
 class RegistrationStepOne: UIView {
     
-    private let nameField = NameField(
+    let nameField = NameField(
         label: "სახელი:",
         placeholder: "შეიყვანეთ სახელი"
     )
     
-    private let mailField = NameField(
+    let mailField = NameField(
         label: "ელ. ფოსტის მისამართი:",
         placeholder: "შეიყვანეთ ელ. ფოსტის მისამართი"
     )
     
-    private let passwordField = PasswordField(
+    let passwordField = PasswordField(
         label: "პაროლი:",
         placeholder: "********"
     )
     
-    private let confirmPasswordField = PasswordField(
+    let confirmPasswordField = PasswordField(
         label: "გაიმეორეთ პაროლი:",
         placeholder: "********"
     )
@@ -39,7 +39,7 @@ class RegistrationStepOne: UIView {
         ])
         
         stack.axis = .vertical
-//        stack.alignment = .center
+        //        stack.alignment = .center
         stack.spacing = 20
         stack.translatesAutoresizingMaskIntoConstraints = false
         return stack

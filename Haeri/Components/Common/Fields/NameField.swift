@@ -113,9 +113,6 @@ class NameField: UIStackView {
     }
     
     func getInputText() -> String? {
-        guard let text = textField.text, !text.isEmpty else {
-            return nil
-        }
-        return text
+        return textField.text
     }
 }

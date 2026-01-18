@@ -89,6 +89,10 @@ struct MainView: View {
             airQualityIndex = newValue
         }
         .onAppear {
+            if dependencies.locationManager.authorizationStatus == .notDetermined {
+                dependencies.locationManager.requestAuthorization()
+            }
+            
             configureTabBarAppearance()
             viewModel.appLaunch()
         }

@@ -33,10 +33,14 @@ final class AddPostViewModel: ObservableObject {
     }
     
     func createPost() {
+        guard let currentUser = authManager.currentUser else {
+            return
+        }
+        
         let newPost = PostModel(
             id: (communityService.posts.map { $0.id }.max() ?? 0) + 1,
             date: Date(),
-            author: authManager.currentUser,
+            author: currentUser,
             title: title.trimmingCharacters(in: .whitespacesAndNewlines),
             content: content.trimmingCharacters(in: .whitespacesAndNewlines),
             likes: 0,

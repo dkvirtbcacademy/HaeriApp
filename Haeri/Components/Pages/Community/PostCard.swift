@@ -54,11 +54,11 @@ struct PostCard: View {
             id: 1,
             date: Date(),
             author: UserModel(
-                id: 1,
+                id: "a",
                 name: "Dato",
                 avatar: "Avatar 1",
                 email: "dato@mail.com",
-                password: "123456",
+                categories: ["parent"],
                 savedPosts: [1],
                 likedPosts: [1],
             ),
@@ -67,13 +67,13 @@ struct PostCard: View {
             likes: 32,
             comments: [
                 PostModel.Comment(
-                    id: 1,
+                    id: "b",
                     user: UserModel(
-                        id: 2,
+                        id: "a",
                         name: "Nino",
                         avatar: "Avatar 2",
                         email: "nino@mail.com",
-                        password: "123456",
+                        categories: ["parent"],
                         savedPosts: [],
                         likedPosts: [1],
                     ),

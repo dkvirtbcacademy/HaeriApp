@@ -8,7 +8,7 @@
 import UIKit
 import Combine
 
-class LoginViewController: UIViewController {
+class LoginViewController: UIViewController, UIKitAlertHandler {
     private let viewModel: LoginViewModel
     private var cancellables = Set<AnyCancellable>()
     private let button = UikitButton(label: "დაწყება")
@@ -65,6 +65,14 @@ class LoginViewController: UIViewController {
         stepTwo.registerTapped = { [weak self] in
             self?.viewModel.navigateToRegister()
         }
+        
+        viewModel.authManager.$authError
+            .compactMap { $0 }
+            .sink { [weak self] error in
+                self?.handleAuthError(error)
+                self?.viewModel.authManager.authError = nil
+            }
+            .store(in: &cancellables)
     }
     
     private func setupLogo() {
@@ -100,7 +108,20 @@ class LoginViewController: UIViewController {
     
     private func setButton() {
         button.addAction(UIAction { [weak self] _ in
-            self?.viewModel.handleButtonTap()
+            guard let self = self else { return }
+            
+            if self.viewModel.currentStep == 1 {
+                self.viewModel.moveToNextStep()
+                return
+            }
+            
+            if self.viewModel.currentStep == 2 {
+                guard self.captureUserData() else { return }
+                
+                Task { @MainActor in
+                    await self.viewModel.loginUser()
+                }
+            }
         }, for: .touchUpInside)
         
         button.translatesAutoresizingMaskIntoConstraints = false
@@ -112,6 +133,39 @@ class LoginViewController: UIViewController {
             button.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
             button.heightAnchor.constraint(equalToConstant: 50)
         ])
+    }
+    
+    @discardableResult
+    private func captureUserData() -> Bool {
+        let email = stepTwo.mailField.getInputText()?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let password = stepTwo.passwordField.getInputText()?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        
+        if email.isEmpty {
+            stepTwo.mailField.showError("გთხოვთ შეიყვანოთ ელ. ფოსტა")
+            return false
+        }
+        
+        if password.isEmpty {
+            stepTwo.passwordField.showError("გთხოვთ შეიყვანოთ პაროლი")
+            return false
+        }
+        
+        if password.count < 6 {
+            stepTwo.passwordField.showError("პაროლი უნდა შედგებოდეს მინიმუმ 6 სიმბოლოსგან")
+            return false
+        }
+        
+        clearErrors()
+        
+        viewModel.userEmail = email
+        viewModel.userPassword = password
+        
+        return true
+    }
+    
+    func clearErrors() {
+        stepTwo.mailField.clearError()
+        stepTwo.passwordField.clearError()
     }
     
     private func bindViewModel() {

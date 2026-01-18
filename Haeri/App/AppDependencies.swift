@@ -8,6 +8,7 @@
 import Foundation
 import Combine
 
+@MainActor
 class AppDependencies: ObservableObject {
     let authManager: AuthManager
     let locationManager: LocationManager
@@ -16,7 +17,8 @@ class AppDependencies: ObservableObject {
     let airPollutionManager: AirPollutionManager
     let communityService: CommunityService
     let aiRecommendationManager: AIRecomendationManager
-    let coordinator: MainTabCoordinator
+    let mainTabCoordinator: MainTabCoordinator
+    let appCoordinator: AppCoordinator
     
     init() {
         self.authManager = AuthManager()
@@ -37,6 +39,11 @@ class AppDependencies: ObservableObject {
             authManager: authManager
         )
         
-        self.coordinator = MainTabCoordinator()
+        self.mainTabCoordinator = MainTabCoordinator()
+        
+        self.appCoordinator = AppCoordinator(
+            authManager: authManager,
+            locationManager: locationManager
+        )
     }
 }

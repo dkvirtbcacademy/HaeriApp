@@ -77,8 +77,8 @@ class RegistrationStepTwo: UIView {
         ])
     }
     
-    func getSelectedCategories() -> [String] {
-        return selectedIndices.sorted().map { userCategories[$0].label }
+    func getSelectedCategorySlugs() -> [String] {
+        return selectedIndices.sorted().map { userCategories[$0].slug }
     }
 }
 

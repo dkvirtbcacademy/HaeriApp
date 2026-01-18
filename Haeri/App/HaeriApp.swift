@@ -9,40 +9,19 @@ import SwiftUI
 
 @main
 struct HaeriApp: App {
-    @StateObject private var dependencies = AppDependencies()
-    @StateObject private var appCoordinator: AppCoordinator
-    @State private var showLaunchScreen = true
     
-    init() {
-        let deps = AppDependencies()
-        _dependencies = StateObject(wrappedValue: deps)
-        _appCoordinator = StateObject(wrappedValue: AppCoordinator(
-            authManager: deps.authManager,
-            locationManager: deps.locationManager
-        ))
-    }
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
+    
+    @StateObject private var dependencies = AppDependencies()
+    @State private var showLaunchScreen = true
     
     var body: some Scene {
         WindowGroup {
             ZStack {
-                Group {
-                    switch appCoordinator.rootState {
-                    case .authenticated:
-                        MainView(
-                            dependencies: dependencies,
-                            coordinator: appCoordinator.mainTabCoordinator
-                        )
-                        .transition(.opacity)
-                    case .unauthenticated:
-                        LoginFlowView(
-                            dependencies: dependencies,
-                            loginCoordinator: appCoordinator.loginCoordinator
-                        )
-                        .ignoresSafeArea()
-                        .transition(.opacity)
-                    }
-                }
-                .animation(.easeInOut(duration: 0.3), value: appCoordinator.rootState)
+                AppRootView(
+                    appCoordinator: dependencies.appCoordinator,
+                    dependencies: dependencies
+                )
                 
                 if showLaunchScreen {
                     LaunchScreen()

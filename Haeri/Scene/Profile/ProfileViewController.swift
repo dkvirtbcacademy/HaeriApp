@@ -2,7 +2,7 @@
 //  ProfileViewController.swift
 //  Haeri
 //
-//  Enhanced Profile Design
+//  Created by kv on 12.01.26.
 //
 
 import UIKit
@@ -50,7 +50,7 @@ class ProfileViewController: UIViewController {
     
     private lazy var userIcon: UIImageView = {
         let imageView = UIImageView()
-        imageView.image = UIImage(named: viewModel.authManager.userAvatar ?? "Avatar 1")
+        imageView.image = UIImage(named: viewModel.authManager.currentUser?.avatar ?? "Avatar 1")
         imageView.tintColor = UIColor(named: "DarkText")
         imageView.contentMode = .scaleAspectFit
         imageView.translatesAutoresizingMaskIntoConstraints = false
@@ -69,7 +69,7 @@ class ProfileViewController: UIViewController {
     
     private lazy var nameLabel: UILabel = {
         let label = UILabel()
-        label.text = viewModel.authManager.userName ?? "User"
+        label.text = viewModel.authManager.currentUser?.name ?? "User"
         label.font = .firagoBold(.xlarge)
         label.textColor = UIColor(named: "TextColor")
         label.numberOfLines = 0
@@ -110,15 +110,11 @@ class ProfileViewController: UIViewController {
     }
     
     private func observeUserChanges() {
-        viewModel.authManager.$userName
-            .sink { [weak self] newName in
-                self?.nameLabel.text = newName ?? "User"
-            }
-            .store(in: &cancellables)
-        
-        viewModel.authManager.$userAvatar
-            .sink { [weak self] newAvatar in
-                self?.userIcon.image = UIImage(named: newAvatar ?? "Avatar 1")
+        viewModel.authManager.$currentUser
+            .sink { [weak self] user in
+                guard let self = self else { return }
+                self.nameLabel.text = user?.name ?? "User"
+                self.userIcon.image = UIImage(named: user?.avatar ?? "Avatar 1")
             }
             .store(in: &cancellables)
     }

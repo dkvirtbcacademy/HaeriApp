@@ -33,12 +33,12 @@ class LoginStepTwo: UIView {
         return label
     }()
     
-    private let nameField = NameField(
+    let mailField = NameField(
         label: "ელ. ფოსტის მისამართი:",
         placeholder: "შეიყვანეთ ელ. ფოსტის მისამართი"
     )
     
-    private let passwordField = PasswordField(
+    let passwordField = PasswordField(
         label: "პაროლი:",
         placeholder: "შეიყვანეთ პაროლი"
     )
@@ -49,10 +49,10 @@ class LoginStepTwo: UIView {
     
     private lazy var loginStackView: UIStackView = {
         let stack = UIStackView(arrangedSubviews: [
-            nameField,
+            mailField,
             passwordField,
             goToRegisterView,
-//            uikitGoogleButton
+            //            uikitGoogleButton
         ])
         
         stack.axis = .vertical
@@ -112,7 +112,7 @@ class LoginStepTwo: UIView {
         addSubview(loginStackView)
         
         NSLayoutConstraint.activate([
-//            loginStackView.topAnchor.constraint(equalTo: descriptionLabel.bottomAnchor, constant: 45),
+            //            loginStackView.topAnchor.constraint(equalTo: descriptionLabel.bottomAnchor, constant: 45),
             loginStackView.centerYAnchor.constraint(equalTo: centerYAnchor, constant: 20),
             loginStackView.leadingAnchor.constraint(equalTo: leadingAnchor),
             loginStackView.trailingAnchor.constraint(equalTo: trailingAnchor)

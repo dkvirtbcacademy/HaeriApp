@@ -90,7 +90,7 @@ class ChangePasswordViewController: UIViewController {
     }
     
     private func savePassword() {
-        guard let currentPassword = currentPasswordField.getInputText() else {
+        guard currentPasswordField.getInputText() != nil else {
             currentPasswordField.showError("გთხოვთ შეიყვანოთ მიმდინარე პაროლი")
             return
         }
@@ -99,21 +99,20 @@ class ChangePasswordViewController: UIViewController {
             newPasswordField.showError("გთხოვთ შეიყვანოთ ახალი პაროლი")
             return
         }
-        
-        if currentPassword != viewModel.authManager.userPassword {
-            currentPasswordField.showError("არასწორი პაროლი")
-            return
-        }
-        
-        if newPassword.count < 8 {
-            newPasswordField.showError("პაროლი უნდა შედგებოდეს მინიმუმ 8 სიმბოლოსგან")
+        if newPassword.count < 6 {
+            newPasswordField.showError("პაროლი უნდა შედგებოდეს მინიმუმ 6 სიმბოლოსგან")
             return
         }
         
         currentPasswordField.clearError()
         newPasswordField.clearError()
         
-        viewModel.authManager.changeUserPassword(newPassword)
-        viewModel.coordinator.navigateBack()
+        Task { @MainActor in
+            await viewModel.authManager.changePassword(newPassword: newPassword)
+            
+            if viewModel.authManager.alertItem == nil {
+                viewModel.coordinator.navigateBack()
+            }
+        }
     }
 }

@@ -9,14 +9,20 @@ import Foundation
 import Combine
 import CoreLocation
 
+@MainActor
 final class RegisterViewModel: ObservableObject {
     private let coordinator: LoginCoordinator
-    private let authManager: AuthManager
+    let authManager: AuthManager
     private let locationManager: LocationManager
     private var cancellables = Set<AnyCancellable>()
     
     @Published private(set) var currentStep: Int = 1
     @Published private(set) var buttonTitle: String = "გაგრძელება"
+    
+    @Published var userName: String = ""
+    @Published var userEmail: String = ""
+    @Published var userPassword: String = ""
+    @Published var userCategory: [String] = []
     
     let maxSteps = 2
     
@@ -28,21 +34,23 @@ final class RegisterViewModel: ObservableObject {
         self.coordinator = coordinator
         self.authManager = authManager
         self.locationManager = locationManager
+        observeAuthorizationStatus()
     }
     
     func getUserCategories() -> [UserCategoryModel] {
         authManager.userCategories
     }
     
-    func handleButtonTap() {
-        if currentStep == maxSteps {
-            createAccount()
-            return
-        }
-        
+    func moveToNextStep() {
         if currentStep < maxSteps {
             currentStep += 1
             updateButtonTitle()
+        }
+    }
+    
+    func handleButtonTap() async {
+        if currentStep == maxSteps {
+            await createAccount()
         }
     }
     
@@ -50,12 +58,18 @@ final class RegisterViewModel: ObservableObject {
         buttonTitle = currentStep == 2 ? "დასრულება" : "გაგრძელება"
     }
     
-    private func createAccount() {
+    private func createAccount() async {
         let status = locationManager.authorizationStatus
         
         switch status {
         case .authorizedWhenInUse, .authorizedAlways, .denied:
-            authManager.login()
+            await authManager.createUser(
+                name: userName,
+                email: userEmail,
+                password: userPassword,
+                avatar: "Avatar 1",
+                categories: userCategory
+            )
         case .notDetermined:
             locationManager.requestAuthorization()
         default:
@@ -68,9 +82,19 @@ final class RegisterViewModel: ObservableObject {
             .removeDuplicates()
             .dropFirst()
             .sink { [weak self] status in
+                guard let self else { return }
+                
                 switch status {
                 case .authorizedWhenInUse, .authorizedAlways, .denied, .restricted:
-                    self?.authManager.login()
+                    Task { @MainActor in
+                        await self.authManager.createUser(
+                            name: self.userName,
+                            email: self.userEmail,
+                            password: self.userPassword,
+                            avatar: "Avatar 1",
+                            categories: self.userCategory
+                        )
+                    }
                 case .notDetermined:
                     break
                 @unknown default:

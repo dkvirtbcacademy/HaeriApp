@@ -14,6 +14,7 @@ final class ProfileViewModel: ObservableObject {
     let authManager: AuthManager
     
     var airQualityValue: Int = 25
+    var cancellables = Set<AnyCancellable>()
     
     init(coordinator: ProfileCoordinator, authManager: AuthManager) {
         self.coordinator = coordinator

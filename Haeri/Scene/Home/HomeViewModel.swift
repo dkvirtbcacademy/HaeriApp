@@ -2,7 +2,7 @@
 //  HomeViewModel.swift
 //  Haeri
 //
-//  Updated to use Groq API (FREE: 14,400 requests/day)
+//  Created by kv on 05.01.26.
 //
 
 import Foundation

@@ -17,7 +17,7 @@ struct PostModel: Identifiable, Codable {
     var comments: [Comment]
     
     struct Comment: Codable, Identifiable {
-        let id: Int
+        let id: String
         let user: UserModel
         let content: String
     }

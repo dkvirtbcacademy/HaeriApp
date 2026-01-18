@@ -49,7 +49,7 @@ final class AIRecomendationManager: ObservableObject, AlertHandler {
         
         do {
             let recommendation = try await generateRecommendationFromAPI(
-                userCategories: authManager.userCategory,
+                userCategories: getUserCategories(),
                 airPollution: airPollutionItem
             )
             aiRecommendation = recommendation
@@ -62,6 +62,16 @@ final class AIRecomendationManager: ObservableObject, AlertHandler {
         }
         
         isLoadingRecommendation = false
+    }
+    
+    private func getUserCategories() -> [UserCategoryModel] {
+        guard let user = authManager.currentUser else {
+            return []
+        }
+        
+        return authManager.userCategories.filter { categoryModel in
+            user.categories.contains(categoryModel.slug)
+        }
     }
     
     private func generateRecommendationFromAPI(
@@ -89,7 +99,12 @@ final class AIRecomendationManager: ObservableObject, AlertHandler {
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("Bearer \(groqAPIKey)", forHTTPHeaderField: "Authorization")
-        request.httpBody = try JSONEncoder().encode(requestBody)
+        
+        do {
+            request.httpBody = try JSONEncoder().encode(requestBody)
+        } catch {
+            throw AIRecomendationError.encodingError
+        }
         
         let (data, response) = try await URLSession.shared.data(for: request)
         
@@ -106,14 +121,18 @@ final class AIRecomendationManager: ObservableObject, AlertHandler {
             }
         }
         
-        let result = try JSONDecoder().decode(GroqAPIResponse.self, from: data)
-        
-        guard let content = result.choices.first?.message.content?.trimmingCharacters(in: .whitespacesAndNewlines),
-              !content.isEmpty else {
-            throw AIRecomendationError.emptyResponse
+        do {
+            let result = try JSONDecoder().decode(GroqAPIResponse.self, from: data)
+            
+            guard let content = result.choices.first?.message.content?.trimmingCharacters(in: .whitespacesAndNewlines),
+                  !content.isEmpty else {
+                throw AIRecomendationError.emptyResponse
+            }
+            
+            return content
+        } catch {
+            throw AIRecomendationError.decodingError
         }
-        
-        return content
     }
     
     private func buildPrompt(

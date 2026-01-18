@@ -14,7 +14,7 @@ class NetworkManager: ObservableObject {
             throw NetworkError.noDataAvailable
         }
         
-        var urlRequest = URLRequest(url: url)
+        let urlRequest = URLRequest(url: url)
         do {
             let (data, response) = try await URLSession.shared.data(for: urlRequest)
             

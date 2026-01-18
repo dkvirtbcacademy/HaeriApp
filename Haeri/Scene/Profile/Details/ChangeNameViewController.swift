@@ -6,10 +6,12 @@
 //
 
 import UIKit
+import Combine
 
 class ChangeNameViewController: UIViewController {
     
     private let viewModel: ProfileViewModel
+    private var cancellables = Set<AnyCancellable>()
     
     private let header = UikitPageHeader(pageName: "სახელის შეცვლა")
     
@@ -19,6 +21,13 @@ class ChangeNameViewController: UIViewController {
     )
     
     private let saveButton = UikitButton(label: "შენახვა")
+    
+    private let activityIndicator: UIActivityIndicatorView = {
+        let indicator = UIActivityIndicatorView(style: .large)
+        indicator.hidesWhenStopped = true
+        indicator.translatesAutoresizingMaskIntoConstraints = false
+        return indicator
+    }()
     
     init(viewModel: ProfileViewModel) {
         self.viewModel = viewModel
@@ -37,6 +46,7 @@ class ChangeNameViewController: UIViewController {
         
         setupUI()
         setActions()
+        observeLoadingState()
     }
     
     private func setupUI() {
@@ -46,6 +56,7 @@ class ChangeNameViewController: UIViewController {
         view.addSubview(header)
         view.addSubview(nameField)
         view.addSubview(saveButton)
+        view.addSubview(activityIndicator)
         
         NSLayoutConstraint.activate([
             header.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
@@ -60,7 +71,10 @@ class ChangeNameViewController: UIViewController {
             saveButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -40),
             saveButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
             saveButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
-            saveButton.heightAnchor.constraint(equalToConstant: 50)
+            saveButton.heightAnchor.constraint(equalToConstant: 50),
+            
+            activityIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            activityIndicator.centerYAnchor.constraint(equalTo: view.centerYAnchor)
         ])
     }
     
@@ -79,14 +93,46 @@ class ChangeNameViewController: UIViewController {
         )
     }
     
+    private func observeLoadingState() {
+        viewModel.authManager.$isLoading
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] isLoading in
+                guard let self = self else { return }
+                
+                if isLoading {
+                    self.activityIndicator.startAnimating()
+                    self.saveButton.isEnabled = false
+                    self.saveButton.alpha = 0.5
+                    self.nameField.isUserInteractionEnabled = false
+                } else {
+                    self.activityIndicator.stopAnimating()
+                    self.saveButton.isEnabled = true
+                    self.saveButton.alpha = 1.0
+                    self.nameField.isUserInteractionEnabled = true
+                }
+            }
+            .store(in: &cancellables)
+    }
+    
     private func saveName() {
-        guard let name = nameField.getInputText() else {
+        guard let name = nameField.getInputText(), !name.isEmpty else {
             nameField.showError("გთხოვთ შეიყვანოთ სახელი")
             return
         }
         
+        if name.count < 2 {
+            nameField.showError("სახელი უნდა შედგებოდეს მინიმუმ 2 სიმბოლოსგან")
+            return
+        }
+        
         nameField.clearError()
-        viewModel.authManager.changeUserName(name)
-        viewModel.coordinator.navigateBack()
+        
+        Task { @MainActor in
+            await viewModel.authManager.updateUserName(name)
+            
+            if viewModel.authManager.alertItem == nil {
+                viewModel.coordinator.navigateBack()
+            }
+        }
     }
 }

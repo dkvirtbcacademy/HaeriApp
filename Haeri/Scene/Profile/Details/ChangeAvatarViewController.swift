@@ -6,10 +6,12 @@
 //
 
 import UIKit
+import Combine
 
 class ChangeAvatarViewController: UIViewController {
     
     private let viewModel: ProfileViewModel
+    private var cancellables = Set<AnyCancellable>()
     
     private let header = UikitPageHeader(pageName: "ავატარის შეცვლა")
     private var selectedAvatar: String?
@@ -30,9 +32,16 @@ class ChangeAvatarViewController: UIViewController {
     
     private let saveButton = UikitButton(label: "შენახვა")
     
+    private let activityIndicator: UIActivityIndicatorView = {
+        let indicator = UIActivityIndicatorView(style: .large)
+        indicator.hidesWhenStopped = true
+        indicator.translatesAutoresizingMaskIntoConstraints = false
+        return indicator
+    }()
+    
     init(viewModel: ProfileViewModel) {
         self.viewModel = viewModel
-        self.selectedAvatar = viewModel.authManager.userAvatar
+        self.selectedAvatar = viewModel.authManager.currentUser?.avatar
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -48,6 +57,7 @@ class ChangeAvatarViewController: UIViewController {
         
         setupUI()
         setActions()
+        observeLoadingState()
     }
     
     private func setupUI() {
@@ -57,6 +67,7 @@ class ChangeAvatarViewController: UIViewController {
         view.addSubview(header)
         view.addSubview(collectionView)
         view.addSubview(saveButton)
+        view.addSubview(activityIndicator)
         
         collectionView.delegate = self
         collectionView.dataSource = self
@@ -75,7 +86,10 @@ class ChangeAvatarViewController: UIViewController {
             saveButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -40),
             saveButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
             saveButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
-            saveButton.heightAnchor.constraint(equalToConstant: 50)
+            saveButton.heightAnchor.constraint(equalToConstant: 50),
+            
+            activityIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            activityIndicator.centerYAnchor.constraint(equalTo: view.centerYAnchor)
         ])
     }
     
@@ -92,10 +106,37 @@ class ChangeAvatarViewController: UIViewController {
         )
     }
     
+    private func observeLoadingState() {
+        viewModel.authManager.$isLoading
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] isLoading in
+                guard let self = self else { return }
+                
+                if isLoading {
+                    self.activityIndicator.startAnimating()
+                    self.saveButton.isEnabled = false
+                    self.saveButton.alpha = 0.5
+                    self.collectionView.isUserInteractionEnabled = false
+                } else {
+                    self.activityIndicator.stopAnimating()
+                    self.saveButton.isEnabled = true
+                    self.saveButton.alpha = 1.0
+                    self.collectionView.isUserInteractionEnabled = true
+                }
+            }
+            .store(in: &cancellables)
+    }
+    
     private func saveAvatar() {
         guard let avatar = selectedAvatar else { return }
-        viewModel.authManager.changeUserAvatar(avatar)
-        viewModel.coordinator.navigateBack()
+        
+        Task { @MainActor in
+            await viewModel.authManager.updateUserAvatar(avatar)
+            
+            if viewModel.authManager.alertItem == nil {
+                viewModel.coordinator.navigateBack()
+            }
+        }
     }
 }
 

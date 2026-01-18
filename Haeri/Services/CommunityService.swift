@@ -21,14 +21,13 @@ final class CommunityService: ObservableObject {
     }
     
     @Published var searchText: String = ""
-    
     @Published var filteredPosts: [PostModel] = []
     
     init(authManager: AuthManager, networkManager: NetworkManager) {
         self.authManager = authManager
         self.networkManager = networkManager
         loadStaticData()
-        updateFilteredPosts()   
+        updateFilteredPosts()
     }
     
     private func updateFilteredPosts() {
@@ -39,11 +38,15 @@ final class CommunityService: ObservableObject {
             case .popular:
                 result = result.sorted { $0.likes > $1.likes }
             case .myPosts:
-                result = result.filter { $0.author.id == authManager.userId }
+                result = result.filter { $0.author.id == authManager.currentUser?.id }
             case .saved:
-                result = result.filter { authManager.userSavedPosts.contains($0.id) }
+                result = result.filter {
+                    authManager.currentUser?.savedPosts.contains($0.id) ?? false
+                }
             case .liked:
-                result = result.filter { authManager.userLikedPosts.contains($0.id) }
+                result = result.filter {
+                    authManager.currentUser?.likedPosts.contains($0.id) ?? false
+                }
             case .latest:
                 result = result.sorted { $0.date > $1.date }
             }
@@ -61,7 +64,7 @@ final class CommunityService: ObservableObject {
         guard let postId = currentPost?.id else { return }
         
         guard let post = posts.first(where: { $0.id == postId }),
-              post.author.id == authManager.userId else {
+              post.author.id == authManager.currentUser?.id else {
             return
         }
         
@@ -84,17 +87,19 @@ final class CommunityService: ObservableObject {
         currentPost?.comments.append(comment)
     }
     
-    func toggleLike(postId: Int) {
+    func toggleLike(postId: Int) async {
         guard let index = posts.firstIndex(where: { $0.id == postId }) else {
             return
         }
         
-        if authManager.userLikedPosts.contains(postId) {
+        let isLiked = authManager.currentUser?.likedPosts.contains(postId) ?? false
+        
+        if isLiked {
             posts[index].likes -= 1
-            authManager.removeLikedPosts(postId)
+            await authManager.removeLikedPost(postId)
         } else {
             posts[index].likes += 1
-            authManager.addLikedPosts(postId)
+            await authManager.addLikedPost(postId)
         }
         
         if currentPost?.id == postId {
@@ -104,64 +109,57 @@ final class CommunityService: ObservableObject {
         updateFilteredPosts()
     }
     
-    func savePost(postId: Int) {
-        if authManager.userSavedPosts.contains(postId) {
-            authManager.userSavedPosts.removeAll { $0 == postId }
+    func savePost(postId: Int) async {
+        let isSaved = authManager.currentUser?.savedPosts.contains(postId) ?? false
+        
+        if isSaved {
+            await authManager.removeSavedPost(postId)
         } else {
-            authManager.userSavedPosts.append(postId)
+            await authManager.addSavedPost(postId)
         }
+        
         updateFilteredPosts()
     }
     
     private func loadStaticData() {
         let user1 = UserModel(
-            id: 1,
+            id: "user1_firebase_uid",
             name: "Dato",
             avatar: "Avatar 1",
             email: "dato@mail.com",
-            password: "123456",
-            savedPosts: [1, 4],
-            likedPosts: [1, 2, 5, 7],
+            categories: ["parent"]
         )
         
         let user2 = UserModel(
-            id: 2,
+            id: "user2_firebase_uid",
             name: "Nino",
             avatar: "Avatar 2",
             email: "nino@mail.com",
-            password: "123456",
-            savedPosts: [2, 6],
-            likedPosts: [1, 3, 6],
+            categories: ["parent"]
         )
         
         let user3 = UserModel(
-            id: 3,
+            id: "user3_firebase_uid",
             name: "Gio",
             avatar: "Avatar 3",
             email: "gio@mail.com",
-            password: "123456",
-            savedPosts: [3],
-            likedPosts: [1, 2, 3, 4, 8],
+            categories: ["activist"]
         )
         
         let user4 = UserModel(
-            id: 4,
+            id: "user4_firebase_uid",
             name: "Mariam",
             avatar: "Avatar 4",
             email: "mariam@mail.com",
-            password: "123456",
-            savedPosts: [5, 7],
-            likedPosts: [2, 4, 6],
+            categories: ["parent"]
         )
         
         let user5 = UserModel(
-            id: 5,
+            id: "user5_firebase_uid",
             name: "Luka",
             avatar: "Avatar 5",
             email: "luka@mail.com",
-            password: "123456",
-            savedPosts: [8],
-            likedPosts: [1, 5, 7, 9],
+            categories: ["sportsman"]
         )
         
         let now = Date()
@@ -177,12 +175,12 @@ final class CommunityService: ObservableObject {
                 likes: 32,
                 comments: [
                     PostModel.Comment(
-                        id: 1,
+                        id: "c1",
                         user: user2,
                         content: "Yes! I checked AQI and it's much better 🌤️"
                     ),
                     PostModel.Comment(
-                        id: 2,
+                        id: "c2",
                         user: user3,
                         content: "Let's hope it stays like this."
                     )
@@ -198,12 +196,12 @@ final class CommunityService: ObservableObject {
                 likes: 18,
                 comments: [
                     PostModel.Comment(
-                        id: 3,
+                        id: "c3",
                         user: user1,
                         content: "Every morning before work."
                     ),
                     PostModel.Comment(
-                        id: 4,
+                        id: "c4",
                         user: user4,
                         content: "I check it before my morning run!"
                     )
@@ -229,17 +227,17 @@ final class CommunityService: ObservableObject {
                 likes: 45,
                 comments: [
                     PostModel.Comment(
-                        id: 5,
+                        id: "c5",
                         user: user2,
                         content: "Absolutely! Children's health should come first."
                     ),
                     PostModel.Comment(
-                        id: 6,
+                        id: "c6",
                         user: user5,
                         content: "Some European cities do this at AQI 100+"
                     ),
                     PostModel.Comment(
-                        id: 7,
+                        id: "c7",
                         user: user1,
                         content: "I keep my kids home when it's really bad."
                     )
@@ -255,7 +253,7 @@ final class CommunityService: ObservableObject {
                 likes: 27,
                 comments: [
                     PostModel.Comment(
-                        id: 8,
+                        id: "c8",
                         user: user3,
                         content: "I have 10 plants now! My apartment air feels fresher."
                     )
@@ -271,12 +269,12 @@ final class CommunityService: ObservableObject {
                 likes: 15,
                 comments: [
                     PostModel.Comment(
-                        id: 9,
+                        id: "c9",
                         user: user4,
                         content: "I use Xiaomi. Works great and affordable."
                     ),
                     PostModel.Comment(
-                        id: 10,
+                        id: "c10",
                         user: user2,
                         content: "Philips is expensive but worth it!"
                     )
@@ -292,7 +290,7 @@ final class CommunityService: ObservableObject {
                 likes: 22,
                 comments: [
                     PostModel.Comment(
-                        id: 11,
+                        id: "c11",
                         user: user5,
                         content: "I avoid outdoor exercise above 75 AQI."
                     )
@@ -308,12 +306,12 @@ final class CommunityService: ObservableObject {
                 likes: 38,
                 comments: [
                     PostModel.Comment(
-                        id: 12,
+                        id: "c12",
                         user: user1,
                         content: "We need stricter regulations on factories."
                     ),
                     PostModel.Comment(
-                        id: 13,
+                        id: "c13",
                         user: user3,
                         content: "Public transport improvements would help too."
                     )
@@ -329,7 +327,7 @@ final class CommunityService: ObservableObject {
                 likes: 14,
                 comments: [
                     PostModel.Comment(
-                        id: 14,
+                        id: "c14",
                         user: user5,
                         content: "It's the heating systems and temperature inversions."
                     )
@@ -345,17 +343,17 @@ final class CommunityService: ObservableObject {
                 likes: 56,
                 comments: [
                     PostModel.Comment(
-                        id: 15,
+                        id: "c15",
                         user: user1,
                         content: "This is amazing! How can I start one in my area?"
                     ),
                     PostModel.Comment(
-                        id: 16,
+                        id: "c16",
                         user: user2,
                         content: "Great initiative! 👏"
                     ),
                     PostModel.Comment(
-                        id: 17,
+                        id: "c17",
                         user: user4,
                         content: "Would love to join if you're near Saburtalo!"
                     )

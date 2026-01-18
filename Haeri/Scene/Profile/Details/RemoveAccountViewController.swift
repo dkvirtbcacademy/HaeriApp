@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Combine
 
 class RemoveAccountViewController: UIViewController {
     
@@ -40,6 +41,13 @@ class RemoveAccountViewController: UIViewController {
         return button
     }()
     
+    private let activityIndicator: UIActivityIndicatorView = {
+        let indicator = UIActivityIndicatorView(style: .large)
+        indicator.hidesWhenStopped = true
+        indicator.translatesAutoresizingMaskIntoConstraints = false
+        return indicator
+    }()
+    
     init(viewModel: ProfileViewModel) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
@@ -57,6 +65,7 @@ class RemoveAccountViewController: UIViewController {
         
         setupUI()
         setActions()
+        observeLoadingState()
     }
     
     private func setupUI() {
@@ -64,6 +73,7 @@ class RemoveAccountViewController: UIViewController {
         view.addSubview(header)
         view.addSubview(warningLabel)
         view.addSubview(deleteButton)
+        view.addSubview(activityIndicator)
         
         NSLayoutConstraint.activate([
             header.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
@@ -78,7 +88,10 @@ class RemoveAccountViewController: UIViewController {
             deleteButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -40),
             deleteButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
             deleteButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
-            deleteButton.heightAnchor.constraint(equalToConstant: 50)
+            deleteButton.heightAnchor.constraint(equalToConstant: 50),
+            
+            activityIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            activityIndicator.centerYAnchor.constraint(equalTo: view.centerYAnchor)
         ])
     }
     
@@ -93,6 +106,25 @@ class RemoveAccountViewController: UIViewController {
             },
             for: .touchUpInside
         )
+    }
+    
+    private func observeLoadingState() {
+        viewModel.authManager.$isLoading
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] isLoading in
+                guard let self = self else { return }
+                
+                if isLoading {
+                    self.activityIndicator.startAnimating()
+                    self.deleteButton.isEnabled = false
+                    self.deleteButton.alpha = 0.5
+                } else {
+                    self.activityIndicator.stopAnimating()
+                    self.deleteButton.isEnabled = true
+                    self.deleteButton.alpha = 1.0
+                }
+            }
+            .store(in: &viewModel.cancellables)
     }
     
     private func showDeleteConfirmation() {
@@ -111,6 +143,8 @@ class RemoveAccountViewController: UIViewController {
     }
     
     private func deleteAccount() {
-        viewModel.authManager.deleteAccount()
+        Task { @MainActor in
+            await viewModel.authManager.deleteAccount()
+        }
     }
 }

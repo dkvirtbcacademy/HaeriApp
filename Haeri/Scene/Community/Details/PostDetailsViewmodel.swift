@@ -42,17 +42,17 @@ final class PostDetailsViewModel: ObservableObject {
             }
             .assign(to: &$post)
         
-        authManager.$userLikedPosts
-            .map { [weak self] likedPosts in
+        authManager.$currentUser
+            .map { [weak self] user in
                 guard let self = self else { return false }
-                return likedPosts.contains(self.postId)
+                return user?.likedPosts.contains(self.postId) ?? false
             }
             .assign(to: &$isLiked)
         
-        authManager.$userSavedPosts
-            .map { [weak self] savedPosts in
+        authManager.$currentUser
+            .map { [weak self] user in
                 guard let self = self else { return false }
-                return savedPosts.contains(self.postId)
+                return user?.savedPosts.contains(self.postId) ?? false
             }
             .assign(to: &$isSaved)
     }
@@ -71,19 +71,27 @@ final class PostDetailsViewModel: ObservableObject {
     }
     
     func toggleLike() {
-        communityService.toggleLike(postId: postId)
+        Task {
+            await communityService.toggleLike(postId: postId)
+        }
     }
     
     func savePost() {
-        communityService.savePost(postId: postId)
+        Task {
+            await communityService.savePost(postId: postId)
+        }
     }
     
     func addComment() {
-        guard !commentText.isEmpty, let post = post else { return }
+        guard !commentText.isEmpty,
+              let post = post,
+              let currentUser = authManager.currentUser else {
+            return
+        }
         
         let newComment = PostModel.Comment(
-            id: post.comments.count + 1,
-            user: authManager.currentUser,
+            id: "\(post.comments.count + 1)",
+            user: currentUser,
             content: commentText
         )
         
@@ -93,11 +101,14 @@ final class PostDetailsViewModel: ObservableObject {
     }
     
     var canComment: Bool {
-        !commentText.isEmpty
+        !commentText.isEmpty && authManager.currentUser != nil
     }
     
     func isPostAuthor() -> Bool {
-        guard let post = post else { return false }
-        return post.author.id == authManager.userId
+        guard let post = post,
+              let currentUserId = authManager.currentUser?.id else {
+            return false
+        }
+        return post.author.id == currentUserId
     }
 }

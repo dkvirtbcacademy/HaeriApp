@@ -8,7 +8,7 @@
 import UIKit
 import Combine
 
-class RegisterViewController: UIViewController {
+class RegisterViewController: UIViewController, UIKitAlertHandler {
     private let viewModel: RegisterViewModel
     private var cancellables = Set<AnyCancellable>()
     
@@ -103,10 +103,97 @@ class RegisterViewController: UIViewController {
         }
         
         button.addAction(UIAction { [weak self] _ in
-            self?.viewModel.handleButtonTap()
+            guard let self else { return }
+            
+            if self.viewModel.currentStep == 1 {
+                guard self.captureStepOneData() else {
+                    return
+                }
+                self.viewModel.moveToNextStep()
+            } else if self.viewModel.currentStep == 2 {
+                guard self.captureStepTwoData() else {
+                    return
+                }
+                Task { @MainActor in
+                    await self.viewModel.handleButtonTap()
+                }
+            }
+            
         }, for: .touchUpInside)
         
         bindViewModel()
+        
+        viewModel.authManager.$authError
+            .compactMap { $0 }
+            .sink { [weak self] error in
+                self?.handleAuthError(error)
+                self?.viewModel.authManager.authError = nil
+            }
+            .store(in: &cancellables)
+    }
+    
+    @discardableResult
+    private func captureStepOneData() -> Bool {
+        let name = stepOne.nameField.getInputText()?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let email = stepOne.mailField.getInputText()?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let password = stepOne.passwordField.getInputText()?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let confirmPassword = stepOne.confirmPasswordField.getInputText()?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        
+        if name.isEmpty {
+            stepOne.nameField.showError("გთხოვთ შეიყვანოთ სახელი")
+            return false
+        }
+        
+        if email.isEmpty {
+            stepOne.mailField.showError("გთხოვთ შეიყვანოთ ელ. ფოსტა")
+            return false
+        }
+        
+        if password.isEmpty {
+            stepOne.passwordField.showError("გთხოვთ შეიყვანოთ პაროლი")
+            return false
+        }
+        
+        if password.count < 6 {
+            stepOne.passwordField.showError("პაროლი უნდა შედგებოდეს მინიმუმ 6 სიმბოლოსგან")
+            return false
+        }
+        
+        if password != confirmPassword {
+            stepOne.confirmPasswordField.showError("პაროლები არ ემთხვევა")
+            return false
+        }
+        
+        clearErrors()
+        
+        viewModel.userName = name
+        viewModel.userEmail = email
+        viewModel.userPassword = password
+        
+        return true
+    }
+    
+    func clearErrors() {
+        stepOne.nameField.clearError()
+        stepOne.mailField.clearError()
+        stepOne.passwordField.clearError()
+        stepOne.confirmPasswordField.clearError()
+    }
+    
+    @discardableResult
+    private func captureStepTwoData() -> Bool {
+        let selectedCategories = stepTwo.getSelectedCategorySlugs()
+        
+        if selectedCategories.isEmpty {
+            showAlert(UIKitAlertItem(
+                title: "კატეგორია არ არის არჩეული",
+                message: "გთხოვთ აირჩიოთ მინიმუმ ერთი კატეგორია"
+            ))
+            return false
+        }
+        
+        viewModel.userCategory = selectedCategories
+        return true
     }
     
     private func bindViewModel() {

@@ -9,14 +9,18 @@ import Foundation
 import Combine
 import CoreLocation
 
+@MainActor
 final class LoginViewModel: ObservableObject {
-    private let coordinator: LoginCoordinator
-    private let authManager: AuthManager
+    let coordinator: LoginCoordinator
+    let authManager: AuthManager
     private let locationManager: LocationManager
     private var cancellables = Set<AnyCancellable>()
     
     @Published private(set) var currentStep: Int = 1
     @Published private(set) var buttonTitle: String = "დაწყება"
+    
+    @Published var userEmail: String = ""
+    @Published var userPassword: String = ""
     
     let maxSteps = 2
     
@@ -32,12 +36,7 @@ final class LoginViewModel: ObservableObject {
         observeAuthorizationStatus()
     }
     
-    func handleButtonTap() {
-        if currentStep == maxSteps {
-            createAccount()
-            return
-        }
-        
+    func moveToNextStep() {
         if currentStep < maxSteps {
             currentStep += 1
             updateButtonTitle()
@@ -48,12 +47,12 @@ final class LoginViewModel: ObservableObject {
         buttonTitle = currentStep == 2 ? "გაგრძელება" : "დაწყება"
     }
     
-    private func createAccount() {
+    func loginUser() async {
         let status = locationManager.authorizationStatus
         
         switch status {
         case .authorizedWhenInUse, .authorizedAlways, .denied:
-            authManager.login()
+            await authManager.login(email: userEmail, password: userPassword)
         case .notDetermined:
             locationManager.requestAuthorization()
         default:
@@ -66,9 +65,13 @@ final class LoginViewModel: ObservableObject {
             .removeDuplicates()
             .dropFirst()
             .sink { [weak self] status in
+                guard let self = self else { return }
+                
                 switch status {
                 case .authorizedWhenInUse, .authorizedAlways, .denied, .restricted:
-                    self?.authManager.login()
+                    Task { @MainActor in
+                        await self.authManager.login(email: self.userEmail, password: self.userPassword)
+                    }
                 case .notDetermined:
                     break
                 @unknown default:
@@ -81,5 +84,4 @@ final class LoginViewModel: ObservableObject {
     func navigateToRegister() {
         coordinator.navigate(to: .register)
     }
-    
 }

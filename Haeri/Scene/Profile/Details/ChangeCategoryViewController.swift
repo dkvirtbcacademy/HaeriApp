@@ -6,10 +6,12 @@
 //
 
 import UIKit
+import Combine
 
 class ChangeCategoryViewController: UIViewController {
     
     private let viewModel: ProfileViewModel
+    private var cancellables = Set<AnyCancellable>()
     
     private let header = UikitPageHeader(pageName: "კატეგორიის შეცვლა")
     
@@ -37,16 +39,24 @@ class ChangeCategoryViewController: UIViewController {
     
     private let saveButton = UikitButton(label: "შენახვა")
     
+    private let activityIndicator: UIActivityIndicatorView = {
+        let indicator = UIActivityIndicatorView(style: .large)
+        indicator.hidesWhenStopped = true
+        indicator.translatesAutoresizingMaskIntoConstraints = false
+        return indicator
+    }()
+    
     init(viewModel: ProfileViewModel) {
         self.viewModel = viewModel
+        super.init(nibName: nil, bundle: nil)
         
-        for (index, category) in viewModel.authManager.userCategories.enumerated() {
-            if viewModel.authManager.userCategory.contains(where: { $0.label == category.label }) {
-                selectedIndices.insert(index)
+        if let userCategories = viewModel.authManager.currentUser?.categories {
+            for (index, category) in viewModel.authManager.userCategories.enumerated() {
+                if userCategories.contains(category.slug) {
+                    selectedIndices.insert(index)
+                }
             }
         }
-        
-        super.init(nibName: nil, bundle: nil)
     }
     
     required init?(coder: NSCoder) {
@@ -61,6 +71,7 @@ class ChangeCategoryViewController: UIViewController {
         
         setupUI()
         setActions()
+        observeLoadingState()
     }
     
     private func setupUI() {
@@ -71,6 +82,7 @@ class ChangeCategoryViewController: UIViewController {
         view.addSubview(titleLabel)
         view.addSubview(tableView)
         view.addSubview(saveButton)
+        view.addSubview(activityIndicator)
         
         tableView.delegate = self
         tableView.dataSource = self
@@ -94,7 +106,10 @@ class ChangeCategoryViewController: UIViewController {
             saveButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -40),
             saveButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
             saveButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
-            saveButton.heightAnchor.constraint(equalToConstant: 50)
+            saveButton.heightAnchor.constraint(equalToConstant: 50),
+            
+            activityIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            activityIndicator.centerYAnchor.constraint(equalTo: view.centerYAnchor)
         ])
     }
     
@@ -111,15 +126,44 @@ class ChangeCategoryViewController: UIViewController {
         )
     }
     
+    private func observeLoadingState() {
+        viewModel.authManager.$isLoading
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] isLoading in
+                guard let self = self else { return }
+                
+                if isLoading {
+                    self.activityIndicator.startAnimating()
+                    self.saveButton.isEnabled = false
+                    self.saveButton.alpha = 0.5
+                    self.tableView.isUserInteractionEnabled = false
+                } else {
+                    self.activityIndicator.stopAnimating()
+                    self.saveButton.isEnabled = true
+                    self.saveButton.alpha = 1.0
+                    self.tableView.isUserInteractionEnabled = true
+                }
+            }
+            .store(in: &cancellables)
+    }
+    
     private func saveCategories() {
         guard !selectedIndices.isEmpty else {
             showError("გთხოვთ აირჩიოთ მინიმუმ ერთი კატეგორია")
             return
         }
         
-        let selectedCategories = selectedIndices.sorted().map { viewModel.authManager.userCategories[$0] }
-        viewModel.authManager.changeUserCategory(selectedCategories)
-        viewModel.coordinator.navigateBack()
+        let selectedCategorySlugs = selectedIndices.sorted().map {
+            viewModel.authManager.userCategories[$0].slug
+        }
+        
+        Task { @MainActor in
+            await viewModel.authManager.updateUserCategories(selectedCategorySlugs)
+            
+            if viewModel.authManager.alertItem == nil {
+                viewModel.coordinator.navigateBack()
+            }
+        }
     }
     
     private func showError(_ message: String) {

@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import UIKit
 
 struct AlertItem: Identifiable {
     let id = UUID()
@@ -14,10 +15,28 @@ struct AlertItem: Identifiable {
     let dismissButton: Alert.Button
 }
 
+struct UIKitAlertItem {
+    let title: String
+    let message: String
+    let buttonTitle: String
+    
+    init(title: String, message: String, buttonTitle: String = "OK") {
+        self.title = title
+        self.message = message
+        self.buttonTitle = buttonTitle
+    }
+}
+
 @MainActor
 protocol AlertHandler: AnyObject {
     var alertItem: AlertItem? { get set }
 }
+
+@MainActor
+protocol UIKitAlertHandler: AnyObject {
+    func showAlert(_ alertItem: UIKitAlertItem)
+}
+
 
 extension AlertHandler {
     func handleNetworkError(_ error: NetworkError, context: String = "") {
@@ -71,5 +90,84 @@ extension AlertHandler {
         case .emptyResponse:
             alertItem = AIRecomendationAlertContext.emptyResponse
         }
+    }
+    
+    func handleAuthError(_ error: AuthError) {
+        switch error {
+        case .userNotFound:
+            alertItem = AuthAlertContext.userNotFound
+        case .invalidCredentials:
+            alertItem = AuthAlertContext.invalidCredentials
+        case .weakPassword:
+            alertItem = AuthAlertContext.weakPassword
+        case .emailAlreadyInUse:
+            alertItem = AuthAlertContext.emailAlreadyInUse
+        case .networkError:
+            alertItem = AuthAlertContext.networkError
+        case .firestoreError(let message):
+            alertItem = AuthAlertContext.firestoreError(message: message)
+        case .invalidEmail:
+            alertItem = AuthAlertContext.invalidEmail
+        case .userDisabled:
+            alertItem = AuthAlertContext.userDisabled
+        case .tooManyRequests:
+            alertItem = AuthAlertContext.tooManyRequests
+        case .operationNotAllowed:
+            alertItem = AuthAlertContext.operationNotAllowed
+        case .requiresRecentLogin:
+            alertItem = AuthAlertContext.requiresRecentLogin
+        case .unknown(let message):
+            alertItem = AuthAlertContext.unknown(message: message)
+        }
+    }
+}
+
+extension UIKitAlertHandler where Self: UIViewController {
+    func showAlert(_ alertItem: UIKitAlertItem) {
+        let alert = UIAlertController(
+            title: alertItem.title,
+            message: alertItem.message,
+            preferredStyle: .alert
+        )
+        
+        alert.addAction(UIAlertAction(
+            title: alertItem.buttonTitle,
+            style: .default
+        ))
+        
+        present(alert, animated: true)
+    }
+    
+    func handleAuthError(_ error: AuthError) {
+        let alertItem: UIKitAlertItem
+        
+        switch error {
+        case .userNotFound:
+            alertItem = AuthUIKitAlertContext.userNotFound
+        case .invalidCredentials:
+            alertItem = AuthUIKitAlertContext.invalidCredentials
+        case .weakPassword:
+            alertItem = AuthUIKitAlertContext.weakPassword
+        case .emailAlreadyInUse:
+            alertItem = AuthUIKitAlertContext.emailAlreadyInUse
+        case .networkError:
+            alertItem = AuthUIKitAlertContext.networkError
+        case .firestoreError(let message):
+            alertItem = AuthUIKitAlertContext.firestoreError(message: message)
+        case .invalidEmail:
+            alertItem = AuthUIKitAlertContext.invalidEmail
+        case .userDisabled:
+            alertItem = AuthUIKitAlertContext.userDisabled
+        case .tooManyRequests:
+            alertItem = AuthUIKitAlertContext.tooManyRequests
+        case .operationNotAllowed:
+            alertItem = AuthUIKitAlertContext.operationNotAllowed
+        case .requiresRecentLogin:
+            alertItem = AuthUIKitAlertContext.requiresRecentLogin
+        case .unknown(let message):
+            alertItem = AuthUIKitAlertContext.unknown(message: message)
+        }
+        
+        showAlert(alertItem)
     }
 }
