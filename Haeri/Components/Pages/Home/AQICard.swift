@@ -42,6 +42,7 @@ struct AQICard: View {
                     Text(aqiDetail.category)
                         .font(.firagoMedium(.xsmall))
                         .foregroundColor(.text)
+                        .multilineTextAlignment(.center)
                         .padding(.horizontal, 10)
                         .padding(.vertical, 5)
                         .background(

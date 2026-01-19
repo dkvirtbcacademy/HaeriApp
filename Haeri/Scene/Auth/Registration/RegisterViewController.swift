@@ -10,6 +10,7 @@ import Combine
 
 class RegisterViewController: UIViewController, UIKitAlertHandler {
     private let viewModel: RegisterViewModel
+    private let formValidationManager: FormValidationManager
     private var cancellables = Set<AnyCancellable>()
     
     private let header = UikitPageHeader(pageName: "რეგისტრაცია")
@@ -26,8 +27,9 @@ class RegisterViewController: UIViewController, UIKitAlertHandler {
     
     private let button = UikitButton(label: "გაგრძელება")
     
-    init(viewModel: RegisterViewModel) {
+    init(viewModel: RegisterViewModel, formValidationManager: FormValidationManager) {
         self.viewModel = viewModel
+        self.formValidationManager = formValidationManager
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -42,6 +44,7 @@ class RegisterViewController: UIViewController, UIKitAlertHandler {
         setupUI()
         setupActions()
         setupKeyboardHandling()
+        setupFieldObservers()
     }
     
     private func setupUI() {
@@ -97,6 +100,42 @@ class RegisterViewController: UIViewController, UIKitAlertHandler {
         ])
     }
     
+    private func setupFieldObservers() {
+        stepOne.nameField.onTextChanged = { [weak self] _ in
+            self?.validateAndClearFieldError(\.nameError, field: self?.stepOne.nameField)
+        }
+        
+        stepOne.mailField.onTextChanged = { [weak self] _ in
+            self?.validateAndClearFieldError(\.emailError, field: self?.stepOne.mailField)
+        }
+        
+        stepOne.passwordField.onTextChanged = { [weak self] _ in
+            self?.validateAndClearFieldError(\.passwordError, field: self?.stepOne.passwordField)
+            self?.validateAndClearFieldError(\.confirmPasswordError, field: self?.stepOne.confirmPasswordField)
+        }
+        
+        stepOne.confirmPasswordField.onTextChanged = { [weak self] _ in
+            self?.validateAndClearFieldError(\.confirmPasswordError, field: self?.stepOne.confirmPasswordField)
+        }
+    }
+    
+    private func validateAndClearFieldError(_ keyPath: KeyPath<ValidationResult, String?>, field: Any?) {
+        let result = formValidationManager.validateRegistrationStepOne(
+            name: stepOne.nameField.getInputText() ?? "",
+            email: stepOne.mailField.getInputText() ?? "",
+            password: stepOne.passwordField.getInputText() ?? "",
+            confirmPassword: stepOne.confirmPasswordField.getInputText() ?? ""
+        )
+        
+        if result[keyPath: keyPath] == nil {
+            if let nameField = field as? NameField {
+                nameField.clearError()
+            } else if let passwordField = field as? PasswordField {
+                passwordField.clearError()
+            }
+        }
+    }
+    
     private func setupActions() {
         header.onBackTapped = { [weak self] in
             self?.viewModel.navigateBack()
@@ -132,45 +171,68 @@ class RegisterViewController: UIViewController, UIKitAlertHandler {
             .store(in: &cancellables)
     }
     
-    @discardableResult
     private func captureStepOneData() -> Bool {
-        let name = stepOne.nameField.getInputText()?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-        let email = stepOne.mailField.getInputText()?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-        let password = stepOne.passwordField.getInputText()?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-        let confirmPassword = stepOne.confirmPasswordField.getInputText()?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let name = stepOne.nameField.getInputText() ?? ""
+        let email = stepOne.mailField.getInputText() ?? ""
+        let password = stepOne.passwordField.getInputText() ?? ""
+        let confirmPassword = stepOne.confirmPasswordField.getInputText() ?? ""
         
-        if name.isEmpty {
-            stepOne.nameField.showError("გთხოვთ შეიყვანოთ სახელი")
-            return false
+        let result = formValidationManager.validateRegistrationStepOne(
+            name: name,
+            email: email,
+            password: password,
+            confirmPassword: confirmPassword
+        )
+        
+        if let nameError = result.nameError {
+            stepOne.nameField.setError(nameError)
+        } else {
+            stepOne.nameField.clearError()
         }
         
-        if email.isEmpty {
-            stepOne.mailField.showError("გთხოვთ შეიყვანოთ ელ. ფოსტა")
-            return false
+        if let emailError = result.emailError {
+            stepOne.mailField.setError(emailError)
+        } else {
+            stepOne.mailField.clearError()
         }
         
-        if password.isEmpty {
-            stepOne.passwordField.showError("გთხოვთ შეიყვანოთ პაროლი")
-            return false
+        if let passwordError = result.passwordError {
+            stepOne.passwordField.setError(passwordError)
+        } else {
+            stepOne.passwordField.clearError()
         }
         
-        if password.count < 6 {
-            stepOne.passwordField.showError("პაროლი უნდა შედგებოდეს მინიმუმ 6 სიმბოლოსგან")
-            return false
+        if let confirmPasswordError = result.confirmPasswordError {
+            stepOne.confirmPasswordField.setError(confirmPasswordError)
+        } else {
+            stepOne.confirmPasswordField.clearError()
         }
         
-        if password != confirmPassword {
-            stepOne.confirmPasswordField.showError("პაროლები არ ემთხვევა")
-            return false
+        if result.isValid {
+            viewModel.userName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+            viewModel.userEmail = email.trimmingCharacters(in: .whitespacesAndNewlines)
+            viewModel.userPassword = password.trimmingCharacters(in: .whitespacesAndNewlines)
+            return true
         }
         
-        clearErrors()
+        return false
+    }
+    
+    @discardableResult
+    private func captureStepTwoData() -> Bool {
+        let selectedCategories = stepTwo.getSelectedCategorySlugs()
         
-        viewModel.userName = name
-        viewModel.userEmail = email
-        viewModel.userPassword = password
+        let result = formValidationManager.validateRegistrationStepTwo(categories: selectedCategories)
         
-        return true
+        if result.isValid {
+            viewModel.userCategory = selectedCategories
+            return true
+        } else {
+            if let error = result.categoryError {
+                showAlert(UIKitAlertItem(title: "შეცდომა", message: error))
+            }
+            return false
+        }
     }
     
     func clearErrors() {
@@ -178,22 +240,6 @@ class RegisterViewController: UIViewController, UIKitAlertHandler {
         stepOne.mailField.clearError()
         stepOne.passwordField.clearError()
         stepOne.confirmPasswordField.clearError()
-    }
-    
-    @discardableResult
-    private func captureStepTwoData() -> Bool {
-        let selectedCategories = stepTwo.getSelectedCategorySlugs()
-        
-        if selectedCategories.isEmpty {
-            showAlert(UIKitAlertItem(
-                title: "კატეგორია არ არის არჩეული",
-                message: "გთხოვთ აირჩიოთ მინიმუმ ერთი კატეგორია"
-            ))
-            return false
-        }
-        
-        viewModel.userCategory = selectedCategories
-        return true
     }
     
     private func bindViewModel() {

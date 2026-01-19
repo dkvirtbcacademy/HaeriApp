@@ -8,9 +8,10 @@
 import UIKit
 
 class PasswordField: UIStackView {
+    var onTextChanged: ((String) -> Void)?
     
     private let fieldLabel: UILabel = {
-       let label = UILabel()
+        let label = UILabel()
         label.font = .firago(.xsmall)
         label.textColor = UIColor(named: "TextColor")
         label.translatesAutoresizingMaskIntoConstraints = false
@@ -18,7 +19,7 @@ class PasswordField: UIStackView {
     }()
     
     private let textField: UITextField = {
-       let textfield = UITextField()
+        let textfield = UITextField()
         textfield.font = .firago(.xsmall)
         textfield.textColor = UIColor(named: "TextColor")
         textfield.autocapitalizationType = .none
@@ -51,7 +52,7 @@ class PasswordField: UIStackView {
         button.tag = 999
         button.addTarget(textfield, action: #selector(UITextField.togglePasswordVisibility), for: .touchUpInside)
         rightView.addSubview(button)
-
+        
         textfield.rightView = rightView
         textfield.rightViewMode = .always
         
@@ -80,9 +81,9 @@ class PasswordField: UIStackView {
                 .font: UIFont.firago(.xsmall)
             ]
         )
-
+        
         super.init(frame: .zero)
-
+        
         axis = .vertical
         spacing = 8
         distribution = .fill
@@ -91,8 +92,8 @@ class PasswordField: UIStackView {
         
         setUI()
         setConstraints()
+        setupTextFieldDelegate()
     }
-    
     
     required init(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
@@ -110,7 +111,14 @@ class PasswordField: UIStackView {
         ])
     }
     
-    func showError(_ message: String) {
+    private func setupTextFieldDelegate() {
+        textField.addAction(UIAction { [weak self] _ in
+            guard let self = self else { return }
+            self.onTextChanged?(self.textField.text ?? "")
+        }, for: .editingChanged)
+    }
+    
+    func setError(_ message: String) {
         errorLabel.text = message
         errorLabel.isHidden = false
         
@@ -119,8 +127,8 @@ class PasswordField: UIStackView {
             self.textField.layer.borderColor = UIColor(named: "ErrorColor")?.cgColor
         }
     }
-
-    public func clearError() {
+    
+    func clearError() {
         UIView.animate(withDuration: 0.3, animations: {
             self.errorLabel.alpha = 0.0
             self.textField.layer.borderColor = UIColor(named: "TextColor")?.cgColor
@@ -131,9 +139,6 @@ class PasswordField: UIStackView {
     }
     
     func getInputText() -> String? {
-        guard let text = textField.text, !text.isEmpty else {
-            return nil
-        }
-        return text
+        return textField.text
     }
 }

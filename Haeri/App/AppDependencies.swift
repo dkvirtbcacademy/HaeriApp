@@ -14,17 +14,18 @@ class AppDependencies: ObservableObject {
     let locationManager: LocationManager
     let networkManager: NetworkManager
     let userDefaultsManager: UserDefaultsManager
+    let formValidationManager: FormValidationManager
     let airPollutionManager: AirPollutionManager
     let communityService: CommunityService
     let aiRecommendationManager: AIRecomendationManager
-    let mainTabCoordinator: MainTabCoordinator
-    let appCoordinator: AppCoordinator
     
     init() {
         self.authManager = AuthManager()
         self.locationManager = LocationManager()
         self.networkManager = NetworkManager()
         self.userDefaultsManager = UserDefaultsManager()
+        self.formValidationManager = FormValidationManager()
+        
         self.airPollutionManager = AirPollutionManager(
             networkManager: networkManager,
             userDefaultsManager: userDefaultsManager
@@ -39,11 +40,5 @@ class AppDependencies: ObservableObject {
             authManager: authManager
         )
         
-        self.mainTabCoordinator = MainTabCoordinator()
-        
-        self.appCoordinator = AppCoordinator(
-            authManager: authManager,
-            locationManager: locationManager
-        )
     }
 }

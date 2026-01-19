@@ -20,4 +20,8 @@ final class ProfileViewModel: ObservableObject {
         self.coordinator = coordinator
         self.authManager = authManager
     }
+    
+    func navigateBack() {
+        coordinator.navigateBack()
+    }
 }

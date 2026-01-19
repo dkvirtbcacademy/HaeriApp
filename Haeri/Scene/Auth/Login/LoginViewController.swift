@@ -10,6 +10,7 @@ import Combine
 
 class LoginViewController: UIViewController, UIKitAlertHandler {
     private let viewModel: LoginViewModel
+    private let formValidationManager: FormValidationManager
     private var cancellables = Set<AnyCancellable>()
     private let button = UikitButton(label: "დაწყება")
     
@@ -32,8 +33,9 @@ class LoginViewController: UIViewController, UIKitAlertHandler {
         return logo
     }()
     
-    init(viewModel: LoginViewModel) {
+    init(viewModel: LoginViewModel, formValidationManager: FormValidationManager) {
         self.viewModel = viewModel
+        self.formValidationManager = formValidationManager
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -48,7 +50,7 @@ class LoginViewController: UIViewController, UIKitAlertHandler {
         
         setupUI()
         setupActions()
-        
+        setupFieldObservers()
         setupKeyboardHandling()
     }
     
@@ -57,6 +59,38 @@ class LoginViewController: UIViewController, UIKitAlertHandler {
         setButton()
         setProgressStackView()
         setupStepContainer()
+    }
+    
+    private func setupFieldObservers() {
+        stepTwo.mailField.onTextChanged = { [weak self] _ in
+            self?.validateAndClearEmailError()
+        }
+        
+        stepTwo.passwordField.onTextChanged = { [weak self] _ in
+            self?.validateAndClearPasswordError()
+        }
+    }
+    
+    private func validateAndClearEmailError() {
+        let email = stepTwo.mailField.getInputText() ?? ""
+        let password = stepTwo.passwordField.getInputText() ?? ""
+        
+        let result = formValidationManager.validateLogin(email: email, password: password)
+        
+        if result.emailError == nil {
+            stepTwo.mailField.clearError()
+        }
+    }
+    
+    private func validateAndClearPasswordError() {
+        let email = stepTwo.mailField.getInputText() ?? ""
+        let password = stepTwo.passwordField.getInputText() ?? ""
+        
+        let result = formValidationManager.validateLogin(email: email, password: password)
+        
+        if result.passwordError == nil {
+            stepTwo.passwordField.clearError()
+        }
     }
     
     private func setupActions() {
@@ -137,30 +171,30 @@ class LoginViewController: UIViewController, UIKitAlertHandler {
     
     @discardableResult
     private func captureUserData() -> Bool {
-        let email = stepTwo.mailField.getInputText()?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-        let password = stepTwo.passwordField.getInputText()?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let email = stepTwo.mailField.getInputText() ?? ""
+        let password = stepTwo.passwordField.getInputText() ?? ""
         
-        if email.isEmpty {
-            stepTwo.mailField.showError("გთხოვთ შეიყვანოთ ელ. ფოსტა")
-            return false
+        let result = formValidationManager.validateLogin(email: email, password: password)
+        
+        if let emailError = result.emailError {
+            stepTwo.mailField.setError(emailError)
+        } else {
+            stepTwo.mailField.clearError()
         }
         
-        if password.isEmpty {
-            stepTwo.passwordField.showError("გთხოვთ შეიყვანოთ პაროლი")
-            return false
+        if let passwordError = result.passwordError {
+            stepTwo.passwordField.setError(passwordError)
+        } else {
+            stepTwo.passwordField.clearError()
         }
         
-        if password.count < 6 {
-            stepTwo.passwordField.showError("პაროლი უნდა შედგებოდეს მინიმუმ 6 სიმბოლოსგან")
-            return false
+        if result.isValid {
+            viewModel.userEmail = email.trimmingCharacters(in: .whitespacesAndNewlines)
+            viewModel.userPassword = password.trimmingCharacters(in: .whitespacesAndNewlines)
+            return true
         }
         
-        clearErrors()
-        
-        viewModel.userEmail = email
-        viewModel.userPassword = password
-        
-        return true
+        return false
     }
     
     func clearErrors() {

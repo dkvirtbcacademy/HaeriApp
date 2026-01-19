@@ -91,16 +91,16 @@ class ChangePasswordViewController: UIViewController {
     
     private func savePassword() {
         guard currentPasswordField.getInputText() != nil else {
-            currentPasswordField.showError("გთხოვთ შეიყვანოთ მიმდინარე პაროლი")
+            currentPasswordField.setError("გთხოვთ შეიყვანოთ მიმდინარე პაროლი")
             return
         }
         
         guard let newPassword = newPasswordField.getInputText() else {
-            newPasswordField.showError("გთხოვთ შეიყვანოთ ახალი პაროლი")
+            newPasswordField.setError("გთხოვთ შეიყვანოთ ახალი პაროლი")
             return
         }
-        if newPassword.count < 6 {
-            newPasswordField.showError("პაროლი უნდა შედგებოდეს მინიმუმ 6 სიმბოლოსგან")
+        if newPassword.count < 8 {
+            newPasswordField.setError("პაროლი უნდა შედგებოდეს მინიმუმ 8 სიმბოლოსგან")
             return
         }
         

@@ -18,25 +18,21 @@ final class AppCoordinator: ObservableObject {
     
     @Published private(set) var rootState: RootState = .unauthenticated
     @Published var loginCoordinator: LoginCoordinator
-    @Published var mainTabCoordinator = MainTabCoordinator()
+    @Published var mainTabCoordinator: MainTabCoordinator
     
-    private let authManager: AuthManager
-    private let locationManager: LocationManager
+    private unowned let dependencies: AppDependencies
     private var cancellables = Set<AnyCancellable>()
     
-    init(authManager: AuthManager, locationManager: LocationManager) {
-        self.authManager = authManager
-        self.locationManager = locationManager
-        self.loginCoordinator = LoginCoordinator(
-            authManager: authManager,
-            locationManager: locationManager
-        )
-        self.rootState = authManager.isLoggedIn ? .authenticated : .unauthenticated
+    init(dependencies: AppDependencies) {
+        self.dependencies = dependencies
+        self.loginCoordinator = LoginCoordinator(dependencies: dependencies)
+        self.mainTabCoordinator = MainTabCoordinator()
+        self.rootState = dependencies.authManager.isLoggedIn ? .authenticated : .unauthenticated
         observeAuthChanges()
     }
     
     private func observeAuthChanges() {
-        authManager.$isLoggedIn
+        dependencies.authManager.$isLoggedIn
             .sink { [weak self] isLoggedIn in
                 self?.rootState = isLoggedIn ? .authenticated : .unauthenticated
             }
@@ -44,13 +40,10 @@ final class AppCoordinator: ObservableObject {
     }
     
     func logout() {
-        locationManager.clearLocationOnLogout()
-        authManager.logout()
+        dependencies.locationManager.clearLocationOnLogout()
+        dependencies.authManager.logout()
         
-        loginCoordinator = LoginCoordinator(
-            authManager: authManager,
-            locationManager: locationManager
-        )
+        loginCoordinator = LoginCoordinator(dependencies: dependencies)
         mainTabCoordinator = MainTabCoordinator()
     }
 }

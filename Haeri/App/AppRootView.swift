@@ -8,8 +8,14 @@
 import SwiftUI
 
 struct AppRootView: View {
-    @ObservedObject var appCoordinator: AppCoordinator
-    let dependencies: AppDependencies
+    @StateObject private var dependencies = AppDependencies()
+    @StateObject private var appCoordinator: AppCoordinator
+    
+    init() {
+        let deps = AppDependencies()
+        _dependencies = StateObject(wrappedValue: deps)
+        _appCoordinator = StateObject(wrappedValue: AppCoordinator(dependencies: deps))
+    }
     
     var body: some View {
         Group {
@@ -17,7 +23,7 @@ struct AppRootView: View {
             case .authenticated:
                 MainView(
                     dependencies: dependencies,
-                    coordinator: dependencies.mainTabCoordinator
+                    coordinator: appCoordinator.mainTabCoordinator
                 )
                 .transition(.opacity)
             case .unauthenticated:

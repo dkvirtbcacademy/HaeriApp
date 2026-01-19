@@ -11,17 +11,12 @@ import SwiftUI
 struct HaeriApp: App {
     
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
-    
-    @StateObject private var dependencies = AppDependencies()
     @State private var showLaunchScreen = true
     
     var body: some Scene {
         WindowGroup {
             ZStack {
-                AppRootView(
-                    appCoordinator: dependencies.appCoordinator,
-                    dependencies: dependencies
-                )
+                AppRootView()
                 
                 if showLaunchScreen {
                     LaunchScreen()
@@ -30,10 +25,9 @@ struct HaeriApp: App {
                 }
             }
             .animation(.easeOut(duration: 0.5), value: showLaunchScreen)
-            .onAppear {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
-                    showLaunchScreen = false
-                }
+            .task {
+                try? await Task.sleep(nanoseconds: 3_000_000_000)
+                showLaunchScreen = false
             }
         }
     }

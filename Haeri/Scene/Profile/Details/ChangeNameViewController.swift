@@ -116,12 +116,12 @@ class ChangeNameViewController: UIViewController {
     
     private func saveName() {
         guard let name = nameField.getInputText(), !name.isEmpty else {
-            nameField.showError("გთხოვთ შეიყვანოთ სახელი")
+            nameField.setError("გთხოვთ შეიყვანოთ სახელი")
             return
         }
         
         if name.count < 2 {
-            nameField.showError("სახელი უნდა შედგებოდეს მინიმუმ 2 სიმბოლოსგან")
+            nameField.setError("სახელი უნდა შედგებოდეს მინიმუმ 2 სიმბოლოსგან")
             return
         }
         

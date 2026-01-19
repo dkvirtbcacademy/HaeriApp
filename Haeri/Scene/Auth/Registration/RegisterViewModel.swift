@@ -24,6 +24,11 @@ final class RegisterViewModel: ObservableObject {
     @Published var userPassword: String = ""
     @Published var userCategory: [String] = []
     
+    @Published var userNameError: String?
+    @Published var userEmailError: String?
+    @Published var userPasswordError: String?
+    @Published var userCategoryError: String?
+    
     let maxSteps = 2
     
     init(

@@ -18,7 +18,8 @@ struct LoginFlowView: UIViewControllerRepresentable {
             locationManager: dependencies.locationManager
         )
         let loginVC = LoginViewController(
-            viewModel:viewModel
+            viewModel:viewModel,
+            formValidationManager: dependencies.formValidationManager
         )
         
         let navigationController = UINavigationController(rootViewController: loginVC)

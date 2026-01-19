@@ -15,13 +15,10 @@ final class LoginCoordinator: ObservableObject {
     }
     
     weak var navigationController: UINavigationController?
+    private unowned let dependencies: AppDependencies
     
-    private let authManager: AuthManager
-    private let locationManager: LocationManager
-    
-    init(authManager: AuthManager, locationManager: LocationManager) {
-        self.authManager = authManager
-        self.locationManager = locationManager
+    init(dependencies: AppDependencies) {
+        self.dependencies = dependencies
     }
     
     func navigate(to destination: Destination) {
@@ -34,10 +31,13 @@ final class LoginCoordinator: ObservableObject {
         case .register:
             let viewModel = RegisterViewModel(
                 coordinator: self,
-                authManager: authManager,
-                locationManager: locationManager
+                authManager: dependencies.authManager,
+                locationManager: dependencies.locationManager
             )
-            viewController = RegisterViewController(viewModel: viewModel)
+            viewController = RegisterViewController(
+                viewModel: viewModel,
+                formValidationManager: dependencies.formValidationManager
+            )
         }
         
         navigationController.pushViewController(viewController, animated: true)
