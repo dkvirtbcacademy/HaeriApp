@@ -11,8 +11,8 @@ struct SwiftUILoadingView: View {
     let label: String
     var body: some View {
         VStack(spacing: 16) {
-            ProgressView()
-                .scaleEffect(1.5)
+            ExpandingRings()
+                .foregroundColor(.text)
             Text("")
                 .font(.firago(.medium))
                 .foregroundColor(.secondary)
@@ -23,4 +23,5 @@ struct SwiftUILoadingView: View {
 
 #Preview {
     SwiftUILoadingView(label: "დაელოდეთ ინფორმაცია იტვირთება...")
+        .background(.green)
 }

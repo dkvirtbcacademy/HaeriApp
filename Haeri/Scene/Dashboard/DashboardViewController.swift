@@ -45,11 +45,13 @@ class DashboardViewController: UIViewController {
         return table
     }()
     
-    private lazy var activityIndicator: UIActivityIndicatorView = {
-        let indicator = UIActivityIndicatorView(style: .large)
-        indicator.translatesAutoresizingMaskIntoConstraints = false
-        indicator.hidesWhenStopped = true
-        return indicator
+    private lazy var loadingHostingController: UIHostingController<ExpandingRings> = {
+        let loadingView = ExpandingRings()
+        let hostingController = UIHostingController(rootView: loadingView)
+        hostingController.view.backgroundColor = .clear
+        hostingController.view.translatesAutoresizingMaskIntoConstraints = false
+        hostingController.view.isHidden = true
+        return hostingController
     }()
     
     private lazy var addCityButtonHostingController: UIHostingController<AddCityButton> = {
@@ -99,7 +101,7 @@ class DashboardViewController: UIViewController {
     private func setupUI() {
         setHeaderView()
         setTableView()
-        setActivityIndicator()
+        setupLoadingIndicator()
         setupAddCityButton()
     }
     
@@ -131,14 +133,18 @@ class DashboardViewController: UIViewController {
         ])
     }
     
-    private func setActivityIndicator() {
-        view.addSubview(activityIndicator)
-        
-        NSLayoutConstraint.activate([
-            activityIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            activityIndicator.centerYAnchor.constraint(equalTo: view.centerYAnchor)
-        ])
-    }
+    private func setupLoadingIndicator() {
+            addChild(loadingHostingController)
+            view.addSubview(loadingHostingController.view)
+            loadingHostingController.didMove(toParent: self)
+            
+            NSLayoutConstraint.activate([
+                loadingHostingController.view.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+                loadingHostingController.view.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+                loadingHostingController.view.widthAnchor.constraint(equalToConstant: 80),
+                loadingHostingController.view.heightAnchor.constraint(equalToConstant: 80)
+            ])
+        }
     
     private func setupAddCityButton() {
         addChild(addCityButtonHostingController)
@@ -185,11 +191,7 @@ class DashboardViewController: UIViewController {
         viewModel.$isLoading
             .receive(on: DispatchQueue.main)
             .sink { [weak self] isLoading in
-                if isLoading {
-                    self?.activityIndicator.startAnimating()
-                } else {
-                    self?.activityIndicator.stopAnimating()
-                }
+                self?.loadingHostingController.view.isHidden = !isLoading
             }
             .store(in: &cancellables)
     }

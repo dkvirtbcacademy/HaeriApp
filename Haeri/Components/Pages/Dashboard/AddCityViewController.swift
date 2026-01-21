@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import SwiftUI
 import Combine
 
 protocol AddCityViewControllerDelegate: AnyObject {
@@ -63,11 +64,13 @@ class AddCityViewController: UIViewController {
         return table
     }()
     
-    private lazy var activityIndicator: UIActivityIndicatorView = {
-        let indicator = UIActivityIndicatorView(style: .medium)
-        indicator.translatesAutoresizingMaskIntoConstraints = false
-        indicator.hidesWhenStopped = true
-        return indicator
+    private lazy var loadingHostingController: UIHostingController<ExpandingRings> = {
+        let loadingView = ExpandingRings()
+        let hostingController = UIHostingController(rootView: loadingView)
+        hostingController.view.backgroundColor = .clear
+        hostingController.view.translatesAutoresizingMaskIntoConstraints = false
+        hostingController.view.isHidden = true
+        return hostingController
     }()
     
     private let emptyStateLabel: UILabel = {
@@ -105,8 +108,11 @@ class AddCityViewController: UIViewController {
         view.addSubview(searchTextField)
         view.addSubview(findButton)
         view.addSubview(tableView)
-        view.addSubview(activityIndicator)
         view.addSubview(emptyStateLabel)
+        
+        addChild(loadingHostingController)
+        view.addSubview(loadingHostingController.view)
+        loadingHostingController.didMove(toParent: self)
         
         NSLayoutConstraint.activate([
             searchTextField.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 20),
@@ -124,8 +130,10 @@ class AddCityViewController: UIViewController {
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
             
-            activityIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            activityIndicator.topAnchor.constraint(equalTo: findButton.bottomAnchor, constant: 40),
+            loadingHostingController.view.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            loadingHostingController.view.topAnchor.constraint(equalTo: findButton.bottomAnchor, constant: 40),
+            loadingHostingController.view.widthAnchor.constraint(equalToConstant: 40),
+            loadingHostingController.view.heightAnchor.constraint(equalToConstant: 40),
             
             emptyStateLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             emptyStateLabel.topAnchor.constraint(equalTo: findButton.bottomAnchor, constant: 40)
@@ -147,15 +155,16 @@ class AddCityViewController: UIViewController {
         }
         
         searchTextField.resignFirstResponder()
-        activityIndicator.startAnimating()
+        loadingHostingController.view.isHidden = false
         tableView.isHidden = true
         emptyStateLabel.isHidden = true
         
         Task {
             await viewModel.findCity(name: searchText)
+            loadingHostingController.view.isHidden = false
             
             await MainActor.run {
-                activityIndicator.stopAnimating()
+                loadingHostingController.view.isHidden = true
                 searchResults = viewModel.getSearchResults()
                 
                 if searchResults.isEmpty {

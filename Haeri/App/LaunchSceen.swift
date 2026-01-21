@@ -26,9 +26,8 @@ struct LaunchScreen: View {
                     .scaledToFit()
                     .frame(height: 80)
                 
-                ProgressView()
-                    .tint(.text)
-                    .scaleEffect(1.7)
+                ExpandingRings()
+                    .foregroundColor(.text)
             }
         }
     }

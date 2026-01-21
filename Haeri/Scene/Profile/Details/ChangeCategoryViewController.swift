@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import SwiftUI
 import Combine
 
 class ChangeCategoryViewController: UIViewController {
@@ -39,11 +40,13 @@ class ChangeCategoryViewController: UIViewController {
     
     private let saveButton = UikitButton(label: "შენახვა")
     
-    private let activityIndicator: UIActivityIndicatorView = {
-        let indicator = UIActivityIndicatorView(style: .large)
-        indicator.hidesWhenStopped = true
-        indicator.translatesAutoresizingMaskIntoConstraints = false
-        return indicator
+    private lazy var loadingHostingController: UIHostingController<ExpandingRings> = {
+        let loadingView = ExpandingRings()
+        let hostingController = UIHostingController(rootView: loadingView)
+        hostingController.view.translatesAutoresizingMaskIntoConstraints = false
+        hostingController.view.backgroundColor = .clear
+        hostingController.view.isHidden = true
+        return hostingController
     }()
     
     init(viewModel: ProfileViewModel) {
@@ -82,7 +85,10 @@ class ChangeCategoryViewController: UIViewController {
         view.addSubview(titleLabel)
         view.addSubview(tableView)
         view.addSubview(saveButton)
-        view.addSubview(activityIndicator)
+    
+        addChild(loadingHostingController)
+        view.addSubview(loadingHostingController.view)
+        loadingHostingController.didMove(toParent: self)
         
         tableView.delegate = self
         tableView.dataSource = self
@@ -108,8 +114,10 @@ class ChangeCategoryViewController: UIViewController {
             saveButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
             saveButton.heightAnchor.constraint(equalToConstant: 50),
             
-            activityIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            activityIndicator.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+            loadingHostingController.view.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            loadingHostingController.view.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            loadingHostingController.view.widthAnchor.constraint(equalToConstant: 60),
+            loadingHostingController.view.heightAnchor.constraint(equalToConstant: 60),
         ])
     }
     
@@ -133,12 +141,12 @@ class ChangeCategoryViewController: UIViewController {
                 guard let self = self else { return }
                 
                 if isLoading {
-                    self.activityIndicator.startAnimating()
+                    loadingHostingController.view.isHidden = false
                     self.saveButton.isEnabled = false
                     self.saveButton.alpha = 0.5
                     self.tableView.isUserInteractionEnabled = false
                 } else {
-                    self.activityIndicator.stopAnimating()
+                    loadingHostingController.view.isHidden = true
                     self.saveButton.isEnabled = true
                     self.saveButton.alpha = 1.0
                     self.tableView.isUserInteractionEnabled = true

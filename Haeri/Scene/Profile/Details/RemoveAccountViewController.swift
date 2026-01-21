@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import SwiftUI
 import Combine
 
 class RemoveAccountViewController: UIViewController {
@@ -41,11 +42,13 @@ class RemoveAccountViewController: UIViewController {
         return button
     }()
     
-    private let activityIndicator: UIActivityIndicatorView = {
-        let indicator = UIActivityIndicatorView(style: .large)
-        indicator.hidesWhenStopped = true
-        indicator.translatesAutoresizingMaskIntoConstraints = false
-        return indicator
+    private lazy var loadingHostingController: UIHostingController<ExpandingRings> = {
+        let loadingView = ExpandingRings()
+        let hostingController = UIHostingController(rootView: loadingView)
+        hostingController.view.translatesAutoresizingMaskIntoConstraints = false
+        hostingController.view.backgroundColor = .clear
+        hostingController.view.isHidden = true
+        return hostingController
     }()
     
     init(viewModel: ProfileViewModel) {
@@ -73,7 +76,10 @@ class RemoveAccountViewController: UIViewController {
         view.addSubview(header)
         view.addSubview(warningLabel)
         view.addSubview(deleteButton)
-        view.addSubview(activityIndicator)
+        
+        addChild(loadingHostingController)
+        view.addSubview(loadingHostingController.view)
+        loadingHostingController.didMove(toParent: self)
         
         NSLayoutConstraint.activate([
             header.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
@@ -90,8 +96,10 @@ class RemoveAccountViewController: UIViewController {
             deleteButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
             deleteButton.heightAnchor.constraint(equalToConstant: 50),
             
-            activityIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            activityIndicator.centerYAnchor.constraint(equalTo: view.centerYAnchor)
+            loadingHostingController.view.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            loadingHostingController.view.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            loadingHostingController.view.widthAnchor.constraint(equalToConstant: 60),
+            loadingHostingController.view.heightAnchor.constraint(equalToConstant: 60),
         ])
     }
     
@@ -115,11 +123,11 @@ class RemoveAccountViewController: UIViewController {
                 guard let self = self else { return }
                 
                 if isLoading {
-                    self.activityIndicator.startAnimating()
+                    loadingHostingController.view.isHidden = false
                     self.deleteButton.isEnabled = false
                     self.deleteButton.alpha = 0.5
                 } else {
-                    self.activityIndicator.stopAnimating()
+                    loadingHostingController.view.isHidden = true
                     self.deleteButton.isEnabled = true
                     self.deleteButton.alpha = 1.0
                 }
