@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import SwiftUI
 import Combine
 
 class LoginViewController: UIViewController, UIKitAlertHandler {
@@ -33,6 +34,15 @@ class LoginViewController: UIViewController, UIKitAlertHandler {
         return logo
     }()
     
+    private lazy var loadingHostingController: UIHostingController<ExpandingRings> = {
+        let loadingView = ExpandingRings()
+        let hostingController = UIHostingController(rootView: loadingView)
+        hostingController.view.translatesAutoresizingMaskIntoConstraints = false
+        hostingController.view.backgroundColor = .clear
+        hostingController.view.isHidden = true
+        return hostingController
+    }()
+    
     init(viewModel: LoginViewModel, formValidationManager: FormValidationManager) {
         self.viewModel = viewModel
         self.formValidationManager = formValidationManager
@@ -52,6 +62,7 @@ class LoginViewController: UIViewController, UIKitAlertHandler {
         setupActions()
         setupFieldObservers()
         setupKeyboardHandling()
+        observeLoadingState()
     }
     
     private func setupUI() {
@@ -59,6 +70,20 @@ class LoginViewController: UIViewController, UIKitAlertHandler {
         setButton()
         setProgressStackView()
         setupStepContainer()
+        setupLoadingView()
+    }
+    
+    private func setupLoadingView() {
+        addChild(loadingHostingController)
+        view.addSubview(loadingHostingController.view)
+        loadingHostingController.didMove(toParent: self)
+        
+        NSLayoutConstraint.activate([
+            loadingHostingController.view.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            loadingHostingController.view.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            loadingHostingController.view.widthAnchor.constraint(equalToConstant: 60),
+            loadingHostingController.view.heightAnchor.constraint(equalToConstant: 60),
+        ])
     }
     
     private func setupFieldObservers() {
@@ -105,6 +130,29 @@ class LoginViewController: UIViewController, UIKitAlertHandler {
             .sink { [weak self] error in
                 self?.handleAuthError(error)
                 self?.viewModel.authManager.authError = nil
+            }
+            .store(in: &cancellables)
+    }
+    
+    private func observeLoadingState() {
+        viewModel.authManager.$isLoading
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] isLoading in
+                guard let self = self else { return }
+                
+                if isLoading {
+                    self.loadingHostingController.view.isHidden = false
+                    self.button.isEnabled = false
+                    self.button.alpha = 0.5
+                    self.stepTwo.mailField.isUserInteractionEnabled = false
+                    self.stepTwo.passwordField.isUserInteractionEnabled = false
+                } else {
+                    self.loadingHostingController.view.isHidden = true
+                    self.button.isEnabled = true
+                    self.button.alpha = 1.0
+                    self.stepTwo.mailField.isUserInteractionEnabled = true
+                    self.stepTwo.passwordField.isUserInteractionEnabled = true
+                }
             }
             .store(in: &cancellables)
     }

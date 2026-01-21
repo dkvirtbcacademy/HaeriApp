@@ -82,6 +82,7 @@ final class LoginViewModel: ObservableObject {
     }
     
     func navigateToRegister() {
+        authManager.authError = nil
         coordinator.navigate(to: .register)
     }
 }

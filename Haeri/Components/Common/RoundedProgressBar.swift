@@ -20,8 +20,13 @@ struct RoundedProgressBar: View {
         ZStack {
             Circle()
                 .trim(from: 0, to: 0.7)
-                .stroke(Color.gray.opacity(0.3),
-                        style: StrokeStyle(lineWidth: 15, lineCap: .round))
+                .stroke(
+                    Color.text.opacity(0.5),
+                    style: StrokeStyle(
+                        lineWidth: 15,
+                        lineCap: .round
+                    )
+                )
                 .rotationEffect(.degrees(144))
             
             Circle()
@@ -41,7 +46,7 @@ struct RoundedProgressBar: View {
                 
                 Text("0")
                     .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(.gray)
+                    .foregroundColor(.text)
                     .position(
                         x: radius - 60,
                         y: geometry.size.height - 10
@@ -49,7 +54,7 @@ struct RoundedProgressBar: View {
                 
                 Text("\(maxValue.formatted())")
                     .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(.gray)
+                    .foregroundColor(.text)
                     .position(
                         x: radius + 60,
                         y: geometry.size.height - 10

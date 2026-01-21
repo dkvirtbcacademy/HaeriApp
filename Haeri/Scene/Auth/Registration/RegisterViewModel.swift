@@ -110,6 +110,7 @@ final class RegisterViewModel: ObservableObject {
     }
     
     func navigateBack() {
+        authManager.authError = nil
         coordinator.navigateBack()
     }
 }
