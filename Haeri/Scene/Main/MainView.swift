@@ -29,7 +29,8 @@ struct MainView: View {
         
         _viewModel = StateObject(wrappedValue: MainViewModel(
             locationManager: dependencies.locationManager,
-            airPollutionManager: dependencies.airPollutionManager
+            airPollutionManager: dependencies.airPollutionManager,
+            userDefaultsManager: dependencies.userDefaultsManager
         ))
     }
     
@@ -94,7 +95,9 @@ struct MainView: View {
             }
             
             configureTabBarAppearance()
-            viewModel.appLaunch()
+            Task {
+                await viewModel.appLaunch()
+            }
         }
         .onChange(of: scenePhase) { _, newPhase in
             handleScenePhaseChange(newPhase)

@@ -131,7 +131,6 @@ final class AuthManager: ObservableObject, AlertHandler {
                 self.isLoggedIn = false
             }
         } catch {
-            print("Firestore fetch error: \(error)")
             handleAuthError(.firestoreError("Failed to fetch user data: \(error.localizedDescription)"))
             self.isLoggedIn = false
         }
