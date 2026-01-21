@@ -60,6 +60,14 @@ final class DashboardViewModel: ObservableObject {
         )
     }
     
+    func setFavoriteCity(_ cityName: String) {
+        airPollutionManager.setFavoriteCity(cityName)
+    }
+    
+    func isFavoriteCity(_ cityName: String) -> Bool {
+        return airPollutionManager.isFavoriteCity(cityName)
+    }
+    
     func removeCity(at index: Int) {
         guard index < cities.count else { return }
         let cityName = cities[index].city
@@ -68,13 +76,13 @@ final class DashboardViewModel: ObservableObject {
     
     func navigateToCityDetail(cityData: CityAirPollution, backgroudColor: String) {
         coordinator.navigate(
-                to: .cityDetail(
-                    cityData,
-                    homeCoordinator,
-                    aiRecommendationManager,
-                    backgroudColor
-                )
+            to: .cityDetail(
+                cityData,
+                homeCoordinator,
+                aiRecommendationManager,
+                backgroudColor
             )
+        )
     }
     
     func navigateToAddCity(delegate: AddCityViewControllerDelegate) {

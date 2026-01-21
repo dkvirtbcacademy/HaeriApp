@@ -17,6 +17,23 @@ struct HomePage: View {
     
     init(
         coordinator: HomeCoordinator,
+        airPollutionManager: AirPollutionManager,
+        aiRecommendationManager: AIRecomendationManager,
+        backgroudColor: String? = nil
+    ) {
+        self.backgroudColor = backgroudColor
+        self.aiRecommendationManager = aiRecommendationManager
+        
+        _viewModel = StateObject(
+            wrappedValue: HomeViewModel(
+                coordinator: coordinator,
+                airPollutionManager: airPollutionManager
+            )
+        )
+    }
+    
+    init(
+        coordinator: HomeCoordinator,
         cityData: CityAirPollution,
         aiRecommendationManager: AIRecomendationManager,
         backgroudColor: String? = nil
@@ -25,7 +42,10 @@ struct HomePage: View {
         self.aiRecommendationManager = aiRecommendationManager
         
         _viewModel = StateObject(
-            wrappedValue: HomeViewModel(coordinator: coordinator, cityData: cityData)
+            wrappedValue: HomeViewModel(
+                coordinator: coordinator,
+                cityData: cityData
+            )
         )
     }
     
@@ -66,12 +86,12 @@ struct HomePage: View {
                 }
                 .padding()
                 
-                
-                AIRecomendations(
-                    aiRecommendationManager: aiRecommendationManager,
-                    cityData: viewModel.cityData
-                )
-                
+                if let cityData = viewModel.cityData {
+                    AIRecomendations(
+                        aiRecommendationManager: aiRecommendationManager,
+                        cityData: cityData
+                    )
+                }
             }
         }
         .sheet(item: $selectedPollutant) { pollutant in
@@ -91,51 +111,5 @@ struct HomePage: View {
         .onDisappear {
             aiRecommendationManager.clearRecommendation()
         }
-        //        .onAppear {
-        //            if !initialRecomendationLoaded {
-        //                initialRecomendationLoaded = true
-        //                Task {
-        //                    await aiRecommendationManager.generateAIRecommendation(for: viewModel.cityData)
-        //                }
-        //            }
-        //        }
     }
-}
-
-
-
-#Preview {
-    HomePage(
-        coordinator: HomeCoordinator(),
-        cityData: CityAirPollution(
-            city: "Rustavi",
-            localeName: "რუსთავი",
-            response: AirPollutionResponse(
-                coord: AirPollutionResponse.Coord(
-                    lat: 41.5489,
-                    lon: 44.9961
-                ),
-                list: [
-                    AirPollutionResponse.AirPollutionItem(
-                        main: AirPollutionResponse.AirPollutionItem.AQI(aqi: 2),
-                        components: AirPollutionResponse.AirPollutionItem.Components(
-                            co: 230.31,
-                            no: 0.0,
-                            no2: 0.74,
-                            o3: 68.66,
-                            so2: 0.64,
-                            pm2_5: 3.41,
-                            pm10: 3.68
-                        ),
-                        dt: 1609459200
-                    )
-                ]
-            )
-        ),
-        aiRecommendationManager: AIRecomendationManager(
-            networkManager: NetworkManager(),
-            authManager: AuthManager()
-        ),
-        backgroudColor: "Orange Air"
-    )
 }

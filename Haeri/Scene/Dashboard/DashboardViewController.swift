@@ -134,17 +134,17 @@ class DashboardViewController: UIViewController {
     }
     
     private func setupLoadingIndicator() {
-            addChild(loadingHostingController)
-            view.addSubview(loadingHostingController.view)
-            loadingHostingController.didMove(toParent: self)
-            
-            NSLayoutConstraint.activate([
-                loadingHostingController.view.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-                loadingHostingController.view.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-                loadingHostingController.view.widthAnchor.constraint(equalToConstant: 80),
-                loadingHostingController.view.heightAnchor.constraint(equalToConstant: 80)
-            ])
-        }
+        addChild(loadingHostingController)
+        view.addSubview(loadingHostingController.view)
+        loadingHostingController.didMove(toParent: self)
+        
+        NSLayoutConstraint.activate([
+            loadingHostingController.view.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            loadingHostingController.view.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            loadingHostingController.view.widthAnchor.constraint(equalToConstant: 80),
+            loadingHostingController.view.heightAnchor.constraint(equalToConstant: 80)
+        ])
+    }
     
     private func setupAddCityButton() {
         addChild(addCityButtonHostingController)
@@ -217,7 +217,17 @@ extension DashboardViewController: UITableViewDataSource {
         }
         
         let cityData = viewModel.cities[indexPath.row]
-        cell.configure(with: cityData)
+        let isFavorite = viewModel.isFavoriteCity(cityData.city)
+        
+        cell.configure(with: cityData, isFavorite: isFavorite)
+        
+        cell.onFavoriteTapped = { [weak self] in
+            self?.viewModel.setFavoriteCity(cityData.city)
+            
+            UIView.performWithoutAnimation {
+                self?.tableView.reloadData()
+            }
+        }
         
         return cell
     }

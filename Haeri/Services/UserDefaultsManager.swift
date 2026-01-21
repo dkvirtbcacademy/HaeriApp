@@ -11,6 +11,7 @@ final class UserDefaultsManager {
     
     private enum Keys {
         static let cities = "saved_cities"
+        static let favoriteCityKey = "favoriteCity"
     }
     
     private let defaults: UserDefaults
@@ -25,6 +26,14 @@ final class UserDefaultsManager {
     
     func loadCities() -> [String]? {
         return defaults.stringArray(forKey: Keys.cities)
+    }
+    
+    func saveFavoriteCity(_ city: String) {
+        UserDefaults.standard.set(city, forKey: Self.Keys.favoriteCityKey)
+    }
+    
+    func loadFavoriteCity() -> String? {
+        return UserDefaults.standard.string(forKey: Self.Keys.favoriteCityKey)
     }
     
     func clearCities() {

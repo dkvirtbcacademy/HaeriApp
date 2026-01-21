@@ -11,6 +11,8 @@ class CityAirPollutionCell: UITableViewCell {
     
     static let identifier = "CityAirPollutionCell"
     
+    var onFavoriteTapped: (() -> Void)?
+    
     private let containerView: UIView = {
         let view = UIView()
         view.translatesAutoresizingMaskIntoConstraints = false
@@ -67,6 +69,16 @@ class CityAirPollutionCell: UITableViewCell {
         return label
     }()
     
+    private lazy var favoriteButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.tintColor = .text.withAlphaComponent(0.7)
+        button.backgroundColor = .clear
+        button.layer.cornerRadius = 16
+        button.addTarget(self, action: #selector(favoriteTapped), for: .touchUpInside)
+        return button
+    }()
+    
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -97,7 +109,6 @@ class CityAirPollutionCell: UITableViewCell {
             containerView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
             containerView.heightAnchor.constraint(equalToConstant: 150),
         ])
-        
     }
     
     private func setTrapezoid() {
@@ -114,7 +125,7 @@ class CityAirPollutionCell: UITableViewCell {
     }
     
     private func setStackViews() {
-        let leftStack = UIStackView(arrangedSubviews: [aqiLabel])
+        let leftStack = UIStackView(arrangedSubviews: [favoriteButton, aqiLabel])
         leftStack.axis = .vertical
         leftStack.spacing = 8
         leftStack.translatesAutoresizingMaskIntoConstraints = false
@@ -135,6 +146,9 @@ class CityAirPollutionCell: UITableViewCell {
             infoStack.leadingAnchor.constraint(equalTo: leftStack.leadingAnchor),
             infoStack.bottomAnchor.constraint(equalTo: trapezoidView.bottomAnchor, constant: -20),
             infoStack.trailingAnchor.constraint(lessThanOrEqualTo: trapezoidView.centerXAnchor),
+            
+            favoriteButton.widthAnchor.constraint(equalToConstant: 15),
+            favoriteButton.heightAnchor.constraint(equalToConstant: 15)
         ])
     }
     
@@ -147,7 +161,6 @@ class CityAirPollutionCell: UITableViewCell {
             iconImageView.widthAnchor.constraint(equalToConstant: 120),
             iconImageView.heightAnchor.constraint(equalToConstant: 120),
         ])
-        
     }
     
     private func setPollutantBadge() {
@@ -159,8 +172,11 @@ class CityAirPollutionCell: UITableViewCell {
         ])
     }
     
+    @objc private func favoriteTapped() {
+        onFavoriteTapped?()
+    }
     
-    func configure(with cityData: CityAirPollution) {
+    func configure(with cityData: CityAirPollution, isFavorite: Bool) {
         guard let item = cityData.response.item else { return }
         
         let aqi = item.main.aqi
@@ -174,10 +190,12 @@ class CityAirPollutionCell: UITableViewCell {
         cityLabel.text = cityData.localeName ?? cityData.city
         iconImageView.image = UIImage(named: category.imageName)
         
+        let starImage = isFavorite ? UIImage(systemName: "star.fill") : UIImage(systemName: "star")
+        favoriteButton.setImage(starImage, for: .normal)
+        
         trapezoidView.setNeedsLayout()
         trapezoidView.layoutIfNeeded()
     }
-    
     
     override func prepareForReuse() {
         super.prepareForReuse()
@@ -187,6 +205,7 @@ class CityAirPollutionCell: UITableViewCell {
         cityLabel.text = nil
         iconImageView.image = nil
         trapezoidView.fillColor = .clear
+        onFavoriteTapped = nil
     }
 }
 

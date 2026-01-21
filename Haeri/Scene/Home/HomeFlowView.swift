@@ -20,7 +20,7 @@ struct HomeFlowView: View {
                 if let cityData = airPollutionManager.currentCityData {
                     HomePage(
                         coordinator: coordinator,
-                        cityData: cityData,
+                        airPollutionManager: airPollutionManager,
                         aiRecommendationManager: aiRecommendationManager,
                     )
                 } else {

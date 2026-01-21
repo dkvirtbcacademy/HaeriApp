@@ -26,6 +26,9 @@ final class AirPollutionManager: ObservableObject, AlertHandler {
     @Published var currentCityData: CityAirPollution? {
         didSet {
             updateAirQualityIndex()
+            if let city = currentCityData?.city {
+                userDefaultsManager.saveFavoriteCity(city)
+            }
         }
     }
     
@@ -74,6 +77,23 @@ final class AirPollutionManager: ObservableObject, AlertHandler {
                 handleNetworkError(.networkError)
             }
         }
+        
+        if let favoriteCity = userDefaultsManager.loadFavoriteCity(),
+           let favoriteCityData = airPollutionData.first(where: { $0.city == favoriteCity }) {
+            currentCityData = favoriteCityData
+        } else if let firstCity = airPollutionData.first {
+            currentCityData = firstCity
+        }
+    }
+    
+    func setFavoriteCity(_ cityName: String) {
+        if let cityData = airPollutionData.first(where: { $0.city == cityName }) {
+            currentCityData = cityData
+        }
+    }
+    
+    func isFavoriteCity(_ cityName: String) -> Bool {
+        return currentCityData?.city == cityName
     }
     
     func fetchCoordinates(city: String) async throws -> (lat: Double, lon: Double, localeName: String?)? {
@@ -172,5 +192,9 @@ final class AirPollutionManager: ObservableObject, AlertHandler {
     func removeChoosenCity(cityName: String) {
         cities.removeAll { $0 == cityName }
         airPollutionData.removeAll { $0.city == cityName }
+        
+        if currentCityData?.city == cityName {
+            currentCityData = airPollutionData.first
+        }
     }
 }
