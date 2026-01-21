@@ -27,5 +27,12 @@ final class MainTabCoordinator: ObservableObject {
     func switchTab(_ tab: Tab) {
         selectedTab = tab
     }
+    
+    func resetAllCoordinators() {
+        homeCoordinator = HomeCoordinator()
+        dashboardCoordinator = DashboardCoordinator()
+        communityCoordinator = CommunityCoordinator()
+        profileCoordinator = ProfileCoordinator()
+    }
 
 }

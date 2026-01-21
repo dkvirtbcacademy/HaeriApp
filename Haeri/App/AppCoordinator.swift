@@ -34,7 +34,16 @@ final class AppCoordinator: ObservableObject {
     private func observeAuthChanges() {
         dependencies.authManager.$isLoggedIn
             .sink { [weak self] isLoggedIn in
-                self?.rootState = isLoggedIn ? .authenticated : .unauthenticated
+                guard let self = self else { return }
+                
+                if isLoggedIn {
+                    self.mainTabCoordinator.selectedTab = .home
+                    self.mainTabCoordinator.resetAllCoordinators()
+                    self.rootState = .authenticated
+                } else {
+                    self.loginCoordinator.reset()
+                    self.rootState = .unauthenticated
+                }
             }
             .store(in: &cancellables)
     }

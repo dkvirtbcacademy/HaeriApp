@@ -50,4 +50,8 @@ final class LoginCoordinator: ObservableObject {
     func popToRoot() {
         navigationController?.popToRootViewController(animated: true)
     }
+    
+    func reset() {
+        navigationController?.popToRootViewController(animated: false)
+    }
 }
