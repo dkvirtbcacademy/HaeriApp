@@ -51,8 +51,5 @@ final class AppCoordinator: ObservableObject {
     func logout() {
         dependencies.locationManager.clearLocationOnLogout()
         dependencies.authManager.logout()
-        
-        loginCoordinator = LoginCoordinator(dependencies: dependencies)
-        mainTabCoordinator = MainTabCoordinator()
     }
 }
