@@ -12,7 +12,7 @@ struct PostDetailsPage: View {
     @Environment(\.airQuality) var airQuality
     
     init(
-        postId: Int,
+        postId: String,
         communityService: CommunityService,
         authManager: AuthManager,
         coordinator: CommunityCoordinator
@@ -49,7 +49,7 @@ struct PostDetailsPage: View {
                         Divider()
                         
                         CommentsSection(
-                            comments: post.comments,
+                            comments: viewModel.comments,
                             commentText: $viewModel.commentText,
                             canComment: viewModel.canComment,
                             onAddComment: { viewModel.addComment() }
@@ -79,7 +79,7 @@ struct PostDetailsPage: View {
 #Preview {
     NavigationStack {
         PostDetailsPage(
-            postId: 1,
+            postId: "1",
             communityService: CommunityService(
                 authManager: AuthManager(),
                 networkManager: NetworkManager()

@@ -41,7 +41,7 @@ struct PostBodyView: View {
             
             HStack(spacing: 4) {
                 Image(systemName: "message")
-                Text("\(post.comments.count)")
+                Text("\(post.commentCount)")
             }
             .foregroundStyle(.darkText).opacity(0.7)
             .padding(.horizontal, 14)

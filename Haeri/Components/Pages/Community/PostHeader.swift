@@ -15,14 +15,14 @@ struct PostHeaderView: View {
     var body: some View {
         HStack {
             ZStack {
-                Image(post.author.avatar)
-                    .resizable()    
+                Image(post.authorAvatar)
+                    .resizable()
                     .frame(width: 40, height: 40)
             }
             .glassEffect(.circle(size: 64))
             
             VStack(alignment: .leading, spacing: 4) {
-                Text(post.author.name)
+                Text(post.authorName)
                     .font(.firagoBold(.xxsmall))
                     .foregroundStyle(.darkText)
                 Text(post.formattedDate)

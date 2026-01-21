@@ -12,7 +12,7 @@ import Combine
 final class CommunityCoordinator: ObservableObject {
     
     enum Route: Hashable {
-        case details(postId: Int)
+        case details(postId: String)
         case addPost
     }
     

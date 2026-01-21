@@ -6,20 +6,37 @@
 //
 
 import Foundation
+import FirebaseFirestore
 
 struct PostModel: Identifiable, Codable {
-    let id: Int
+    @DocumentID var id: String?
     let date: Date
-    let author: UserModel
+    let authorId: String
+    let authorName: String
+    let authorAvatar: String
     let title: String
     let content: String
     var likes: Int
-    var comments: [Comment]
+    var commentCount: Int
+}
+
+struct CommentModel: Identifiable, Codable {
+    @DocumentID var id: String?
+    let postId: String
+    let userId: String
+    let userName: String
+    let userAvatar: String
+    let content: String
+    let date: Date
     
-    struct Comment: Codable, Identifiable {
-        let id: String
-        let user: UserModel
-        let content: String
+    init(id: String? = nil, postId: String, userId: String, userName: String, userAvatar: String, content: String, date: Date = Date()) {
+        self.id = id
+        self.postId = postId
+        self.userId = userId
+        self.userName = userName
+        self.userAvatar = userAvatar
+        self.content = content
+        self.date = date
     }
 }
 
@@ -37,5 +54,14 @@ extension PostModel {
         formatter.dateStyle = .medium
         formatter.timeStyle = .short
         return formatter.string(from: date)
+    }
+}
+
+extension CommentModel {
+    var formattedDate: String {
+        let formatter = RelativeDateTimeFormatter()
+        formatter.locale = Locale(identifier: "ka_GE")
+        formatter.unitsStyle = .abbreviated
+        return formatter.localizedString(for: date, relativeTo: Date())
     }
 }

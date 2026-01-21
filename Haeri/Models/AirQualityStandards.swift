@@ -75,7 +75,7 @@ struct AirQualityStandards {
             description: "PM2.5 არის წვრილი ნაწილაკები, რომლებიც 2.5 მიკრომეტრზე ნაკლებია. ისინი შეიძლება ღრმად შეაღწიონ ფილტვებში და სისხლის ნაკადში, რაც იწვევს სერიოზულ ჯანმრთელობის პრობლემებს.",
             unit: "μg/m³",
             ranges: [
-                .init(min: 0, max: 12, category: "კარგი", color: "GreenAir", parentSymbol: "PM2.5"),
+                .init(min: 0, max: 12, category: "კარგი", color: "Green Air", parentSymbol: "PM2.5"),
                 .init(min: 12.1, max: 35.4, category: "ზომიერი", color: "Yellow Air", parentSymbol: "PM2.5"),
                 .init(min: 35.5, max: 55.4, category: "არაჯანსაღი მგრძნობიარე ჯგუფებისთვის", color: "Orange Air", parentSymbol: "PM2.5"),
                 .init(min: 55.5, max: 150.4, category: "არაჯანსაღი", color: "Red Air", parentSymbol: "PM2.5"),

@@ -12,6 +12,7 @@ import Foundation
 final class AddPostViewModel: ObservableObject {
     @Published var title: String = ""
     @Published var content: String = ""
+    @Published var isSubmitting: Bool = false
     
     private let communityService: CommunityService
     private let authManager: AuthManager
@@ -30,25 +31,35 @@ final class AddPostViewModel: ObservableObject {
     var canPost: Bool {
         !title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
         && !content.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        && !isSubmitting
     }
     
     func createPost() {
-        guard let currentUser = authManager.currentUser else {
+        guard let currentUser = authManager.currentUser,
+              let userId = currentUser.id else {
             return
         }
         
-        let newPost = PostModel(
-            id: (communityService.posts.map { $0.id }.max() ?? 0) + 1,
-            date: Date(),
-            author: currentUser,
-            title: title.trimmingCharacters(in: .whitespacesAndNewlines),
-            content: content.trimmingCharacters(in: .whitespacesAndNewlines),
-            likes: 0,
-            comments: []
-        )
-        
-        communityService.addPost(newPost)
-        coordinator.navigateBack()
+        Task {
+            isSubmitting = true
+            
+            let newPost = PostModel(
+                id: nil,
+                date: Date(),
+                authorId: userId,
+                authorName: currentUser.name,
+                authorAvatar: currentUser.avatar,
+                title: title.trimmingCharacters(in: .whitespacesAndNewlines),
+                content: content.trimmingCharacters(in: .whitespacesAndNewlines),
+                likes: 0,
+                commentCount: 0
+            )
+            
+            await communityService.addPost(newPost)
+            
+            isSubmitting = false
+            coordinator.navigateBack()
+        }
     }
     
     func cancel() {

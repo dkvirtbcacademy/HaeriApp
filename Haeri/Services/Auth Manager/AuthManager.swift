@@ -66,6 +66,7 @@ final class AuthManager: ObservableObject, AlertHandler {
             let userId = authResult.user.uid
             
             let newUser = UserModel(
+                id: userId,
                 name: name,
                 avatar: avatar,
                 email: email,
@@ -137,16 +138,7 @@ final class AuthManager: ObservableObject, AlertHandler {
     }
     
     private func saveUserToFirestore(user: UserModel, userId: String) async throws {
-        let userData: [String: Any] = [
-            "name": user.name,
-            "avatar": user.avatar,
-            "email": user.email,
-            "categories": user.categories,
-            "savedPosts": user.savedPosts,
-            "likedPosts": user.likedPosts,
-        ]
-        
-        try await db.collection("users").document(userId).setData(userData)
+        try db.collection("users").document(userId).setData(from: user)
     }
     
     func updateUserName(_ name: String) async {
@@ -225,7 +217,7 @@ final class AuthManager: ObservableObject, AlertHandler {
         }
     }
     
-    func addSavedPost(_ postId: Int) async {
+    func addSavedPost(_ postId: String) async {
         guard let user = currentUser, let userId = user.id else {
             handleAuthError(.userNotFound)
             return
@@ -246,7 +238,7 @@ final class AuthManager: ObservableObject, AlertHandler {
         }
     }
     
-    func removeSavedPost(_ postId: Int) async {
+    func removeSavedPost(_ postId: String) async {
         guard let user = currentUser, let userId = user.id else {
             handleAuthError(.userNotFound)
             return
@@ -263,7 +255,7 @@ final class AuthManager: ObservableObject, AlertHandler {
         }
     }
     
-    func addLikedPost(_ postId: Int) async {
+    func addLikedPost(_ postId: String) async {
         guard let user = currentUser, let userId = user.id else {
             handleAuthError(.userNotFound)
             return
@@ -284,7 +276,7 @@ final class AuthManager: ObservableObject, AlertHandler {
         }
     }
     
-    func removeLikedPost(_ postId: Int) async {
+    func removeLikedPost(_ postId: String) async {
         guard let user = currentUser, let userId = user.id else {
             handleAuthError(.userNotFound)
             return

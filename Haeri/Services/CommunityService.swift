@@ -7,27 +7,97 @@
 
 import Foundation
 import Combine
+import FirebaseFirestore
 
 @MainActor
 final class CommunityService: ObservableObject {
     
     private let networkManager: NetworkManager
     private let authManager: AuthManager
+    private let db = Firestore.firestore()
     
     @Published var posts: [PostModel] = []
     @Published var currentPost: PostModel? = nil
+    @Published var currentPostComments: [CommentModel] = []
     @Published var selectedFilter: FilterPost? = nil {
         didSet { updateFilteredPosts() }
     }
     
     @Published var searchText: String = ""
     @Published var filteredPosts: [PostModel] = []
+    @Published var isLoading: Bool = false
+    
+    private var postsListener: ListenerRegistration?
+    private var commentsListener: ListenerRegistration?
     
     init(authManager: AuthManager, networkManager: NetworkManager) {
         self.authManager = authManager
         self.networkManager = networkManager
-        loadStaticData()
-        updateFilteredPosts()
+        setupPostsListener()
+    }
+    
+    deinit {
+        postsListener?.remove()
+        commentsListener?.remove()
+    }
+    
+    private func setupPostsListener() {
+        isLoading = true
+        
+        postsListener = db.collection("posts")
+            .order(by: "date", descending: true)
+            .addSnapshotListener { [weak self] snapshot, error in
+                guard let self = self else { return }
+                
+                if let error = error {
+                    print("Error fetching posts: \(error)")
+                    self.isLoading = false
+                    return
+                }
+                
+                guard let documents = snapshot?.documents else {
+                    self.isLoading = false
+                    return
+                }
+                
+                self.posts = documents.compactMap { doc -> PostModel? in
+                    try? doc.data(as: PostModel.self)
+                }
+                
+                self.updateFilteredPosts()
+                self.isLoading = false
+            }
+    }
+    
+    private func setupCommentsListener(postId: String) {
+        commentsListener?.remove()
+        
+        commentsListener = db.collection("comments")
+            .whereField("postId", isEqualTo: postId)
+            .order(by: "date", descending: false)
+            .addSnapshotListener(includeMetadataChanges: true) { [weak self] snapshot, error in
+                guard let self = self else { return }
+                
+                if let error = error {
+                    print("Error fetching comments: \(error)")
+                    return
+                }
+                
+                guard let snapshot = snapshot else {
+                    print("No snapshot in comments listener")
+                    return
+                }
+                
+                self.currentPostComments = snapshot.documents.compactMap { doc -> CommentModel? in
+                    do {
+                        let comment = try doc.data(as: CommentModel.self)
+                        return comment
+                    } catch {
+                        print("Failed to decode comment: \(error)")
+                        return nil
+                    }
+                }
+            }
     }
     
     private func updateFilteredPosts() {
@@ -38,14 +108,16 @@ final class CommunityService: ObservableObject {
             case .popular:
                 result = result.sorted { $0.likes > $1.likes }
             case .myPosts:
-                result = result.filter { $0.author.id == authManager.currentUser?.id }
+                result = result.filter { $0.authorId == authManager.currentUser?.id }
             case .saved:
                 result = result.filter {
-                    authManager.currentUser?.savedPosts.contains($0.id) ?? false
+                    guard let postId = $0.id else { return false }
+                    return authManager.currentUser?.savedPosts.contains(postId) ?? false
                 }
             case .liked:
                 result = result.filter {
-                    authManager.currentUser?.likedPosts.contains($0.id) ?? false
+                    guard let postId = $0.id else { return false }
+                    return authManager.currentUser?.likedPosts.contains(postId) ?? false
                 }
             case .latest:
                 result = result.sorted { $0.date > $1.date }
@@ -55,61 +127,90 @@ final class CommunityService: ObservableObject {
         filteredPosts = result
     }
     
-    func addPost(_ post: PostModel) {
-        posts.insert(post, at: 0)
-        updateFilteredPosts()
+    func addPost(_ post: PostModel) async {
+        do {
+            let docRef = db.collection("posts").document()
+            var newPost = post
+            newPost.id = docRef.documentID
+            try docRef.setData(from: newPost)
+        } catch {
+            print("Error adding post: \(error)")
+        }
     }
     
-    func deleteCurrentPost() {
+    func deleteCurrentPost() async {
         guard let postId = currentPost?.id else { return }
+        guard currentPost?.authorId == authManager.currentUser?.id else { return }
         
-        guard let post = posts.first(where: { $0.id == postId }),
-              post.author.id == authManager.currentUser?.id else {
-            return
+        do {
+            let commentsSnapshot = try await db.collection("comments")
+                .whereField("postId", isEqualTo: postId)
+                .getDocuments()
+            
+            for document in commentsSnapshot.documents {
+                try await document.reference.delete()
+            }
+            
+            try await db.collection("posts").document(postId).delete()
+            
+            currentPost = nil
+            currentPostComments = []
+            commentsListener?.remove()
+        } catch {
+            print("Error deleting post: \(error)")
         }
-        
-        posts.removeAll { $0.id == postId }
-        currentPost = nil
-        updateFilteredPosts()
     }
     
-    func setCurrentPost(postId: Int) {
+    func setCurrentPost(postId: String) {
+        print("Setting current post: \(postId)")
         currentPost = posts.first(where: { $0.id == postId })
+        setupCommentsListener(postId: postId)
     }
     
-    func addComment(_ comment: PostModel.Comment) {
-        guard let postId = currentPost?.id,
-              let index = posts.firstIndex(where: { $0.id == postId }) else {
+    
+    func addComment(_ comment: CommentModel) async {
+        guard let postId = currentPost?.id else {
             return
         }
         
-        posts[index].comments.append(comment)
-        currentPost?.comments.append(comment)
+        do {
+            let docRef = db.collection("comments").document()
+            var newComment = comment
+            newComment.id = docRef.documentID
+            
+            self.currentPostComments.append(newComment)
+            
+            try docRef.setData(from: newComment)
+            
+            try await db.collection("posts").document(postId).updateData([
+                "commentCount": FieldValue.increment(Int64(1))
+            ])
+        } catch {
+            print("Error adding comment: \(error)")
+            self.currentPostComments.removeAll { $0.id == comment.id }
+        }
     }
     
-    func toggleLike(postId: Int) async {
-        guard let index = posts.firstIndex(where: { $0.id == postId }) else {
-            return
-        }
-        
+    func toggleLike(postId: String) async {
         let isLiked = authManager.currentUser?.likedPosts.contains(postId) ?? false
+        let increment: Int64 = isLiked ? -1 : 1
         
-        if isLiked {
-            posts[index].likes -= 1
-            await authManager.removeLikedPost(postId)
-        } else {
-            posts[index].likes += 1
-            await authManager.addLikedPost(postId)
+        do {
+            try await db.collection("posts").document(postId).updateData([
+                "likes": FieldValue.increment(increment)
+            ])
+            
+            if isLiked {
+                await authManager.removeLikedPost(postId)
+            } else {
+                await authManager.addLikedPost(postId)
+            }
+        } catch {
+            print("Error toggling like: \(error)")
         }
-        
-        if currentPost?.id == postId {
-            currentPost?.likes = posts[index].likes
-        }
-        
-        updateFilteredPosts()
     }
     
-    func savePost(postId: Int) async {
+    func savePost(postId: String) async {
         let isSaved = authManager.currentUser?.savedPosts.contains(postId) ?? false
         
         if isSaved {
@@ -119,246 +220,5 @@ final class CommunityService: ObservableObject {
         }
         
         updateFilteredPosts()
-    }
-    
-    private func loadStaticData() {
-        let user1 = UserModel(
-            id: "user1_firebase_uid",
-            name: "Dato",
-            avatar: "Avatar 1",
-            email: "dato@mail.com",
-            categories: ["parent"]
-        )
-        
-        let user2 = UserModel(
-            id: "user2_firebase_uid",
-            name: "Nino",
-            avatar: "Avatar 2",
-            email: "nino@mail.com",
-            categories: ["parent"]
-        )
-        
-        let user3 = UserModel(
-            id: "user3_firebase_uid",
-            name: "Gio",
-            avatar: "Avatar 3",
-            email: "gio@mail.com",
-            categories: ["activist"]
-        )
-        
-        let user4 = UserModel(
-            id: "user4_firebase_uid",
-            name: "Mariam",
-            avatar: "Avatar 4",
-            email: "mariam@mail.com",
-            categories: ["parent"]
-        )
-        
-        let user5 = UserModel(
-            id: "user5_firebase_uid",
-            name: "Luka",
-            avatar: "Avatar 5",
-            email: "luka@mail.com",
-            categories: ["sportsman"]
-        )
-        
-        let now = Date()
-        let calendar = Calendar.current
-        
-        posts = [
-            PostModel(
-                id: 1,
-                date: calendar.date(byAdding: .hour, value: -2, to: now) ?? now,
-                author: user1,
-                title: "Air quality in Rustavi",
-                content: "Air feels much cleaner today compared to last week. The AQI dropped from 180 to 65!",
-                likes: 32,
-                comments: [
-                    PostModel.Comment(
-                        id: "c1",
-                        user: user2,
-                        content: "Yes! I checked AQI and it's much better 🌤️"
-                    ),
-                    PostModel.Comment(
-                        id: "c2",
-                        user: user3,
-                        content: "Let's hope it stays like this."
-                    )
-                ]
-            ),
-            
-            PostModel(
-                id: 2,
-                date: calendar.date(byAdding: .hour, value: -5, to: now) ?? now,
-                author: user2,
-                title: "When do you check AQI?",
-                content: "Do you check air quality before going outside? I use the app every morning.",
-                likes: 18,
-                comments: [
-                    PostModel.Comment(
-                        id: "c3",
-                        user: user1,
-                        content: "Every morning before work."
-                    ),
-                    PostModel.Comment(
-                        id: "c4",
-                        user: user4,
-                        content: "I check it before my morning run!"
-                    )
-                ]
-            ),
-            
-            PostModel(
-                id: 3,
-                date: calendar.date(byAdding: .hour, value: -8, to: now) ?? now,
-                author: user3,
-                title: "Mask recommendations",
-                content: "Any good masks for polluted days? Looking for something comfortable for daily use.",
-                likes: 9,
-                comments: []
-            ),
-            
-            PostModel(
-                id: 4,
-                date: calendar.date(byAdding: .day, value: -1, to: now) ?? now,
-                author: user4,
-                title: "School closures due to pollution",
-                content: "Should schools close when AQI goes above 150? My kids have been coughing a lot lately.",
-                likes: 45,
-                comments: [
-                    PostModel.Comment(
-                        id: "c5",
-                        user: user2,
-                        content: "Absolutely! Children's health should come first."
-                    ),
-                    PostModel.Comment(
-                        id: "c6",
-                        user: user5,
-                        content: "Some European cities do this at AQI 100+"
-                    ),
-                    PostModel.Comment(
-                        id: "c7",
-                        user: user1,
-                        content: "I keep my kids home when it's really bad."
-                    )
-                ]
-            ),
-            
-            PostModel(
-                id: 5,
-                date: calendar.date(byAdding: .day, value: -2, to: now) ?? now,
-                author: user5,
-                title: "Indoor plants that help with air quality",
-                content: "Got some snake plants and peace lilies. They actually make a difference indoors! 🌿",
-                likes: 27,
-                comments: [
-                    PostModel.Comment(
-                        id: "c8",
-                        user: user3,
-                        content: "I have 10 plants now! My apartment air feels fresher."
-                    )
-                ]
-            ),
-            
-            PostModel(
-                id: 6,
-                date: calendar.date(byAdding: .day, value: -3, to: now) ?? now,
-                author: user1,
-                title: "Air purifier recommendations?",
-                content: "Looking to buy an air purifier. What brands work well in Tbilisi?",
-                likes: 15,
-                comments: [
-                    PostModel.Comment(
-                        id: "c9",
-                        user: user4,
-                        content: "I use Xiaomi. Works great and affordable."
-                    ),
-                    PostModel.Comment(
-                        id: "c10",
-                        user: user2,
-                        content: "Philips is expensive but worth it!"
-                    )
-                ]
-            ),
-            
-            PostModel(
-                id: 7,
-                date: calendar.date(byAdding: .day, value: -4, to: now) ?? now,
-                author: user3,
-                title: "Exercise with bad air quality",
-                content: "Is it safe to run when AQI is around 100? Or should I stick to indoor workouts?",
-                likes: 22,
-                comments: [
-                    PostModel.Comment(
-                        id: "c11",
-                        user: user5,
-                        content: "I avoid outdoor exercise above 75 AQI."
-                    )
-                ]
-            ),
-            
-            PostModel(
-                id: 8,
-                date: calendar.date(byAdding: .day, value: -5, to: now) ?? now,
-                author: user2,
-                title: "Government air quality measures",
-                content: "What do you think about the new environmental policies? Will they actually help?",
-                likes: 38,
-                comments: [
-                    PostModel.Comment(
-                        id: "c12",
-                        user: user1,
-                        content: "We need stricter regulations on factories."
-                    ),
-                    PostModel.Comment(
-                        id: "c13",
-                        user: user3,
-                        content: "Public transport improvements would help too."
-                    )
-                ]
-            ),
-            
-            PostModel(
-                id: 9,
-                date: calendar.date(byAdding: .day, value: -7, to: now) ?? now,
-                author: user4,
-                title: "Seasonal air quality patterns",
-                content: "Has anyone noticed air quality is always worse in winter? Why is that?",
-                likes: 14,
-                comments: [
-                    PostModel.Comment(
-                        id: "c14",
-                        user: user5,
-                        content: "It's the heating systems and temperature inversions."
-                    )
-                ]
-            ),
-            
-            PostModel(
-                id: 10,
-                date: calendar.date(byAdding: .weekOfYear, value: -2, to: now) ?? now,
-                author: user5,
-                title: "Creating awareness in my neighborhood",
-                content: "Started a local group to discuss air quality issues. 20 families joined so far! 💪",
-                likes: 56,
-                comments: [
-                    PostModel.Comment(
-                        id: "c15",
-                        user: user1,
-                        content: "This is amazing! How can I start one in my area?"
-                    ),
-                    PostModel.Comment(
-                        id: "c16",
-                        user: user2,
-                        content: "Great initiative! 👏"
-                    ),
-                    PostModel.Comment(
-                        id: "c17",
-                        user: user4,
-                        content: "Would love to join if you're near Saburtalo!"
-                    )
-                ]
-            )
-        ]
     }
 }

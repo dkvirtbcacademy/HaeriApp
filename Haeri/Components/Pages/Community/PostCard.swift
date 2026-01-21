@@ -13,7 +13,7 @@ struct PostCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Text(post.author.name)
+                Text(post.authorName)
                     .font(.firago(.xsmall))
                     .foregroundColor(.secondaryDarkText)
                 Spacer()
@@ -33,7 +33,7 @@ struct PostCard: View {
             
             HStack {
                 Image(systemName: "bubble.left")
-                Text("\(post.comments.count)")
+                Text("\(post.commentCount)")
                     .font(.firago(.xsmall))
                     .foregroundColor(.darkText)
             }
@@ -47,41 +47,20 @@ struct PostCard: View {
         .shadow(radius: 2)
     }
 }
-
 #Preview {
     PostCard(
         post: PostModel(
-            id: 1,
+            id: "1",
             date: Date(),
-            author: UserModel(
-                id: "a",
-                name: "Dato",
-                avatar: "Avatar 1",
-                email: "dato@mail.com",
-                categories: ["parent"],
-                savedPosts: [1],
-                likedPosts: [1],
-            ),
+            authorId: "user_1",
+            authorName: "Dato",
+            authorAvatar: "Avatar 1",
             title: "Air quality in Rustavi",
             content: "Air feels much cleaner today compared to last week. The AQI readings show significant improvement.",
             likes: 32,
-            comments: [
-                PostModel.Comment(
-                    id: "b",
-                    user: UserModel(
-                        id: "a",
-                        name: "Nino",
-                        avatar: "Avatar 2",
-                        email: "nino@mail.com",
-                        categories: ["parent"],
-                        savedPosts: [],
-                        likedPosts: [1],
-                    ),
-                    content: "Yes! I checked AQI and it's much better 🌤️"
-                )
-            ]
+            commentCount: 5
         )
     )
     .padding()
-    .background(Color.green)
+    .background(Color.green.opacity(0.3))
 }

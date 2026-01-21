@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct CommentsSection: View {
-    let comments: [PostModel.Comment]
+    let comments: [CommentModel]
     @Binding var commentText: String
     let canComment: Bool
     let onAddComment: () -> Void
@@ -21,13 +21,13 @@ struct CommentsSection: View {
             
             ForEach(comments) { comment in
                 HStack(alignment: .top, spacing: 12) {
-                    Image(comment.user.avatar)
+                    Image(comment.userAvatar)
                         .resizable()
                         .frame(width: 30, height: 30)
                         .glassEffect(.circle(size: 50))
                     
                     VStack(alignment: .leading, spacing: 4) {
-                        Text(comment.user.name)
+                        Text(comment.userName)
                             .font(.firagoMedium(.medium))
                             .foregroundStyle(.darkText)
                         
@@ -53,5 +53,6 @@ struct CommentsSection: View {
                 .disabled(!canComment)
             }
         }
+        .padding(.bottom, 40)
     }
 }

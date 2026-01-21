@@ -18,6 +18,7 @@ class AddCityViewController: UIViewController {
     private let viewModel: DashboardViewModel
     private var cancellables = Set<AnyCancellable>()
     private var searchResults: [GeoResponse] = []
+    private let characterLimit = 40
     
     private let searchTextField: UITextField = {
         let textField = UITextField()
@@ -94,6 +95,8 @@ class AddCityViewController: UIViewController {
         
         setupUI()
         setupNavigationBar()
+        
+        searchTextField.delegate = self
     }
     
     private func setupUI() {
@@ -202,5 +205,17 @@ extension AddCityViewController: UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 60
+    }
+}
+
+extension AddCityViewController: UITextFieldDelegate {
+    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        let currentText = textField.text ?? ""
+        guard let stringRange = Range(range, in: currentText) else {
+            return false
+        }
+        
+        let updatedText = currentText.replacingCharacters(in: stringRange, with: string)
+        return updatedText.count <= characterLimit
     }
 }

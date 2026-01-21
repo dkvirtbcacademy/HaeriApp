@@ -31,7 +31,9 @@ struct CommunityPage: View {
                     ForEach(communityService.filteredPosts) { post in
                         PostCard(post: post)
                             .onTapGesture {
-                                viewModel.navigateToPost(postId: post.id)
+                                guard let postId = post.id else { return }
+                                
+                                viewModel.navigateToPost(postId: postId)
                             }
                     }
                 }

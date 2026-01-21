@@ -5,24 +5,25 @@
 //  Created by kv on 14.01.26.
 //
 
-import Foundation
 import Combine
+import Foundation
 
 @MainActor
 final class PostDetailsViewModel: ObservableObject {
     @Published var commentText: String = ""
     @Published var post: PostModel?
+    @Published var comments: [CommentModel] = []
     @Published var isLiked: Bool = false
     @Published var isSaved: Bool = false
     
-    private let postId: Int
+    private let postId: String
     private let communityService: CommunityService
     private let authManager: AuthManager
     private let coordinator: CommunityCoordinator
     private var cancellables = Set<AnyCancellable>()
     
     init(
-        postId: Int,
+        postId: String,
         communityService: CommunityService,
         authManager: AuthManager,
         coordinator: CommunityCoordinator
@@ -38,9 +39,22 @@ final class PostDetailsViewModel: ObservableObject {
     private func setupObservers() {
         communityService.$posts
             .map { [weak self] posts in
-                posts.first(where: { $0.id == self?.postId })
+                guard let self = self else { return nil }
+                return posts.first(where: { $0.id == self.postId })
             }
             .assign(to: &$post)
+        
+        communityService.$currentPost
+            .sink { [weak self] currentPost in
+                guard let self = self else { return }
+                if currentPost?.id == self.postId, self.post == nil {
+                    self.post = currentPost
+                }
+            }
+            .store(in: &cancellables)
+        
+        communityService.$currentPostComments
+            .assign(to: &$comments)
         
         authManager.$currentUser
             .map { [weak self] user in
@@ -66,8 +80,10 @@ final class PostDetailsViewModel: ObservableObject {
     }
     
     func deletePost() {
-        communityService.deleteCurrentPost()
-        coordinator.navigateBack()
+        Task {
+            await communityService.deleteCurrentPost()
+            coordinator.navigateBack()
+        }
     }
     
     func toggleLike() {
@@ -84,20 +100,24 @@ final class PostDetailsViewModel: ObservableObject {
     
     func addComment() {
         guard !commentText.isEmpty,
-              let post = post,
-              let currentUser = authManager.currentUser else {
+              let currentUser = authManager.currentUser,
+              let userId = currentUser.id
+        else {
             return
         }
-        
-        let newComment = PostModel.Comment(
-            id: "\(post.comments.count + 1)",
-            user: currentUser,
-            content: commentText
+        let newComment = CommentModel(
+            postId: postId,
+            userId: userId,
+            userName: currentUser.name,
+            userAvatar: currentUser.avatar,
+            content: commentText,
+            date: Date()
         )
         
-        communityService.setCurrentPost(postId: postId)
-        communityService.addComment(newComment)
-        commentText = ""
+        Task {
+            await communityService.addComment(newComment)
+            commentText = ""
+        }
     }
     
     var canComment: Bool {
@@ -109,6 +129,6 @@ final class PostDetailsViewModel: ObservableObject {
               let currentUserId = authManager.currentUser?.id else {
             return false
         }
-        return post.author.id == currentUserId
+        return post.authorId == currentUserId
     }
 }

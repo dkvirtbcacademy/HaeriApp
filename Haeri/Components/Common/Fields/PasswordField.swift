@@ -9,6 +9,7 @@ import UIKit
 
 class PasswordField: UIStackView {
     var onTextChanged: ((String) -> Void)?
+    var characterLimit: Int = 20
     
     private let fieldLabel: UILabel = {
         let label = UILabel()
@@ -26,6 +27,7 @@ class PasswordField: UIStackView {
         textfield.autocorrectionType = .no
         textfield.isSecureTextEntry = true
         textfield.isUserInteractionEnabled = true
+        textfield.textContentType = .oneTimeCode
         
         textfield.layer.cornerRadius = 8
         textfield.layer.masksToBounds = true
@@ -112,6 +114,7 @@ class PasswordField: UIStackView {
     }
     
     private func setupTextFieldDelegate() {
+        textField.delegate = self
         textField.addAction(UIAction { [weak self] _ in
             guard let self = self else { return }
             self.onTextChanged?(self.textField.text ?? "")
@@ -140,5 +143,17 @@ class PasswordField: UIStackView {
     
     func getInputText() -> String? {
         return textField.text
+    }
+}
+
+extension PasswordField: UITextFieldDelegate {
+    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        let currentText = textField.text ?? ""
+        guard let stringRange = Range(range, in: currentText) else {
+            return false
+        }
+        
+        let updatedText = currentText.replacingCharacters(in: stringRange, with: string)
+        return updatedText.count <= characterLimit
     }
 }

@@ -9,6 +9,7 @@ import UIKit
 class NameField: UIStackView {
     
     var onTextChanged: ((String) -> Void)?
+    var characterLimit: Int = 40
     
     private let fieldLabel: UILabel = {
         let label = UILabel()
@@ -96,6 +97,7 @@ class NameField: UIStackView {
     }
     
     private func setupTextFieldDelegate() {
+        textField.delegate = self
         textField.addAction(UIAction { [weak self] _ in
             guard let self = self else { return }
             self.onTextChanged?(self.textField.text ?? "")
@@ -124,5 +126,17 @@ class NameField: UIStackView {
     
     func getInputText() -> String? {
         return textField.text
+    }
+}
+
+extension NameField: UITextFieldDelegate {
+    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        let currentText = textField.text ?? ""
+        guard let stringRange = Range(range, in: currentText) else {
+            return false
+        }
+        
+        let updatedText = currentText.replacingCharacters(in: stringRange, with: string)
+        return updatedText.count <= characterLimit
     }
 }

@@ -17,9 +17,10 @@ struct SearchBar: View {
                     .foregroundColor(.darkText.opacity(0.6))
                     .font(.firagoMedium(.xxsmall))
                 
-                TextField("Search community...", text: $searchText)
+                TextField("მოძებნე პოსტი", text: $searchText)
                     .foregroundColor(.darkText)
                     .autocorrectionDisabled()
+                    .characterLimit($searchText, limit: 40)
                 
                 if !searchText.isEmpty {
                     clearButton

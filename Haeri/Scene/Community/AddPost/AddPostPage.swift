@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Combine
 
 struct AddPostPage: View {
     @StateObject private var viewModel: AddPostViewModel
@@ -37,6 +38,7 @@ struct AddPostPage: View {
                         
                         TextField("შეიყვანეთ სათაური", text: $viewModel.title)
                             .customTextFieldStyle()
+                            .characterLimit($viewModel.title, limit: 80)
                             .animation(.none, value: viewModel.title)
                     }
                     
@@ -48,7 +50,7 @@ struct AddPostPage: View {
                         TextEditor(text: $viewModel.content)
                             .font(.firago(.xsmall))
                             .foregroundColor(.text)
-                            .frame(minHeight: 200)
+                            .frame(height: 200)
                             .padding(12)
                             .background(Color.clear)
                             .overlay(

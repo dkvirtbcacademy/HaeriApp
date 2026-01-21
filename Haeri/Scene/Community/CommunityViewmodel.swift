@@ -17,7 +17,7 @@ final class CommunityViewmodel: ObservableObject {
         self.coordinator = coordinator
     }
     
-    func navigateToPost(postId: Int) {
+    func navigateToPost(postId: String) {
         coordinator.navigate(to: .details(postId: postId))
     }
     
