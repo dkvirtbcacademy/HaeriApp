@@ -16,12 +16,12 @@ protocol AddCityViewControllerDelegate: AnyObject {
 class AddCityViewController: UIViewController {
     
     weak var delegate: AddCityViewControllerDelegate?
+    
     private let viewModel: DashboardViewModel
     private var cancellables = Set<AnyCancellable>()
-    private var searchResults: [GeoResponse] = []
     private let characterLimit = 40
     
-    private let searchTextField: UITextField = {
+    private lazy var searchTextField: UITextField = {
         let textField = UITextField()
         textField.placeholder = "ჩაწერეთ ქალაქის სახელი"
         textField.translatesAutoresizingMaskIntoConstraints = false
@@ -29,27 +29,16 @@ class AddCityViewController: UIViewController {
         textField.layer.borderWidth = 1
         textField.layer.borderColor = UIColor.placeholder.cgColor
         textField.font = .firago(.medium)
-        
         textField.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 16, height: 0))
         textField.leftViewMode = .always
         textField.rightView = UIView(frame: CGRect(x: 0, y: 0, width: 16, height: 0))
         textField.rightViewMode = .always
-        
+        textField.autocapitalizationType = .none
+        textField.autocorrectionType = .no
+        textField.addAction(UIAction { [weak self] _ in
+            self?.viewModel.searchText = textField.text ?? ""
+        }, for: .editingChanged)
         return textField
-    }()
-    
-    private lazy var findButton: UIButton = {
-        let button = UIButton(type: .system)
-        button.setTitle("ძებნა", for: .normal)
-        button.titleLabel?.font = .firagoMedium(.medium)
-        button.backgroundColor = .systemBlue
-        button.setTitleColor(.text, for: .normal)
-        button.layer.cornerRadius = 16
-        button.translatesAutoresizingMaskIntoConstraints = false
-        button.addAction(UIAction { [weak self] _ in
-            self?.findButtonTapped()
-        }, for: .touchUpInside)
-        return button
     }()
     
     private lazy var tableView: UITableView = {
@@ -95,18 +84,20 @@ class AddCityViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         setupUI()
         setupNavigationBar()
-        
+        bindViewModel()
         searchTextField.delegate = self
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        viewModel.clearSearch()
     }
     
     private func setupUI() {
         view.backgroundColor = .systemBackground
-        
         view.addSubview(searchTextField)
-        view.addSubview(findButton)
         view.addSubview(tableView)
         view.addSubview(emptyStateLabel)
         
@@ -120,23 +111,18 @@ class AddCityViewController: UIViewController {
             searchTextField.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
             searchTextField.heightAnchor.constraint(equalToConstant: 50),
             
-            findButton.topAnchor.constraint(equalTo: searchTextField.bottomAnchor, constant: 16),
-            findButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            findButton.widthAnchor.constraint(equalToConstant: 120),
-            findButton.heightAnchor.constraint(equalToConstant: 44),
-            
-            tableView.topAnchor.constraint(equalTo: findButton.bottomAnchor, constant: 20),
+            tableView.topAnchor.constraint(equalTo: searchTextField.bottomAnchor, constant: 20),
             tableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
             
             loadingHostingController.view.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            loadingHostingController.view.topAnchor.constraint(equalTo: findButton.bottomAnchor, constant: 40),
+            loadingHostingController.view.topAnchor.constraint(equalTo: searchTextField.bottomAnchor, constant: 40),
             loadingHostingController.view.widthAnchor.constraint(equalToConstant: 40),
             loadingHostingController.view.heightAnchor.constraint(equalToConstant: 40),
             
             emptyStateLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            emptyStateLabel.topAnchor.constraint(equalTo: findButton.bottomAnchor, constant: 40)
+            emptyStateLabel.topAnchor.constraint(equalTo: searchTextField.bottomAnchor, constant: 40)
         ])
     }
     
@@ -149,32 +135,33 @@ class AddCityViewController: UIViewController {
         )
     }
     
-    private func findButtonTapped() {
-        guard let searchText = searchTextField.text, !searchText.isEmpty else {
-            return
-        }
-        
-        searchTextField.resignFirstResponder()
-        loadingHostingController.view.isHidden = false
-        tableView.isHidden = true
-        emptyStateLabel.isHidden = true
-        
-        Task {
-            await viewModel.findCity(name: searchText)
-            loadingHostingController.view.isHidden = false
-            
-            await MainActor.run {
-                loadingHostingController.view.isHidden = true
-                searchResults = viewModel.getSearchResults()
-                
-                if searchResults.isEmpty {
-                    emptyStateLabel.isHidden = false
-                } else {
-                    tableView.isHidden = false
-                    tableView.reloadData()
-                }
+    private func bindViewModel() {
+        viewModel.$searchResults
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] results in
+                self?.tableView.reloadData()
+                self?.updateUIState()
             }
-        }
+            .store(in: &cancellables)
+        
+        viewModel.$isSearchLoading
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] isLoading in
+                self?.loadingHostingController.view.isHidden = !isLoading
+            }
+            .store(in: &cancellables)
+        
+        viewModel.$showEmptyState
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] showEmpty in
+                self?.emptyStateLabel.isHidden = !showEmpty
+            }
+            .store(in: &cancellables)
+    }
+    
+    private func updateUIState() {
+        let hasResults = !viewModel.searchResults.isEmpty
+        tableView.isHidden = !hasResults || viewModel.isSearchLoading
     }
     
     @objc private func cancelButtonTapped() {
@@ -184,7 +171,7 @@ class AddCityViewController: UIViewController {
 
 extension AddCityViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return searchResults.count
+        return viewModel.searchResults.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -195,9 +182,8 @@ extension AddCityViewController: UITableViewDataSource {
             return UITableViewCell()
         }
         
-        let city = searchResults[indexPath.row]
+        let city = viewModel.searchResults[indexPath.row]
         cell.configure(with: city)
-        
         return cell
     }
 }
@@ -205,10 +191,8 @@ extension AddCityViewController: UITableViewDataSource {
 extension AddCityViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-        
-        let selectedCity = searchResults[indexPath.row]
+        let selectedCity = viewModel.searchResults[indexPath.row]
         delegate?.didSelectCity(selectedCity)
-        
         dismiss(animated: true)
     }
     
@@ -223,7 +207,6 @@ extension AddCityViewController: UITextFieldDelegate {
         guard let stringRange = Range(range, in: currentText) else {
             return false
         }
-        
         let updatedText = currentText.replacingCharacters(in: stringRange, with: string)
         return updatedText.count <= characterLimit
     }

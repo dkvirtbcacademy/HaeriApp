@@ -161,6 +161,10 @@ final class AirPollutionManager: ObservableObject, AlertHandler {
         }
     }
     
+    func clearSearchResults() {
+        searchResults = []
+    }
+    
     func addChoosenCity(city: String, lat: Double, lon: Double) async {
         if !cities.contains(city) {
             cities.append(city)

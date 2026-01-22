@@ -13,6 +13,11 @@ final class DashboardViewModel: ObservableObject {
     @Published var cities: [CityAirPollution] = []
     @Published var isLoading: Bool = false
     
+    @Published var searchText: String = ""
+    @Published var searchResults: [GeoResponse] = []
+    @Published var isSearchLoading: Bool = false
+    @Published var showEmptyState: Bool = false
+    
     private let coordinator: DashboardCoordinator
     private let homeCoordinator: HomeCoordinator
     private let airPollutionManager: AirPollutionManager
@@ -30,6 +35,7 @@ final class DashboardViewModel: ObservableObject {
         self.airPollutionManager = airPollutionManager
         self.aiRecommendationManager = aiRecommendationManager
         observeAirPollutionData()
+        setupSearchDebounce()
     }
     
     private func observeAirPollutionData() {
@@ -38,6 +44,48 @@ final class DashboardViewModel: ObservableObject {
         
         airPollutionManager.$isLoading
             .assign(to: &$isLoading)
+    }
+    
+    private func setupSearchDebounce() {
+        $searchText
+            .debounce(for: .milliseconds(500), scheduler: DispatchQueue.main)
+            .removeDuplicates()
+            .filter { $0.count >= 2 || $0.isEmpty }
+            .sink { [weak self] query in
+                self?.performSearch(query: query)
+            }
+            .store(in: &cancellables)
+    }
+    
+    private func performSearch(query: String) {
+        guard !query.isEmpty else {
+            clearSearch()
+            return
+        }
+        
+        searchResults = []
+        airPollutionManager.clearSearchResults()
+        isSearchLoading = true
+        showEmptyState = false
+        
+        Task {
+            await airPollutionManager.findCity(city: query)
+            
+            await MainActor.run { [weak self] in
+                guard let self = self else { return }
+                self.isSearchLoading = false
+                self.searchResults = self.airPollutionManager.searchResults
+                self.showEmptyState = self.searchResults.isEmpty
+            }
+        }
+    }
+    
+    func clearSearch() {
+        searchText = ""
+        searchResults = []
+        showEmptyState = false
+        isSearchLoading = false
+        airPollutionManager.clearSearchResults()
     }
     
     func fetchCitiesData() async {
