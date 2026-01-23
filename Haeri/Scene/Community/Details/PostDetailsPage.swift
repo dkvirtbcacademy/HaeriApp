@@ -9,6 +9,7 @@ import SwiftUI
 
 struct PostDetailsPage: View {
     @StateObject private var viewModel: PostDetailsViewModel
+    @ObservedObject var communityService: CommunityService
     @Environment(\.airQuality) var airQuality
     
     init(
@@ -17,6 +18,7 @@ struct PostDetailsPage: View {
         authManager: AuthManager,
         coordinator: CommunityCoordinator
     ) {
+        self.communityService = communityService
         _viewModel = StateObject(wrappedValue: PostDetailsViewModel(
             postId: postId,
             communityService: communityService,
@@ -31,17 +33,17 @@ struct PostDetailsPage: View {
                 VStack(alignment: .leading, spacing: 20) {
                     Color.clear.frame(height: 60)
                     
-                    if let post = viewModel.post {
+                    if let post = communityService.currentPost {
                         PostHeaderView(
                             post: post,
-                            isPostAuthor: viewModel.isPostAuthor(),
+                            isPostAuthor: communityService.isCurrentPostAuthor,
                             onDelete: { viewModel.deletePost() }
                         )
                         
                         PostBodyView(
                             post: post,
-                            isLiked: viewModel.isLiked,
-                            isSaved: viewModel.isSaved,
+                            isLiked: communityService.isCurrentPostLiked,
+                            isSaved: communityService.isCurrentPostSaved,
                             onLike: { viewModel.toggleLike() },
                             onSave: { viewModel.savePost() }
                         )
@@ -49,7 +51,7 @@ struct PostDetailsPage: View {
                         Divider()
                         
                         CommentsSection(
-                            comments: viewModel.comments,
+                            comments: communityService.currentPostComments,
                             commentText: $viewModel.commentText,
                             canComment: viewModel.canComment,
                             onAddComment: { viewModel.addComment() }

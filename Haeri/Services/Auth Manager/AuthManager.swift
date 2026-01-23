@@ -66,7 +66,6 @@ final class AuthManager: ObservableObject, AlertHandler {
             let userId = authResult.user.uid
             
             let newUser = UserModel(
-                id: userId,
                 name: name,
                 avatar: avatar,
                 email: email,
@@ -213,82 +212,6 @@ final class AuthManager: ObservableObject, AlertHandler {
             try await user.updatePassword(to: newPassword)
         } catch let error as NSError {
             handleAuthError(mapAuthError(error))
-        }
-    }
-    
-    func addSavedPost(_ postId: String) async {
-        guard let user = currentUser, let userId = user.id else {
-            handleAuthError(.userNotFound)
-            return
-        }
-        
-        if user.savedPosts.contains(postId) {
-            return
-        }
-        
-        do {
-            try await db.collection("users").document(userId).updateData([
-                "savedPosts": FieldValue.arrayUnion([postId])
-            ])
-            
-            await fetchUserData(userId: userId)
-        } catch {
-            handleAuthError(.firestoreError(error.localizedDescription))
-        }
-    }
-    
-    func removeSavedPost(_ postId: String) async {
-        guard let user = currentUser, let userId = user.id else {
-            handleAuthError(.userNotFound)
-            return
-        }
-        
-        do {
-            try await db.collection("users").document(userId).updateData([
-                "savedPosts": FieldValue.arrayRemove([postId])
-            ])
-            
-            await fetchUserData(userId: userId)
-        } catch {
-            handleAuthError(.firestoreError(error.localizedDescription))
-        }
-    }
-    
-    func addLikedPost(_ postId: String) async {
-        guard let user = currentUser, let userId = user.id else {
-            handleAuthError(.userNotFound)
-            return
-        }
-        
-        if user.likedPosts.contains(postId) {
-            return
-        }
-        
-        do {
-            try await db.collection("users").document(userId).updateData([
-                "likedPosts": FieldValue.arrayUnion([postId])
-            ])
-            
-            await fetchUserData(userId: userId)
-        } catch {
-            handleAuthError(.firestoreError(error.localizedDescription))
-        }
-    }
-    
-    func removeLikedPost(_ postId: String) async {
-        guard let user = currentUser, let userId = user.id else {
-            handleAuthError(.userNotFound)
-            return
-        }
-        
-        do {
-            try await db.collection("users").document(userId).updateData([
-                "likedPosts": FieldValue.arrayRemove([postId])
-            ])
-            
-            await fetchUserData(userId: userId)
-        } catch {
-            handleAuthError(.firestoreError(error.localizedDescription))
         }
     }
     

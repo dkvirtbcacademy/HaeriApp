@@ -14,27 +14,19 @@ struct UserModel: Identifiable, Codable {
     let avatar: String
     let email: String
     let categories: [String]
-    var savedPosts: [String]
-    var likedPosts: [String]
     
-    init(id: String? = nil, name: String, avatar: String, email: String, categories: [String]) {
+    init(
+        id: String? = nil,
+        name: String,
+        avatar: String,
+        email: String,
+        categories: [String],
+    ) {
         self.id = id
         self.name = name
         self.avatar = avatar
         self.email = email
         self.categories = categories
-        self.savedPosts = []
-        self.likedPosts = []
-    }
-    
-    init(id: String?, name: String, avatar: String, email: String, categories: [String], savedPosts: [String], likedPosts: [String]) {
-        self.id = nil
-        self.name = name
-        self.avatar = avatar
-        self.email = email
-        self.categories = categories
-        self.savedPosts = savedPosts
-        self.likedPosts = likedPosts
     }
 }
 

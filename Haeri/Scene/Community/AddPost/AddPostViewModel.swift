@@ -51,7 +51,8 @@ final class AddPostViewModel: ObservableObject {
                 authorAvatar: currentUser.avatar,
                 title: title.trimmingCharacters(in: .whitespacesAndNewlines),
                 content: content.trimmingCharacters(in: .whitespacesAndNewlines),
-                likes: 0,
+                likes: [],
+                saves: [],
                 commentCount: 0
             )
             

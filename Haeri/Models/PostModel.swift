@@ -16,7 +16,8 @@ struct PostModel: Identifiable, Codable {
     let authorAvatar: String
     let title: String
     let content: String
-    var likes: Int
+    var likes: [String]
+    var saves: [String]
     var commentCount: Int
 }
 

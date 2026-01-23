@@ -57,7 +57,8 @@ struct PostCard: View {
             authorAvatar: "Avatar 1",
             title: "Air quality in Rustavi",
             content: "Air feels much cleaner today compared to last week. The AQI readings show significant improvement.",
-            likes: 32,
+            likes: ["userid"],
+            saves: ["userid"],
             commentCount: 5
         )
     )

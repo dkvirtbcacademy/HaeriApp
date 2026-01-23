@@ -17,7 +17,9 @@ final class CommunityService: ObservableObject {
     private let db = Firestore.firestore()
     
     @Published var posts: [PostModel] = []
-    @Published var currentPost: PostModel? = nil
+    @Published var currentPost: PostModel? = nil {
+        didSet { updateCurrentPostState() }
+    }
     @Published var currentPostComments: [CommentModel] = []
     @Published var selectedFilter: FilterPost? = nil {
         didSet { updateFilteredPosts() }
@@ -26,6 +28,10 @@ final class CommunityService: ObservableObject {
     @Published var searchText: String = ""
     @Published var filteredPosts: [PostModel] = []
     @Published var isLoading: Bool = false
+    
+    @Published var isCurrentPostLiked: Bool = false
+    @Published var isCurrentPostSaved: Bool = false
+    @Published var isCurrentPostAuthor: Bool = false
     
     private var postsListener: ListenerRegistration?
     private var commentsListener: ListenerRegistration?
@@ -64,9 +70,27 @@ final class CommunityService: ObservableObject {
                     try? doc.data(as: PostModel.self)
                 }
                 
+                if let currentPostId = self.currentPost?.id {
+                    self.currentPost = self.posts.first(where: { $0.id == currentPostId })
+                }
+                
                 self.updateFilteredPosts()
                 self.isLoading = false
             }
+    }
+    
+    private func updateCurrentPostState() {
+        guard let post = currentPost,
+              let userId = authManager.currentUser?.id else {
+            isCurrentPostLiked = false
+            isCurrentPostSaved = false
+            isCurrentPostAuthor = false
+            return
+        }
+        
+        isCurrentPostLiked = post.likes.contains(userId)
+        isCurrentPostSaved = post.saves.contains(userId)
+        isCurrentPostAuthor = post.authorId == userId
     }
     
     private func setupCommentsListener(postId: String) {
@@ -106,18 +130,18 @@ final class CommunityService: ObservableObject {
         if let filter = selectedFilter {
             switch filter {
             case .popular:
-                result = result.sorted { $0.likes > $1.likes }
+                result = result.sorted { $0.likes.count > $1.likes.count }
             case .myPosts:
                 result = result.filter { $0.authorId == authManager.currentUser?.id }
             case .saved:
                 result = result.filter {
-                    guard let postId = $0.id else { return false }
-                    return authManager.currentUser?.savedPosts.contains(postId) ?? false
+                    guard let userId = authManager.currentUser?.id else { return false }
+                    return $0.saves.contains(userId)
                 }
             case .liked:
                 result = result.filter {
-                    guard let postId = $0.id else { return false }
-                    return authManager.currentUser?.likedPosts.contains(postId) ?? false
+                    guard let userId = authManager.currentUser?.id else { return false }
+                    return $0.likes.contains(userId)
                 }
             case .latest:
                 result = result.sorted { $0.date > $1.date }
@@ -125,6 +149,49 @@ final class CommunityService: ObservableObject {
         }
         
         filteredPosts = result
+    }
+    
+    
+    func toggleLike(postId: String) async {
+        guard let userId = authManager.currentUser?.id else { return }
+        
+        guard let post = posts.first(where: { $0.id == postId }) else { return }
+        let isLiked = post.likes.contains(userId)
+        
+        do {
+            if isLiked {
+                try await db.collection("posts").document(postId).updateData([
+                    "likes": FieldValue.arrayRemove([userId])
+                ])
+            } else {
+                try await db.collection("posts").document(postId).updateData([
+                    "likes": FieldValue.arrayUnion([userId])
+                ])
+            }
+        } catch {
+            print("Error toggling like: \(error)")
+        }
+    }
+    
+    func toggleSave(postId: String) async {
+        guard let userId = authManager.currentUser?.id else { return }
+        
+        guard let post = posts.first(where: { $0.id == postId }) else { return }
+        let isSaved = post.saves.contains(userId)
+        
+        do {
+            if isSaved {
+                try await db.collection("posts").document(postId).updateData([
+                    "saves": FieldValue.arrayRemove([userId])
+                ])
+            } else {
+                try await db.collection("posts").document(postId).updateData([
+                    "saves": FieldValue.arrayUnion([userId])
+                ])
+            }
+        } catch {
+            print("Error toggling save: \(error)")
+        }
     }
     
     func addPost(_ post: PostModel) async {
@@ -164,9 +231,19 @@ final class CommunityService: ObservableObject {
     func setCurrentPost(postId: String) {
         print("Setting current post: \(postId)")
         currentPost = posts.first(where: { $0.id == postId })
-        setupCommentsListener(postId: postId)
+        if currentPost != nil {
+            setupCommentsListener(postId: postId)
+        }
     }
     
+    func clearCurrentPost() {
+        currentPost = nil
+        currentPostComments = []
+        commentsListener?.remove()
+        isCurrentPostLiked = false
+        isCurrentPostSaved = false
+        isCurrentPostAuthor = false
+    }
     
     func addComment(_ comment: CommentModel) async {
         guard let postId = currentPost?.id else {
@@ -189,36 +266,5 @@ final class CommunityService: ObservableObject {
             print("Error adding comment: \(error)")
             self.currentPostComments.removeAll { $0.id == comment.id }
         }
-    }
-    
-    func toggleLike(postId: String) async {
-        let isLiked = authManager.currentUser?.likedPosts.contains(postId) ?? false
-        let increment: Int64 = isLiked ? -1 : 1
-        
-        do {
-            try await db.collection("posts").document(postId).updateData([
-                "likes": FieldValue.increment(increment)
-            ])
-            
-            if isLiked {
-                await authManager.removeLikedPost(postId)
-            } else {
-                await authManager.addLikedPost(postId)
-            }
-        } catch {
-            print("Error toggling like: \(error)")
-        }
-    }
-    
-    func savePost(postId: String) async {
-        let isSaved = authManager.currentUser?.savedPosts.contains(postId) ?? false
-        
-        if isSaved {
-            await authManager.removeSavedPost(postId)
-        } else {
-            await authManager.addSavedPost(postId)
-        }
-        
-        updateFilteredPosts()
     }
 }

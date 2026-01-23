@@ -31,7 +31,7 @@ struct PostBodyView: View {
             } label: {
                 HStack(spacing: 4) {
                     Image(systemName: isLiked ? "heart.fill" : "heart")
-                    Text("\(post.likes)")
+                    Text("\(post.likes.count)")
                 }
                 .foregroundStyle(isLiked ? .red : .darkText)
                 .padding(.horizontal, 14)
