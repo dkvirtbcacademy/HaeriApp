@@ -28,19 +28,35 @@ struct CommunityPage: View {
         ZStack(alignment: .top) {
             ScrollView {
                 LazyVStack(spacing: 16) {
-                    if communityService.isSearching {
-                        ProgressView("searching...")
+                    if communityService.isLoading && communityService.displayedPosts.isEmpty {
+                        ProgressView("იტვირთება...")
                             .frame(maxWidth: .infinity)
                             .padding(.top, 20)
-                    } else if communityService.filteredPosts.isEmpty {
+                    } else if communityService.displayedPosts.isEmpty {
                         emptyStateView
                     } else {
-                        ForEach(communityService.filteredPosts) { post in
+                        ForEach(communityService.displayedPosts) { post in
                             PostCard(post: post)
                                 .onTapGesture {
                                     guard let postId = post.id else { return }
                                     viewModel.navigateToPost(postId: postId)
                                 }
+                                .onAppear {
+                                    if post.id == communityService.displayedPosts.last?.id {
+                                        communityService.loadMorePosts()
+                                    }
+                                }
+                        }
+                        if communityService.isLoadingMore {
+                            HStack(spacing: 8) {
+                                ProgressView()
+                                    .tint(.text)
+                                Text("მეტის ჩატვირთვა...")
+                                    .font(.firago(.small))
+                                    .foregroundColor(.text)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding()
                         }
                     }
                 }

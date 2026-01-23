@@ -16,39 +16,50 @@ final class CommunityService: ObservableObject {
     private let authManager: AuthManager
     private let db = Firestore.firestore()
     
-    @Published var posts: [PostModel] = []
-    @Published var currentPost: PostModel? = nil {
-        didSet { updateCurrentPostState() }
-    }
+    @Published private(set) var allPosts: [PostModel] = []
+    @Published var currentPost: PostModel?
     @Published var currentPostComments: [CommentModel] = []
-    @Published var selectedFilter: FilterPost? = nil {
-        didSet { applyFilters() }
-    }
+    @Published var selectedFilter: FilterPost?
     @Published var searchText: String = ""
-    @Published var filteredPosts: [PostModel] = []
     @Published var isLoading: Bool = false
-    @Published var isSearching: Bool = false
+    @Published var isLoadingMore: Bool = false
     
-    @Published var isCurrentPostLiked: Bool = false
-    @Published var isCurrentPostSaved: Bool = false
-    @Published var isCurrentPostAuthor: Bool = false
+    var displayedPosts: [PostModel] {
+        let filtered = filterPosts(allPosts)
+        return sortPosts(filtered)
+    }
     
-    private var searchablePosts: [PostModel] = []
-    private var hasLoadedSearchCache: Bool = false
+    var isCurrentPostLiked: Bool {
+        guard let post = currentPost, let userId = authManager.currentUser?.id else { return false }
+        return post.likes.contains(userId)
+    }
     
-    private var postsListener: ListenerRegistration?
+    var isCurrentPostSaved: Bool {
+        guard let post = currentPost, let userId = authManager.currentUser?.id else { return false }
+        return post.saves.contains(userId)
+    }
+    
+    var isCurrentPostAuthor: Bool {
+        guard let post = currentPost, let userId = authManager.currentUser?.id else { return false }
+        return post.authorId == userId
+    }
+    
+    private var lastDocument: DocumentSnapshot?
+    private var hasMorePosts: Bool = true
+    private let pageSize: Int = 10
+    private var isSearchMode: Bool { !searchText.isEmpty }
+    
     private var commentsListener: ListenerRegistration?
     private var cancellables = Set<AnyCancellable>()
     
     init(authManager: AuthManager, networkManager: NetworkManager) {
         self.authManager = authManager
         self.networkManager = networkManager
-        setupPostsListener()
         setupSearchDebounce()
+        loadInitialPosts()
     }
     
     deinit {
-        postsListener?.remove()
         commentsListener?.remove()
         cancellables.removeAll()
     }
@@ -59,37 +70,170 @@ final class CommunityService: ObservableObject {
         $searchText
             .debounce(for: .milliseconds(500), scheduler: DispatchQueue.main)
             .removeDuplicates()
-            .filter { $0.count >= 2 || $0.isEmpty }
             .sink { [weak self] query in
-                self?.performSearch(query: query)
+                guard let self = self else { return }
+                Task { await self.performSearch(query: query) }
             }
             .store(in: &cancellables)
     }
     
-    private func setupPostsListener() {
+    private func loadInitialPosts() {
         isLoading = true
         
-        postsListener = db.collection("posts")
-            .order(by: "date", descending: true)
-            .limit(to: 20)
-            .addSnapshotListener { [weak self] snapshot, error in
-                guard let self = self else { return }
+        Task {
+            do {
+                let snapshot = try await db.collection("posts")
+                    .order(by: "date", descending: true)
+                    .limit(to: pageSize)
+                    .getDocuments()
                 
-                if let error = error {
-                    print("Error fetching posts: \(error)")
-                    self.isLoading = false
-                    return
-                }
+                allPosts = snapshot.documents.compactMap { try? $0.data(as: PostModel.self) }
+                lastDocument = snapshot.documents.last
+                hasMorePosts = snapshot.documents.count == pageSize
                 
-                self.posts = snapshot?.documents.compactMap { try? $0.data(as: PostModel.self) } ?? []
-                
-                if let currentPostId = self.currentPost?.id {
-                    self.currentPost = self.posts.first(where: { $0.id == currentPostId })
-                }
-                
-                self.applyFilters()
-                self.isLoading = false
+                updateCurrentPostIfNeeded()
+                isLoading = false
+            } catch {
+                print("Error loading initial posts: \(error)")
+                isLoading = false
             }
+        }
+    }
+    
+    func loadMorePosts() {
+        guard !isLoadingMore, !isLoading, hasMorePosts,
+              !isSearchMode, let lastDoc = lastDocument else { return }
+        
+        isLoadingMore = true
+        
+        Task {
+            do {
+                let snapshot = try await db.collection("posts")
+                    .order(by: "date", descending: true)
+                    .start(afterDocument: lastDoc)
+                    .limit(to: pageSize)
+                    .getDocuments()
+                
+                let newPosts = snapshot.documents.compactMap { try? $0.data(as: PostModel.self) }
+                allPosts.append(contentsOf: newPosts)
+                lastDocument = snapshot.documents.last
+                hasMorePosts = snapshot.documents.count == pageSize
+                isLoadingMore = false
+            } catch {
+                print("Error loading more posts: \(error)")
+                isLoadingMore = false
+            }
+        }
+    }
+    
+    // MARK: - Search & Filter
+    
+    private func performSearch(query: String) async {
+        let trimmed = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        guard !trimmed.isEmpty else {
+            loadInitialPosts()
+            return
+        }
+        
+        do {
+            let searchQuery = trimmed.lowercased()
+            let keywords = searchQuery.components(separatedBy: .whitespaces).filter { !$0.isEmpty }
+            
+            var results: [String: PostModel] = [:]
+            
+            for keyword in keywords {
+                let snapshot = try await db.collection("posts")
+                    .whereField("titleKeywords", arrayContains: keyword)
+                    .limit(to: 50)
+                    .getDocuments()
+                
+                snapshot.documents.compactMap { try? $0.data(as: PostModel.self) }
+                    .forEach { if let id = $0.id { results[id] = $0 } }
+            }
+            
+            let titleSnapshot = try await db.collection("posts")
+                .order(by: "title")
+                .start(at: [searchQuery])
+                .end(at: [searchQuery + "\u{f8ff}"])
+                .limit(to: 50)
+                .getDocuments()
+            
+            titleSnapshot.documents.compactMap { try? $0.data(as: PostModel.self) }
+                .forEach { if let id = $0.id { results[id] = $0 } }
+            
+            allPosts = Array(results.values)
+                .filter { post in
+                    post.title.localizedCaseInsensitiveContains(searchQuery) ||
+                    post.content.localizedCaseInsensitiveContains(searchQuery) ||
+                    post.titleKeywords.contains { $0.localizedCaseInsensitiveContains(searchQuery) }
+                }
+                .sorted { post1, post2 in
+                    let title1Match = post1.title.localizedCaseInsensitiveContains(searchQuery)
+                    let title2Match = post2.title.localizedCaseInsensitiveContains(searchQuery)
+                    
+                    if title1Match != title2Match {
+                        return title1Match
+                    }
+                    return post1.date > post2.date
+                }
+            
+        } catch {
+            print("Error searching posts: \(error)")
+            allPosts = []
+        }
+    }
+    
+    private func filterPosts(_ posts: [PostModel]) -> [PostModel] {
+        guard let filter = selectedFilter,
+              let userId = authManager.currentUser?.id else {
+            return posts
+        }
+        
+        switch filter {
+        case .myPosts:
+            return posts.filter { $0.authorId == userId }
+        case .saved:
+            return posts.filter { $0.saves.contains(userId) }
+        case .liked:
+            return posts.filter { $0.likes.contains(userId) }
+        case .popular, .latest:
+            return posts
+        }
+    }
+    
+    private func sortPosts(_ posts: [PostModel]) -> [PostModel] {
+        guard let filter = selectedFilter else { return posts }
+        
+        switch filter {
+        case .popular:
+            return posts.sorted { $0.likes.count > $1.likes.count }
+        case .latest:
+            return posts.sorted { $0.date > $1.date }
+        case .myPosts, .saved, .liked:
+            return posts
+        }
+    }
+    
+    // MARK: - Current Post
+    
+    func setCurrentPost(postId: String) {
+        currentPost = allPosts.first(where: { $0.id == postId })
+        
+        if currentPost != nil {
+            setupCommentsListener(postId: postId)
+        }
+    }
+    
+    func clearCurrentPost() {
+        currentPost = nil
+        currentPostComments = []
+        commentsListener?.remove()
+    }
+    
+    private func updateCurrentPostIfNeeded() {
+        guard let currentPostId = currentPost?.id else { return }
+        currentPost = allPosts.first(where: { $0.id == currentPostId })
     }
     
     private func setupCommentsListener(postId: String) {
@@ -106,174 +250,63 @@ final class CommunityService: ObservableObject {
                     return
                 }
                 
-                self.currentPostComments = snapshot?.documents.compactMap { try? $0.data(as: CommentModel.self) } ?? []
+                self.currentPostComments = snapshot?.documents.compactMap {
+                    try? $0.data(as: CommentModel.self)
+                } ?? []
             }
-    }
-    
-    // MARK: - Search & Filter
-    
-    private func performSearch(query: String) {
-        let trimmedText = query.trimmingCharacters(in: .whitespacesAndNewlines)
-        
-        if trimmedText.isEmpty {
-            isSearching = false
-            applyFilters()
-            return
-        }
-        
-        isSearching = true
-        let searchQuery = trimmedText.lowercased()
-        
-        Task { [weak self] in
-            if !(self?.hasLoadedSearchCache ?? true) {
-                await self?.loadSearchCache()
-            }
-            
-            await self?.executeSearch(query: searchQuery)
-        }
-    }
-    
-    private func executeSearch(query: String) async {
-        let results = getSearchResults(for: query)
-        
-        await MainActor.run {
-            self.filteredPosts = results
-            self.isSearching = false
-            self.applyFilters()
-        }
-    }
-    
-    private func getSearchResults(for query: String) -> [PostModel] {
-        var uniquePosts: [String: PostModel] = [:]
-        
-        for post in searchablePosts {
-            if let id = post.id { uniquePosts[id] = post }
-        }
-        
-        for post in posts {
-            if let id = post.id { uniquePosts[id] = post }
-        }
-        
-        return uniquePosts.values
-            .filter { post in
-                post.title.localizedCaseInsensitiveContains(query) ||
-                post.content.localizedCaseInsensitiveContains(query) ||
-                post.titleKeywords.contains { $0.localizedCaseInsensitiveContains(query) }
-            }
-            .sorted { $0.date > $1.date }
-    }
-    
-    private func applyFilters() {
-        var result: [PostModel]
-        
-        if !searchText.isEmpty {
-            result = getSearchResults(for: searchText.lowercased())
-        } else {
-            result = posts
-        }
-        
-        guard let filter = selectedFilter else {
-            filteredPosts = result
-            return
-        }
-        
-        guard let userId = authManager.currentUser?.id else {
-            filteredPosts = result
-            return
-        }
-        
-        switch filter {
-        case .popular:
-            filteredPosts = result.sorted { $0.likes.count > $1.likes.count }
-        case .myPosts:
-            filteredPosts = result.filter { $0.authorId == userId }
-        case .saved:
-            filteredPosts = result.filter { $0.saves.contains(userId) }
-        case .liked:
-            filteredPosts = result.filter { $0.likes.contains(userId) }
-        case .latest:
-            filteredPosts = result.sorted { $0.date > $1.date }
-        }
-    }
-    
-    private func loadSearchCache() async {
-        do {
-            let snapshot = try await db.collection("posts")
-                .order(by: "date", descending: true)
-                .limit(to: 200)
-                .getDocuments()
-            
-            let posts = snapshot.documents.compactMap { try? $0.data(as: PostModel.self) }
-            
-            await MainActor.run {
-                self.searchablePosts = posts
-                self.hasLoadedSearchCache = true
-            }
-        } catch {
-            print("Error loading search cache: \(error)")
-        }
-    }
-    
-    // MARK: - Current Post
-    
-    func setCurrentPost(postId: String) {
-        currentPost = posts.first(where: { $0.id == postId })
-        if currentPost != nil {
-            setupCommentsListener(postId: postId)
-        }
-    }
-    
-    func clearCurrentPost() {
-        currentPost = nil
-        currentPostComments = []
-        commentsListener?.remove()
-        isCurrentPostLiked = false
-        isCurrentPostSaved = false
-        isCurrentPostAuthor = false
-    }
-    
-    private func updateCurrentPostState() {
-        guard let post = currentPost, let userId = authManager.currentUser?.id else {
-            isCurrentPostLiked = false
-            isCurrentPostSaved = false
-            isCurrentPostAuthor = false
-            return
-        }
-        
-        isCurrentPostLiked = post.likes.contains(userId)
-        isCurrentPostSaved = post.saves.contains(userId)
-        isCurrentPostAuthor = post.authorId == userId
     }
     
     // MARK: - Post Actions
     
     func toggleLike(postId: String) async {
-        guard let userId = authManager.currentUser?.id,
-              let post = posts.first(where: { $0.id == postId }) else { return }
+        guard let userId = authManager.currentUser?.id else { return }
         
-        let isLiked = post.likes.contains(userId)
-        
-        do {
-            try await db.collection("posts").document(postId).updateData([
-                "likes": isLiked ? FieldValue.arrayRemove([userId]) : FieldValue.arrayUnion([userId])
-            ])
-        } catch {
-            print("Error toggling like: \(error)")
+        await updatePost(postId: postId) { post in
+            if post.likes.contains(userId) {
+                post.likes.removeAll { $0 == userId }
+                return ("likes", FieldValue.arrayRemove([userId]))
+            } else {
+                post.likes.append(userId)
+                return ("likes", FieldValue.arrayUnion([userId]))
+            }
         }
     }
     
     func toggleSave(postId: String) async {
-        guard let userId = authManager.currentUser?.id,
-              let post = posts.first(where: { $0.id == postId }) else { return }
+        guard let userId = authManager.currentUser?.id else { return }
         
-        let isSaved = post.saves.contains(userId)
+        await updatePost(postId: postId) { post in
+            if post.saves.contains(userId) {
+                post.saves.removeAll { $0 == userId }
+                return ("saves", FieldValue.arrayRemove([userId]))
+            } else {
+                post.saves.append(userId)
+                return ("saves", FieldValue.arrayUnion([userId]))
+            }
+        }
+    }
+    
+    private func updatePost(
+        postId: String,
+        update: (inout PostModel) -> (String, Any)
+    ) async {
+        guard let index = allPosts.firstIndex(where: { $0.id == postId }) else { return }
+        
+        let originalPost = allPosts[index]
+        let (field, value) = update(&allPosts[index])
+        
+        if currentPost?.id == postId {
+            currentPost = allPosts[index]
+        }
         
         do {
-            try await db.collection("posts").document(postId).updateData([
-                "saves": isSaved ? FieldValue.arrayRemove([userId]) : FieldValue.arrayUnion([userId])
-            ])
+            try await db.collection("posts").document(postId).updateData([field: value])
         } catch {
-            print("Error toggling save: \(error)")
+            print("Error updating post: \(error)")
+            allPosts[index] = originalPost
+            if currentPost?.id == postId {
+                currentPost = originalPost
+            }
         }
     }
     
@@ -283,6 +316,8 @@ final class CommunityService: ObservableObject {
             var newPost = post
             newPost.id = docRef.documentID
             try docRef.setData(from: newPost)
+            
+            allPosts.insert(newPost, at: 0)
         } catch {
             print("Error adding post: \(error)")
         }
@@ -303,6 +338,7 @@ final class CommunityService: ObservableObject {
             
             try await db.collection("posts").document(postId).delete()
             
+            allPosts.removeAll { $0.id == postId }
             currentPost = nil
             currentPostComments = []
             commentsListener?.remove()
@@ -326,6 +362,13 @@ final class CommunityService: ObservableObject {
             try await db.collection("posts").document(postId).updateData([
                 "commentCount": FieldValue.increment(Int64(1))
             ])
+            
+            if let index = allPosts.firstIndex(where: { $0.id == postId }) {
+                allPosts[index].commentCount += 1
+                if currentPost?.id == postId {
+                    currentPost = allPosts[index]
+                }
+            }
         } catch {
             print("Error adding comment: \(error)")
             currentPostComments.removeAll { $0.id == comment.id }
