@@ -25,6 +25,14 @@ class DashboardViewController: UIViewController {
         return view
     }()
     
+    private let logoView: UIImageView = {
+        let logo = UIImageView()
+        logo.contentMode = .scaleAspectFit
+        logo.translatesAutoresizingMaskIntoConstraints = false
+        logo.image = UIImage(named: "Haeri Logo")
+        return logo
+    }()
+    
     private let headerLabel: UILabel = {
         let label = UILabel()
         label.font = .firagoMedium(.xxsmall)
@@ -106,7 +114,8 @@ class DashboardViewController: UIViewController {
     }
     
     private func setHeaderView() {
-        headerView.addSubview(headerLabel)
+//        headerView.addSubview(headerLabel)
+        headerView.addSubview(logoView)
         view.addSubview(headerView)
         
         NSLayoutConstraint.activate([
@@ -115,8 +124,9 @@ class DashboardViewController: UIViewController {
             headerView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             headerView.heightAnchor.constraint(equalToConstant: 120),
             
-            headerLabel.centerXAnchor.constraint(equalTo: headerView.centerXAnchor),
-            headerLabel.bottomAnchor.constraint(equalTo: headerView.bottomAnchor, constant: -20)
+            logoView.centerXAnchor.constraint(equalTo: headerView.centerXAnchor),
+            logoView.bottomAnchor.constraint(equalTo: headerView.bottomAnchor, constant: -20),
+            logoView.heightAnchor.constraint(equalToConstant: 30)
         ])
     }
     
