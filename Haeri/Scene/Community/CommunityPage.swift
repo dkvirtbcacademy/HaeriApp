@@ -86,6 +86,13 @@ struct CommunityPage: View {
                 .padding(.bottom, 10)
             }
         }
+        .alert(item: $communityService.alertItem) { alertItem in
+            Alert(
+                title: alertItem.title,
+                message: alertItem.message,
+                dismissButton: alertItem.dismissButton
+            )
+        }
     }
     
     private var emptyStateView: some View {

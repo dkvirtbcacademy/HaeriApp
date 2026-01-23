@@ -8,9 +8,10 @@
 import Foundation
 import Combine
 import FirebaseFirestore
+import Network
 
 @MainActor
-final class CommunityService: ObservableObject {
+final class CommunityService: ObservableObject, AlertHandler {
     
     private let networkManager: NetworkManager
     private let authManager: AuthManager
@@ -23,6 +24,7 @@ final class CommunityService: ObservableObject {
     @Published var searchText: String = ""
     @Published var isLoading: Bool = false
     @Published var isLoadingMore: Bool = false
+    @Published var alertItem: AlertItem? = nil
     
     var displayedPosts: [PostModel] {
         let filtered = filterPosts(allPosts)
@@ -52,9 +54,14 @@ final class CommunityService: ObservableObject {
     private var commentsListener: ListenerRegistration?
     private var cancellables = Set<AnyCancellable>()
     
+    private let networkMonitor = NWPathMonitor()
+    private let networkQueue = DispatchQueue(label: "NetworkMonitor")
+    private var isConnected = true
+    
     init(authManager: AuthManager, networkManager: NetworkManager) {
         self.authManager = authManager
         self.networkManager = networkManager
+        setupNetworkMonitoring()
         setupSearchDebounce()
         loadInitialPosts()
     }
@@ -62,9 +69,27 @@ final class CommunityService: ObservableObject {
     deinit {
         commentsListener?.remove()
         cancellables.removeAll()
+        networkMonitor.cancel()
     }
     
     // MARK: - Setup
+    
+    private func setupNetworkMonitoring() {
+        networkMonitor.pathUpdateHandler = { [weak self] path in
+            Task { @MainActor [weak self] in
+                self?.isConnected = path.status == .satisfied
+            }
+        }
+        networkMonitor.start(queue: networkQueue)
+    }
+    
+    private func checkNetworkConnection() -> Bool {
+        guard isConnected else {
+            handleCommunityError(.noInternetConnection)
+            return false
+        }
+        return true
+    }
     
     private func setupSearchDebounce() {
         $searchText
@@ -95,6 +120,7 @@ final class CommunityService: ObservableObject {
                 isLoading = false
             } catch {
                 print("Error loading initial posts: \(error)")
+                handleCommunityError(.loadingFailed)
                 isLoading = false
             }
         }
@@ -121,6 +147,7 @@ final class CommunityService: ObservableObject {
                 isLoadingMore = false
             } catch {
                 print("Error loading more posts: \(error)")
+                handleCommunityError(.loadingFailed)
                 isLoadingMore = false
             }
         }
@@ -180,6 +207,7 @@ final class CommunityService: ObservableObject {
             
         } catch {
             print("Error searching posts: \(error)")
+            handleCommunityError(.searchFailed)
             allPosts = []
         }
     }
@@ -259,6 +287,7 @@ final class CommunityService: ObservableObject {
     // MARK: - Post Actions
     
     func toggleLike(postId: String) async {
+        guard checkNetworkConnection() else { return }
         guard let userId = authManager.currentUser?.id else { return }
         
         await updatePost(postId: postId) { post in
@@ -273,6 +302,7 @@ final class CommunityService: ObservableObject {
     }
     
     func toggleSave(postId: String) async {
+        guard checkNetworkConnection() else { return }
         guard let userId = authManager.currentUser?.id else { return }
         
         await updatePost(postId: postId) { post in
@@ -290,7 +320,10 @@ final class CommunityService: ObservableObject {
         postId: String,
         update: (inout PostModel) -> (String, Any)
     ) async {
-        guard let index = allPosts.firstIndex(where: { $0.id == postId }) else { return }
+        guard let index = allPosts.firstIndex(where: { $0.id == postId }) else {
+            handleCommunityError(.postNotFound)
+            return
+        }
         
         let originalPost = allPosts[index]
         let (field, value) = update(&allPosts[index])
@@ -303,6 +336,8 @@ final class CommunityService: ObservableObject {
             try await db.collection("posts").document(postId).updateData([field: value])
         } catch {
             print("Error updating post: \(error)")
+            handleCommunityError(.updateFailed)
+            
             allPosts[index] = originalPost
             if currentPost?.id == postId {
                 currentPost = originalPost
@@ -311,6 +346,8 @@ final class CommunityService: ObservableObject {
     }
     
     func addPost(_ post: PostModel) async {
+        guard checkNetworkConnection() else { return }
+        
         do {
             let docRef = db.collection("posts").document()
             var newPost = post
@@ -320,12 +357,22 @@ final class CommunityService: ObservableObject {
             allPosts.insert(newPost, at: 0)
         } catch {
             print("Error adding post: \(error)")
+            handleCommunityError(.firestoreError(error.localizedDescription))
         }
     }
     
     func deleteCurrentPost() async {
-        guard let postId = currentPost?.id,
-              currentPost?.authorId == authManager.currentUser?.id else { return }
+        guard checkNetworkConnection() else { return }
+        
+        guard let postId = currentPost?.id else {
+            handleCommunityError(.postNotFound)
+            return
+        }
+        
+        guard currentPost?.authorId == authManager.currentUser?.id else {
+            handleCommunityError(.unauthorized)
+            return
+        }
         
         do {
             let commentsSnapshot = try await db.collection("comments")
@@ -344,11 +391,17 @@ final class CommunityService: ObservableObject {
             commentsListener?.remove()
         } catch {
             print("Error deleting post: \(error)")
+            handleCommunityError(.deletionFailed)
         }
     }
     
     func addComment(_ comment: CommentModel) async {
-        guard let postId = currentPost?.id else { return }
+        guard checkNetworkConnection() else { return }
+        
+        guard let postId = currentPost?.id else {
+            handleCommunityError(.postNotFound)
+            return
+        }
         
         do {
             let docRef = db.collection("comments").document()
@@ -371,6 +424,7 @@ final class CommunityService: ObservableObject {
             }
         } catch {
             print("Error adding comment: \(error)")
+            handleCommunityError(.commentFailed)
             currentPostComments.removeAll { $0.id == comment.id }
         }
     }

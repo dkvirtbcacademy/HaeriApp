@@ -75,6 +75,13 @@ struct PostDetailsPage: View {
         .onAppear {
             viewModel.onAppear()
         }
+        .alert(item: $communityService.alertItem) { alertItem in
+            Alert(
+                title: alertItem.title,
+                message: alertItem.message,
+                dismissButton: alertItem.dismissButton
+            )
+        }
     }
 }
 

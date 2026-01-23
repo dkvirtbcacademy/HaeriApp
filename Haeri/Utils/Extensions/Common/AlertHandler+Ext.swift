@@ -120,6 +120,31 @@ extension AlertHandler {
             alertItem = AuthAlertContext.unknown(message: message)
         }
     }
+    
+    func handleCommunityError(_ error: CommunityError) {
+        switch error {
+        case .postNotFound:
+            alertItem = CommunityAlertContext.postNotFound
+        case .unauthorized:
+            alertItem = CommunityAlertContext.unauthorized
+        case .firestoreError(let message):
+            alertItem = CommunityAlertContext.firestoreError(message: message)
+        case .networkError:
+            alertItem = CommunityAlertContext.networkError
+        case .noInternetConnection:
+            alertItem = CommunityAlertContext.noInternetConnection
+        case .deletionFailed:
+            alertItem = CommunityAlertContext.deletionFailed
+        case .updateFailed:
+            alertItem = CommunityAlertContext.updateFailed
+        case .searchFailed:
+            alertItem = CommunityAlertContext.searchFailed
+        case .commentFailed:
+            alertItem = CommunityAlertContext.commentFailed
+        case .loadingFailed:
+            alertItem = CommunityAlertContext.loadingFailed
+        }
+    }
 }
 
 extension UIKitAlertHandler where Self: UIViewController {
