@@ -28,13 +28,20 @@ struct CommunityPage: View {
         ZStack(alignment: .top) {
             ScrollView {
                 LazyVStack(spacing: 16) {
-                    ForEach(communityService.filteredPosts) { post in
-                        PostCard(post: post)
-                            .onTapGesture {
-                                guard let postId = post.id else { return }
-                                
-                                viewModel.navigateToPost(postId: postId)
-                            }
+                    if communityService.isSearching {
+                        ProgressView("searching...")
+                            .frame(maxWidth: .infinity)
+                            .padding(.top, 20)
+                    } else if communityService.filteredPosts.isEmpty {
+                        emptyStateView
+                    } else {
+                        ForEach(communityService.filteredPosts) { post in
+                            PostCard(post: post)
+                                .onTapGesture {
+                                    guard let postId = post.id else { return }
+                                    viewModel.navigateToPost(postId: postId)
+                                }
+                        }
                     }
                 }
                 .padding(.horizontal)
@@ -45,7 +52,7 @@ struct CommunityPage: View {
             .coordinateSpace(name: "scrollView")
             
             VStack(spacing: 10) {
-                SearchBar()
+                SearchBar(searchText: $communityService.searchText)
                 FilterView(selectedFilter: $communityService.selectedFilter)
             }
             .padding(.bottom, 20)
@@ -63,6 +70,26 @@ struct CommunityPage: View {
                 .padding(.bottom, 10)
             }
         }
+    }
+    
+    private var emptyStateView: some View {
+        VStack(spacing: 12) {
+            Image(systemName: communityService.searchText.isEmpty ? "doc.text.magnifyingglass" : "magnifyingglass")
+                .font(.system(size: 50))
+                .foregroundColor(.darkText)
+            
+            Text(communityService.searchText.isEmpty ? "პოსტები არ არის" : "ვერაფერი მოიძებნა")
+                .font(.firago(.medium))
+                .foregroundColor(.darkText)
+            
+            if !communityService.searchText.isEmpty {
+                Text("სცადეთ სხვა საძიებო სიტყვა")
+                    .font(.firago(.xxsmall))
+                    .foregroundColor(.darkText)
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.top, 60)
     }
     
     private var scrollOffsetReader: some View {

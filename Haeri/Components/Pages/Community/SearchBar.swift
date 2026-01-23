@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct SearchBar: View {
-    @State var searchText = ""
+    @Binding var searchText: String
     
     var body: some View {
         VStack(spacing: 20) {
@@ -85,6 +85,8 @@ struct SearchBar: View {
 }
 
 #Preview {
-    SearchBar()
+    @Previewable @State var searchText: String = "Hello, World!"
+    
+    SearchBar(searchText: $searchText)
         .background(Color.green)
 }

@@ -8,7 +8,7 @@
 import Foundation
 import FirebaseFirestore
 
-struct PostModel: Identifiable, Codable {
+struct PostModel: Identifiable, Codable, Hashable {
     @DocumentID var id: String?
     let date: Date
     let authorId: String
@@ -19,6 +19,32 @@ struct PostModel: Identifiable, Codable {
     var likes: [String]
     var saves: [String]
     var commentCount: Int
+    var titleKeywords: [String]
+    
+    init(
+        id: String? = nil,
+        date: Date = Date(),
+        authorId: String,
+        authorName: String,
+        authorAvatar: String,
+        title: String,
+        content: String,
+        likes: [String] = [],
+        saves: [String] = [],
+        commentCount: Int = 0
+    ) {
+        self.id = id
+        self.date = date
+        self.authorId = authorId
+        self.authorName = authorName
+        self.authorAvatar = authorAvatar
+        self.title = title
+        self.content = content
+        self.likes = likes
+        self.saves = saves
+        self.commentCount = commentCount
+        self.titleKeywords = title.generateSearchKeywords()
+    }
 }
 
 struct CommentModel: Identifiable, Codable {
