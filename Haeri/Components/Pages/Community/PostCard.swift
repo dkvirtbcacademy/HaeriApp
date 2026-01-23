@@ -13,9 +13,14 @@ struct PostCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Text(post.authorName)
-                    .font(.firago(.xsmall))
-                    .foregroundColor(.secondaryDarkText)
+                HStack(spacing: 6) {
+                    Image(post.authorAvatar)
+                        .resizable()
+                        .frame(maxWidth: 20, maxHeight: 20)
+                    Text(post.authorName)
+                        .font(.firago(.xsmall))
+                        .foregroundColor(.secondaryDarkText)
+                }
                 Spacer()
                 Text(post.formattedDate)
                     .font(.firago(.xsmall))
