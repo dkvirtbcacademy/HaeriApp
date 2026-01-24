@@ -16,7 +16,7 @@ struct LaunchScreen: View {
             VStack {
                 CloudMarqueeView(imageName: "clouds2", height: 300, duration: 20)
                 Spacer()
-                CloudMarqueeView(imageName: "clouds3", height: 200, duration: 10, reversed: true)
+                CloudMarqueeView(imageName: "clouds3", height: 200, duration: 10)
                     .padding(.bottom, 90)
             }
             
@@ -54,12 +54,12 @@ struct CloudMarqueeView: View {
                             .frame(height: height)
                     }
                 }
-                .offset(x: reversed ? -xOffset : xOffset)
+                .offset(x: xOffset)
             }
             .disabled(true)
             .onAppear {
-                withAnimation(.linear(duration: duration).repeatForever(autoreverses: false)) {
-                    xOffset = reversed ? screenWidth : -screenWidth
+                withAnimation(.linear(duration: duration)) {
+                    xOffset = -screenWidth
                 }
             }
         }
