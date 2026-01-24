@@ -136,9 +136,9 @@ class ChangeNameViewController: UIViewController {
         nameField.clearError()
         
         Task { @MainActor in
-            await viewModel.authManager.updateUserName(name)
+            let success = await viewModel.authManager.updateUserName(name)
             
-            if viewModel.authManager.alertItem == nil {
+            if success && viewModel.authManager.alertItem == nil {
                 viewModel.coordinator.navigateBack()
             }
         }

@@ -31,6 +31,7 @@ final class AuthManager: ObservableObject, AlertHandler {
     
     private let db = Firestore.firestore()
     private var authStateHandler: AuthStateDidChangeListenerHandle?
+    private var isInitialLoad = true
     
     init() {
         registerAuthStateHandler()
@@ -48,10 +49,14 @@ final class AuthManager: ObservableObject, AlertHandler {
                 guard let self = self else { return }
                 
                 if let user = user {
-                    await self.fetchUserData(userId: user.uid)
+                    if self.isInitialLoad || self.currentUser?.id != user.uid {
+                        await self.fetchUserData(userId: user.uid)
+                        self.isInitialLoad = false
+                    }
                 } else {
                     self.currentUser = nil
                     self.isLoggedIn = false
+                    self.isInitialLoad = true
                 }
             }
         }
@@ -139,10 +144,10 @@ final class AuthManager: ObservableObject, AlertHandler {
         try db.collection("users").document(userId).setData(from: user)
     }
     
-    func updateUserName(_ name: String) async {
+    func updateUserName(_ name: String) async -> Bool {
         guard let user = currentUser, let userId = user.id else {
             handleAuthError(.userNotFound)
-            return
+            return false
         }
         
         isLoading = true
@@ -153,16 +158,28 @@ final class AuthManager: ObservableObject, AlertHandler {
                 "name": name
             ])
             
-            await fetchUserData(userId: userId)
+            var updatedUser = user
+            let mirror = Mirror(reflecting: updatedUser)
+            updatedUser = UserModel(
+                id: userId,
+                name: name,
+                avatar: user.avatar,
+                email: user.email,
+                categories: user.categories
+            )
+            self.currentUser = updatedUser
+            
+            return true
         } catch {
             handleAuthError(.firestoreError(error.localizedDescription))
+            return false
         }
     }
     
-    func updateUserAvatar(_ avatar: String) async {
+    func updateUserAvatar(_ avatar: String) async -> Bool {
         guard let user = currentUser, let userId = user.id else {
             handleAuthError(.userNotFound)
-            return
+            return false
         }
         
         isLoading = true
@@ -173,16 +190,26 @@ final class AuthManager: ObservableObject, AlertHandler {
                 "avatar": avatar
             ])
             
-            await fetchUserData(userId: userId)
+            let updatedUser = UserModel(
+                id: userId,
+                name: user.name,
+                avatar: avatar,
+                email: user.email,
+                categories: user.categories
+            )
+            self.currentUser = updatedUser
+            
+            return true
         } catch {
             handleAuthError(.firestoreError(error.localizedDescription))
+            return false
         }
     }
     
-    func updateUserCategories(_ categories: [String]) async {
+    func updateUserCategories(_ categories: [String]) async -> Bool {
         guard let user = currentUser, let userId = user.id else {
             handleAuthError(.userNotFound)
-            return
+            return false
         }
         
         isLoading = true
@@ -193,16 +220,26 @@ final class AuthManager: ObservableObject, AlertHandler {
                 "categories": categories
             ])
             
-            await fetchUserData(userId: userId)
+            let updatedUser = UserModel(
+                id: userId,
+                name: user.name,
+                avatar: user.avatar,
+                email: user.email,
+                categories: categories
+            )
+            self.currentUser = updatedUser
+            
+            return true
         } catch {
             handleAuthError(.firestoreError(error.localizedDescription))
+            return false
         }
     }
     
-    func changePassword(newPassword: String) async {
+    func changePassword(newPassword: String) async -> Bool {
         guard let user = Auth.auth().currentUser else {
             handleAuthError(.userNotFound)
-            return
+            return false
         }
         
         isLoading = true
@@ -210,8 +247,10 @@ final class AuthManager: ObservableObject, AlertHandler {
         
         do {
             try await user.updatePassword(to: newPassword)
+            return true
         } catch let error as NSError {
             handleAuthError(mapAuthError(error))
+            return false
         }
     }
     
