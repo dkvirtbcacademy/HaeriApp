@@ -15,55 +15,36 @@ enum NetworkError: Error {
     case noResultsFound
     case networkError
     case invalidURL
-    
-    var localizedDescription: String {
-        switch self {
-        case .wrongStatusCode:
-            return "Received invalid status code from server"
-        case .invalidResponse(let statusCode, _):
-            return "Invalid response with status code: \(statusCode)"
-        case .noDataAvailable:
-            return "No data received from server"
-        case .decodingError:
-            return "Failed to decode server response"
-        case .noResultsFound:
-            return "No results found"
-        case .networkError:
-            return "Network connection failed"
-        case .invalidURL:
-            return "Invalid URL"
-        }
-    }
 }
 
 struct NetworkAlertContext {
     static let wrongStatusCode = AlertItem(
-        title: Text("Invalid Status Code"),
-        message: Text("The server returned an unexpected status code. Please try again."),
-        dismissButton: .default(Text("OK"))
+        title: Text("არასწორი სტატუს კოდი"),
+        message: Text("სერვერმა დააბრუნა მოულოდნელი სტატუს კოდი. გთხოვთ სცადოთ თავიდან."),
+        dismissButton: .default(Text("კარგი"))
     )
     
     static let noDataAvailable = AlertItem(
-        title: Text("No Data"),
-        message: Text("No data was received from the server. Please try again."),
-        dismissButton: .default(Text("OK"))
+        title: Text("მონაცემები არ არის"),
+        message: Text("სერვერიდან მონაცემები არ იქნა მიღებული. გთხოვთ სცადოთ თავიდან."),
+        dismissButton: .default(Text("კარგი"))
     )
     
     static let decodingError = AlertItem(
-        title: Text("Data Error"),
-        message: Text("Unable to process the server response. Please try again."),
-        dismissButton: .default(Text("OK"))
+        title: Text("მონაცემების შეცდომა"),
+        message: Text("სერვერის პასუხის დამუშავება ვერ მოხერხდა. გთხოვთ სცადოთ თავიდან."),
+        dismissButton: .default(Text("კარგი"))
     )
     
     static let networkError = AlertItem(
-        title: Text("Network Error"),
-        message: Text("Unable to connect to the server. Please check your internet connection."),
-        dismissButton: .default(Text("OK"))
+        title: Text("ქსელის შეცდომა"),
+        message: Text("სერვერთან დაკავშირება ვერ მოხერხდა. გთხოვთ შეამოწმოთ ინტერნეტ კავშირი."),
+        dismissButton: .default(Text("კარგი"))
     )
     
     static let invalidURL = AlertItem(
-        title: Text("Invalid URL"),
-        message: Text("The server URL is invalid. Please contact support."),
-        dismissButton: .default(Text("OK"))
+        title: Text("არასწორი URL"),
+        message: Text("სერვერის URL არასწორია. გთხოვთ დაუკავშირდეთ მხარდაჭერას."),
+        dismissButton: .default(Text("კარგი"))
     )
 }

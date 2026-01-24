@@ -24,78 +24,78 @@ enum AuthError: Error {
 
 struct AuthAlertContext {
     static let userNotFound = AlertItem(
-        title: Text("User Not Found"),
-        message: Text("No account exists with this email address."),
-        dismissButton: .default(Text("OK"))
+        title: Text("მომხმარებელი ვერ მოიძებნა"),
+        message: Text("ამ ელფოსტის მისამართით ანგარიში არ არსებობს."),
+        dismissButton: .default(Text("კარგი"))
     )
     
     static let invalidCredentials = AlertItem(
-        title: Text("Invalid Credentials"),
-        message: Text("The email or password you entered is incorrect."),
-        dismissButton: .default(Text("OK"))
+        title: Text("არასწორი მონაცემები"),
+        message: Text("თქვენს მიერ შეყვანილი ელფოსტა ან პაროლი არასწორია."),
+        dismissButton: .default(Text("კარგი"))
     )
     
     static let weakPassword = AlertItem(
-        title: Text("Weak Password"),
-        message: Text("Password must be at least 6 characters long."),
-        dismissButton: .default(Text("OK"))
+        title: Text("სუსტი პაროლი"),
+        message: Text("პაროლი უნდა შეიცავდეს მინიმუმ 6 სიმბოლოს."),
+        dismissButton: .default(Text("კარგი"))
     )
     
     static let emailAlreadyInUse = AlertItem(
-        title: Text("Email Already Registered"),
-        message: Text("An account with this email already exists."),
-        dismissButton: .default(Text("OK"))
+        title: Text("ელფოსტა უკვე რეგისტრირებულია"),
+        message: Text("ამ ელფოსტით ანგარიში უკვე არსებობს."),
+        dismissButton: .default(Text("კარგი"))
     )
     
     static let networkError = AlertItem(
-        title: Text("Network Error"),
-        message: Text("Please check your internet connection."),
-        dismissButton: .default(Text("OK"))
+        title: Text("ქსელის შეცდომა"),
+        message: Text("გთხოვთ შეამოწმოთ ინტერნეტ კავშირი."),
+        dismissButton: .default(Text("კარგი"))
     )
     
     static func firestoreError(message: String) -> AlertItem {
         AlertItem(
-            title: Text("Database Error"),
-            message: Text("Error: \(message)"),
-            dismissButton: .default(Text("OK"))
+            title: Text("მონაცემთა ბაზის შეცდომა"),
+            message: Text("შეცდომა: \(message)"),
+            dismissButton: .default(Text("კარგი"))
         )
     }
     
     static let invalidEmail = AlertItem(
-        title: Text("Invalid Email"),
-        message: Text("Please enter a valid email address."),
-        dismissButton: .default(Text("OK"))
+        title: Text("არასწორი ელფოსტა"),
+        message: Text("გთხოვთ შეიყვანოთ სწორი ელფოსტის მისამართი."),
+        dismissButton: .default(Text("კარგი"))
     )
     
     static let userDisabled = AlertItem(
-        title: Text("Account Disabled"),
-        message: Text("Your account has been disabled."),
-        dismissButton: .default(Text("OK"))
+        title: Text("ანგარიში გათიშულია"),
+        message: Text("თქვენი ანგარიში გათიშულია."),
+        dismissButton: .default(Text("კარგი"))
     )
     
     static let tooManyRequests = AlertItem(
-        title: Text("Too Many Attempts"),
-        message: Text("Please wait a few minutes and try again."),
-        dismissButton: .default(Text("OK"))
+        title: Text("ძალიან ბევრი მცდელობა"),
+        message: Text("გთხოვთ დაელოდოთ რამდენიმე წუთს და სცადოთ თავიდან."),
+        dismissButton: .default(Text("კარგი"))
     )
     
     static let operationNotAllowed = AlertItem(
-        title: Text("Operation Not Allowed"),
-        message: Text("This sign-in method is not enabled."),
-        dismissButton: .default(Text("OK"))
+        title: Text("ოპერაცია დაუშვებელია"),
+        message: Text("ავტორიზაციის ეს მეთოდი გამორთულია."),
+        dismissButton: .default(Text("კარგი"))
     )
     
     static let requiresRecentLogin = AlertItem(
-        title: Text("Authentication Required"),
-        message: Text("Please sign out and sign back in."),
-        dismissButton: .default(Text("OK"))
+        title: Text("ავთენტიფიკაცია საჭიროა"),
+        message: Text("გთხოვთ გახვიდეთ სისტემიდან და შეხვიდეთ ხელახლა."),
+        dismissButton: .default(Text("კარგი"))
     )
     
     static func unknown(message: String) -> AlertItem {
         AlertItem(
-            title: Text("Error"),
+            title: Text("შეცდომა"),
             message: Text(message),
-            dismissButton: .default(Text("OK"))
+            dismissButton: .default(Text("კარგი"))
         )
     }
 }
@@ -103,65 +103,65 @@ struct AuthAlertContext {
 
 struct AuthUIKitAlertContext {
     static let userNotFound = UIKitAlertItem(
-        title: "User Not Found",
-        message: "No account exists with this email address."
+        title: "მომხმარებელი ვერ მოიძებნა",
+        message: "ამ ელფოსტის მისამართით ანგარიში არ არსებობს."
     )
     
     static let invalidCredentials = UIKitAlertItem(
-        title: "Invalid Credentials",
-        message: "The email or password you entered is incorrect."
+        title: "არასწორი მონაცემები",
+        message: "თქვენს მიერ შეყვანილი ელფოსტა ან პაროლი არასწორია."
     )
     
     static let weakPassword = UIKitAlertItem(
-        title: "Weak Password",
-        message: "Password must be at least 6 characters long."
+        title: "სუსტი პაროლი",
+        message: "პაროლი უნდა შეიცავდეს მინიმუმ 6 სიმბოლოს."
     )
     
     static let emailAlreadyInUse = UIKitAlertItem(
-        title: "Email Already Registered",
-        message: "An account with this email already exists."
+        title: "ელფოსტა უკვე რეგისტრირებულია",
+        message: "ამ ელფოსტით ანგარიში უკვე არსებობს."
     )
     
     static let networkError = UIKitAlertItem(
-        title: "Network Error",
-        message: "Please check your internet connection."
+        title: "ქსელის შეცდომა",
+        message: "გთხოვთ შეამოწმოთ ინტერნეტ კავშირი."
     )
     
     static func firestoreError(message: String) -> UIKitAlertItem {
         UIKitAlertItem(
-            title: "Database Error",
-            message: "Error: \(message)"
+            title: "მონაცემთა ბაზის შეცდომა",
+            message: "შეცდომა: \(message)"
         )
     }
     
     static let invalidEmail = UIKitAlertItem(
-        title: "Invalid Email",
-        message: "Please enter a valid email address."
+        title: "არასწორი ელფოსტა",
+        message: "გთხოვთ შეიყვანოთ სწორი ელფოსტის მისამართი."
     )
     
     static let userDisabled = UIKitAlertItem(
-        title: "Account Disabled",
-        message: "Your account has been disabled."
+        title: "ანგარიში გათიშულია",
+        message: "თქვენი ანგარიში გათიშულია."
     )
     
     static let tooManyRequests = UIKitAlertItem(
-        title: "Too Many Attempts",
-        message: "Please wait a few minutes and try again."
+        title: "ძალიან ბევრი მცდელობა",
+        message: "გთხოვთ დაელოდოთ რამდენიმე წუთს და სცადოთ თავიდან."
     )
     
     static let operationNotAllowed = UIKitAlertItem(
-        title: "Operation Not Allowed",
-        message: "This sign-in method is not enabled."
+        title: "ოპერაცია დაუშვებელია",
+        message: "ავტორიზაციის ეს მეთოდი გამორთულია."
     )
     
     static let requiresRecentLogin = UIKitAlertItem(
-        title: "Authentication Required",
-        message: "Please sign out and sign back in."
+        title: "ავთენტიფიკაცია საჭიროა",
+        message: "გთხოვთ გახვიდეთ სისტემიდან და შეხვიდეთ ხელახლა."
     )
     
     static func unknown(message: String) -> UIKitAlertItem {
         UIKitAlertItem(
-            title: "Error",
+            title: "შეცდომა",
             message: message
         )
     }

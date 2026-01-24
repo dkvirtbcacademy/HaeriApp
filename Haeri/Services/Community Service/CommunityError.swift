@@ -19,33 +19,6 @@ enum CommunityError: Error {
     case commentFailed
     case loadingFailed
     case userFetchFailed
-    
-    var localizedDescription: String {
-        switch self {
-        case .postNotFound:
-            return "Post not found"
-        case .unauthorized:
-            return "You are not authorized to perform this action"
-        case .firestoreError(let message):
-            return "Database error: \(message)"
-        case .networkError:
-            return "Network connection failed"
-        case .noInternetConnection:
-            return "No internet connection"
-        case .deletionFailed:
-            return "Failed to delete post"
-        case .updateFailed:
-            return "Failed to update post"
-        case .searchFailed:
-            return "Search operation failed"
-        case .commentFailed:
-            return "Failed to add comment"
-        case .loadingFailed:
-            return "Failed to load posts"
-        case .userFetchFailed:
-            return "Failed to fetch user data"   
-        }
-    }
 }
 
 struct CommunityAlertContext {
