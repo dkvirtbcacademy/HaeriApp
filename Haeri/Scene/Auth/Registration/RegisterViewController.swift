@@ -49,9 +49,9 @@ class RegisterViewController: UIViewController, UIKitAlertHandler {
     
     private func setupUI() {
         setHeader()
-        setStepContainer()
         setButton()
         setProgressStackView()
+        setStepContainer()
     }
     
     private func setHeader() {
@@ -72,7 +72,8 @@ class RegisterViewController: UIViewController, UIKitAlertHandler {
         NSLayoutConstraint.activate([
             stepContainer.topAnchor.constraint(equalTo: header.bottomAnchor, constant: 30),
             stepContainer.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
-            stepContainer.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24)
+            stepContainer.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
+            stepContainer.bottomAnchor.constraint(equalTo: progressSteps.topAnchor, constant: -20)
         ])
     }
     
@@ -80,7 +81,6 @@ class RegisterViewController: UIViewController, UIKitAlertHandler {
         view.addSubview(progressSteps)
         
         NSLayoutConstraint.activate([
-            progressSteps.topAnchor.constraint(greaterThanOrEqualTo: stepContainer.bottomAnchor, constant: 20),
             progressSteps.bottomAnchor.constraint(equalTo: button.topAnchor, constant: -30),
             progressSteps.heightAnchor.constraint(equalToConstant: 3),
             progressSteps.widthAnchor.constraint(equalToConstant: 80),
@@ -145,12 +145,12 @@ class RegisterViewController: UIViewController, UIKitAlertHandler {
             guard let self else { return }
             
             if self.viewModel.currentStep == 1 {
-                guard self.captureStepOneData() else {
+                guard self.captureStepTwoData() else {
                     return
                 }
                 self.viewModel.moveToNextStep()
             } else if self.viewModel.currentStep == 2 {
-                guard self.captureStepTwoData() else {
+                guard self.captureStepOneData() else {
                     return
                 }
                 Task { @MainActor in
@@ -262,9 +262,9 @@ class RegisterViewController: UIViewController, UIKitAlertHandler {
         
         switch currentStep {
         case 1:
-            newStepView = stepOne
-        case 2:
             newStepView = stepTwo
+        case 2:
+            newStepView = stepOne
         default:
             return
         }

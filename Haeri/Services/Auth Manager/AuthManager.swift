@@ -15,10 +15,13 @@ final class AuthManager: ObservableObject, AlertHandler {
     
     let userCategories = [
         UserCategoryModel(label: "მშობელი", iconName: "parent", slug: "parent"),
-        UserCategoryModel(label: "რესპირატორული დაავადების მქონე", iconName: "respiratory issues", slug: "respiratory"),
-        UserCategoryModel(label: "სპორტსმენი / გარე სივრცეში მომუშავე", iconName: "human outside", slug: "sportsman"),
+        UserCategoryModel(label: "ორსული", iconName: "pregnant", slug: "pregnant"),
+        UserCategoryModel(label: "სპორტსმენი", iconName: "athlete", slug: "sportsman"),
+        UserCategoryModel(label: "გარე სივრცეში მომუშავე", iconName: "human outside", slug: "outside"),
         UserCategoryModel(label: "ხანდაზმული", iconName: "elderly", slug: "elderly"),
-        UserCategoryModel(label: "აქტივისტი / მოქალაქე", iconName: "activist", slug: "activist"),
+        UserCategoryModel(label: "აქტივისტი", iconName: "activist", slug: "activist"),
+        UserCategoryModel(label: "მოქალაქე", iconName: "citizen", slug: "citizen"),
+        UserCategoryModel(label: "რესპირატორული დაავადების მქონე", iconName: "respiratory issues", slug: "respiratory"),
     ]
     
     let avatarOptions = ["Avatar 1", "Avatar 2", "Avatar 3", "Avatar 4", "Avatar 5", "Avatar 6", "Avatar 7", "Avatar 8"]

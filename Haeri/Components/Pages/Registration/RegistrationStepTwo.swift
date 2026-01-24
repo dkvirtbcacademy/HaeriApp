@@ -13,7 +13,7 @@ class RegistrationStepTwo: UIView {
     
     private let titleLabel: UILabel = {
         let label = UILabel()
-        label.text = "მიიღე პერსონალიზებული რეკომენდაციები ჰაერის დაბინძურებისგან თავის დასაცავად. \n\n აირჩიე მინიმუმ ერთი კატეგორია:"
+        label.text = "პერსონალიზებული რეკომენდაციების მისაღებად აირჩიე მინიმუმ ერთი კატეგორია:"
         label.font = .firagoMedium(.medium)
         label.textColor = UIColor(named: "TextColor")
         label.numberOfLines = 0
@@ -22,22 +22,11 @@ class RegistrationStepTwo: UIView {
         return label
     }()
     
-    private let tableView: UITableView = {
-        let table = UITableView()
-        table.translatesAutoresizingMaskIntoConstraints = false
-        table.allowsMultipleSelection = true
-        table.separatorStyle = .none
-        table.backgroundColor = .clear
-        table.isScrollEnabled = false
-        return table
-    }()
-    
-    private var selectedIndices: Set<Int> = []
+    private var categoryGameView: CategoryGameView!
     
     init(userCategories: [UserCategoryModel]) {
         self.userCategories = userCategories
         super.init(frame: .zero)
-        
         setupUI()
     }
     
@@ -47,7 +36,7 @@ class RegistrationStepTwo: UIView {
     
     private func setupUI() {
         setTitleLabel()
-        setupTableView()
+        setupCategoryGameView()
     }
     
     private func setTitleLabel() {
@@ -60,50 +49,20 @@ class RegistrationStepTwo: UIView {
         ])
     }
     
-    private func setupTableView() {
-        addSubview(tableView)
-        
-        tableView.delegate = self
-        tableView.dataSource = self
-        tableView.register(UserCategoryCell.self, forCellReuseIdentifier: "UserCategoryCell")
-        
-        let tableHeight = CGFloat(userCategories.count) * 65
+    private func setupCategoryGameView() {
+        categoryGameView = CategoryGameView(userCategories: userCategories)
+        categoryGameView.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(categoryGameView)
         
         NSLayoutConstraint.activate([
-            tableView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 20),
-            tableView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            tableView.trailingAnchor.constraint(equalTo: trailingAnchor),
-            tableView.heightAnchor.constraint(equalToConstant: tableHeight)
+            categoryGameView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 20),
+            categoryGameView.leadingAnchor.constraint(equalTo: leadingAnchor),
+            categoryGameView.trailingAnchor.constraint(equalTo: trailingAnchor),
+            categoryGameView.bottomAnchor.constraint(equalTo: bottomAnchor)
         ])
     }
     
     func getSelectedCategorySlugs() -> [String] {
-        return selectedIndices.sorted().map { userCategories[$0].slug }
-    }
-}
-
-extension RegistrationStepTwo: UITableViewDelegate, UITableViewDataSource {
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return userCategories.count
-    }
-    
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "UserCategoryCell", for: indexPath) as! UserCategoryCell
-        let category = userCategories[indexPath.row]
-        cell.configure(with: category.label, iconName: category.iconName, isSelected: selectedIndices.contains(indexPath.row))
-        return cell
-    }
-    
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        if selectedIndices.contains(indexPath.row) {
-            selectedIndices.remove(indexPath.row)
-        } else {
-            selectedIndices.insert(indexPath.row)
-        }
-        tableView.reloadRows(at: [indexPath], with: .automatic)
-    }
-    
-    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 65
+        return categoryGameView.getSelectedCategorySlugs()
     }
 }
