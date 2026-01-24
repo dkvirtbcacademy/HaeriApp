@@ -9,20 +9,21 @@ import SwiftUI
 
 struct PostHeaderView: View {
     let post: PostModel
+    let author: UserModel?
     let isPostAuthor: Bool
     let onDelete: () -> Void
     
     var body: some View {
         HStack {
             ZStack {
-                Image(post.authorAvatar)
+                Image(author?.avatar ?? "Avatar 1")
                     .resizable()
                     .frame(width: 40, height: 40)
             }
             .glassEffect(.circle(size: 64))
             
             VStack(alignment: .leading, spacing: 4) {
-                Text(post.authorName)
+                Text(author?.name ?? "Anonymous")
                     .font(.firagoBold(.xxsmall))
                     .foregroundStyle(.darkText)
                 Text(post.formattedDate)

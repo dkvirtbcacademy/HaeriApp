@@ -59,8 +59,6 @@ final class PostDetailsViewModel: ObservableObject {
         let comment = CommentModel(
             postId: postId,
             userId: userId,
-            userName: user.name,
-            userAvatar: user.avatar,
             content: commentText
         )
         

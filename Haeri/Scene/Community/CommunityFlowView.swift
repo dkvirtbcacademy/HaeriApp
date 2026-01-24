@@ -47,7 +47,7 @@ struct CommunityFlowView: View {
     CommunityFlowView(
         coordinator: CommunityCoordinator(),
         communityService: CommunityService(
-            authManager: AuthManager(), networkManager: NetworkManager()
+            authManager: AuthManager()
         ),
         authManager: AuthManager()
     )

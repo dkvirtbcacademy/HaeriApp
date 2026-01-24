@@ -36,7 +36,10 @@ struct CommunityPage: View {
                         emptyStateView
                     } else {
                         ForEach(communityService.displayedPosts) { post in
-                            PostCard(post: post)
+                            PostCard(
+                                post: post,
+                                author: communityService.userCache[post.authorId]
+                            )
                                 .onTapGesture {
                                     guard let postId = post.id else { return }
                                     viewModel.navigateToPost(postId: postId)
@@ -157,7 +160,6 @@ struct ScrollOffsetPreferenceKey: PreferenceKey {
         coordinator: CommunityCoordinator(),
         communityService: CommunityService(
             authManager: AuthManager(),
-            networkManager: NetworkManager()
         )
     )
     .preferredColorScheme(.light)

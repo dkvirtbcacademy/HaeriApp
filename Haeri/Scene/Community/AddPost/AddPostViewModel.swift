@@ -47,8 +47,6 @@ final class AddPostViewModel: ObservableObject {
                 id: nil,
                 date: Date(),
                 authorId: userId,
-                authorName: currentUser.name,
-                authorAvatar: currentUser.avatar,
                 title: title.trimmingCharacters(in: .whitespacesAndNewlines),
                 content: content.trimmingCharacters(in: .whitespacesAndNewlines),
                 likes: [],

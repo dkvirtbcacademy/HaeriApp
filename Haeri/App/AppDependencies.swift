@@ -32,7 +32,6 @@ class AppDependencies: ObservableObject {
         )
         self.communityService = CommunityService(
             authManager: authManager,
-            networkManager: networkManager
         )
         
         self.aiRecommendationManager = AIRecomendationManager(

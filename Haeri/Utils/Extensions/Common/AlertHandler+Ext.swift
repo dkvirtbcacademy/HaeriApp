@@ -143,6 +143,8 @@ extension AlertHandler {
             alertItem = CommunityAlertContext.commentFailed
         case .loadingFailed:
             alertItem = CommunityAlertContext.loadingFailed
+        case .userFetchFailed:
+            alertItem = CommunityAlertContext.userFetchFailed
         }
     }
 }

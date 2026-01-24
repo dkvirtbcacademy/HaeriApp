@@ -9,15 +9,16 @@ import SwiftUI
 
 struct PostCard: View {
     let post: PostModel
+    let author: UserModel?
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
                 HStack(spacing: 6) {
-                    Image(post.authorAvatar)
+                    Image(author?.avatar ?? "Avatar 1")
                         .resizable()
                         .frame(maxWidth: 20, maxHeight: 20)
-                    Text(post.authorName)
+                    Text(author?.name ?? "User")
                         .font(.firago(.xsmall))
                         .foregroundColor(.secondaryDarkText)
                 }
@@ -58,13 +59,18 @@ struct PostCard: View {
             id: "1",
             date: Date(),
             authorId: "user_1",
-            authorName: "Dato",
-            authorAvatar: "Avatar 1",
             title: "Air quality in Rustavi",
             content: "Air feels much cleaner today compared to last week. The AQI readings show significant improvement.",
             likes: ["userid"],
             saves: ["userid"],
             commentCount: 5
+        ),
+        author: UserModel(
+            id: "1",
+            name: "admin",
+            avatar: "Avatar 1",
+            email: "asasf",
+            categories: ["asfasfas"]
         )
     )
     .padding()

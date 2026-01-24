@@ -36,6 +36,7 @@ struct PostDetailsPage: View {
                     if let post = communityService.currentPost {
                         PostHeaderView(
                             post: post,
+                            author: communityService.userCache[post.authorId],
                             isPostAuthor: communityService.isCurrentPostAuthor,
                             onDelete: { viewModel.deletePost() }
                         )
@@ -52,6 +53,7 @@ struct PostDetailsPage: View {
                         
                         CommentsSection(
                             comments: communityService.currentPostComments,
+                            userCache: communityService.userCache,
                             commentText: $viewModel.commentText,
                             canComment: viewModel.canComment,
                             onAddComment: { viewModel.addComment() }
@@ -91,7 +93,6 @@ struct PostDetailsPage: View {
             postId: "1",
             communityService: CommunityService(
                 authManager: AuthManager(),
-                networkManager: NetworkManager()
             ),
             authManager: AuthManager(),
             coordinator: CommunityCoordinator()

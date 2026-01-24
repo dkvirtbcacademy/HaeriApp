@@ -18,6 +18,7 @@ enum CommunityError: Error {
     case searchFailed
     case commentFailed
     case loadingFailed
+    case userFetchFailed
     
     var localizedDescription: String {
         switch self {
@@ -41,6 +42,8 @@ enum CommunityError: Error {
             return "Failed to add comment"
         case .loadingFailed:
             return "Failed to load posts"
+        case .userFetchFailed:
+            return "Failed to fetch user data"   
         }
     }
 }
@@ -105,6 +108,12 @@ struct CommunityAlertContext {
     static let loadingFailed = AlertItem(
         title: Text("ჩატვირთვა ვერ მოხერხდა"),
         message: Text("პოსტების ჩატვირთვა ვერ მოხერხდა. გთხოვთ სცადოთ თავიდან."),
+        dismissButton: .default(Text("OK"))
+    )
+    
+    static let userFetchFailed = AlertItem(
+        title: Text("მომხმარებლის მონაცემები ვერ ჩაიტვირთა"),
+        message: Text("ზოგიერთი მომხმარებლის მონაცემების ჩატვირთვა ვერ მოხერხდა. ზოგიერთი სახელი შეიძლება არ გამოჩნდეს."),
         dismissButton: .default(Text("OK"))
     )
 }

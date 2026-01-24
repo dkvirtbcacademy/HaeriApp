@@ -13,7 +13,6 @@ import Network
 @MainActor
 final class CommunityService: ObservableObject, AlertHandler {
     
-    private let networkManager: NetworkManager
     private let authManager: AuthManager
     private let db = Firestore.firestore()
     
@@ -25,6 +24,8 @@ final class CommunityService: ObservableObject, AlertHandler {
     @Published var isLoading: Bool = false
     @Published var isLoadingMore: Bool = false
     @Published var alertItem: AlertItem? = nil
+    
+    @Published private(set) var userCache: [String: UserModel] = [:]
     
     var displayedPosts: [PostModel] {
         let filtered = filterPosts(allPosts)
@@ -58,9 +59,8 @@ final class CommunityService: ObservableObject, AlertHandler {
     private let networkQueue = DispatchQueue(label: "NetworkMonitor")
     private var isConnected = true
     
-    init(authManager: AuthManager, networkManager: NetworkManager) {
+    init(authManager: AuthManager) {
         self.authManager = authManager
-        self.networkManager = networkManager
         setupNetworkMonitoring()
         setupSearchDebounce()
         loadInitialPosts()
@@ -73,6 +73,31 @@ final class CommunityService: ObservableObject, AlertHandler {
     }
     
     // MARK: - Setup
+    
+    private func fetchUsers(userIds: [String]) async {
+        let uncachedIds = userIds.filter { userCache[$0] == nil }
+        
+        guard !uncachedIds.isEmpty else { return }
+        
+        for batch in uncachedIds.chunked(into: 50) {
+            do {
+                let snapshot = try await db.collection("users")
+                    .whereField(FieldPath.documentID(), in: Array(batch))
+                    .getDocuments()
+                
+                for document in snapshot.documents {
+                    if let user = try? document.data(as: UserModel.self) {
+                        userCache[document.documentID] = user
+                    }
+                }
+            } catch {
+                let missingUsers = uncachedIds.filter { userCache[$0] == nil }
+                if !missingUsers.isEmpty {
+                    handleCommunityError(.userFetchFailed)
+                }
+            }
+        }
+    }
     
     private func setupNetworkMonitoring() {
         networkMonitor.pathUpdateHandler = { [weak self] path in
@@ -116,6 +141,9 @@ final class CommunityService: ObservableObject, AlertHandler {
                 lastDocument = snapshot.documents.last
                 hasMorePosts = snapshot.documents.count == pageSize
                 
+                let authorIds = allPosts.map { $0.authorId }
+                await fetchUsers(userIds: authorIds)
+                
                 updateCurrentPostIfNeeded()
                 isLoading = false
             } catch {
@@ -144,6 +172,10 @@ final class CommunityService: ObservableObject, AlertHandler {
                 allPosts.append(contentsOf: newPosts)
                 lastDocument = snapshot.documents.last
                 hasMorePosts = snapshot.documents.count == pageSize
+                
+                let authorIds = newPosts.map { $0.authorId }
+                await fetchUsers(userIds: authorIds)
+                
                 isLoadingMore = false
             } catch {
                 print("Error loading more posts: \(error)")
@@ -278,9 +310,16 @@ final class CommunityService: ObservableObject, AlertHandler {
                     return
                 }
                 
-                self.currentPostComments = snapshot?.documents.compactMap {
+                let comments = snapshot?.documents.compactMap {
                     try? $0.data(as: CommentModel.self)
                 } ?? []
+                
+                self.currentPostComments = comments
+                
+                Task { [weak self] in
+                    let userIds = comments.map { $0.userId }
+                    await self?.fetchUsers(userIds: userIds)
+                }
             }
     }
     

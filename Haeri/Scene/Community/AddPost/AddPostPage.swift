@@ -85,7 +85,6 @@ struct AddPostPage: View {
         AddPostPage(
             communityService: CommunityService(
                 authManager: AuthManager(),
-                networkManager: NetworkManager()
             ),
             authManager: AuthManager(),
             coordinator: CommunityCoordinator()
