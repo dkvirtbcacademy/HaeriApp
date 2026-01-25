@@ -56,7 +56,7 @@ class CategoryGameView: UIView {
             skView.presentScene(scene)
             gameScene = scene
             
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) { [weak self] in
                 self?.gameScene?.startAnimation()
             }
         }
@@ -85,14 +85,8 @@ class CategoryGameScene: SKScene {
     
     override func didMove(to view: SKView) {
         backgroundColor = .clear
-        physicsWorld.gravity = CGVector(dx: 0, dy: -3.0)
+        physicsWorld.gravity = CGVector(dx: 0, dy: -6.8)
         isUserInteractionEnabled = true
-        
-        let backgroundNode = SKShapeNode(rect: frame, cornerRadius: 16)
-        backgroundNode.fillColor = UIColor.text.withAlphaComponent(0.8)
-        backgroundNode.strokeColor = .clear
-        backgroundNode.zPosition = -1
-        addChild(backgroundNode)
         
         let insetRect = frame.insetBy(dx: 2, dy: 2)
         physicsBody = SKPhysicsBody(edgeLoopFrom: insetRect)

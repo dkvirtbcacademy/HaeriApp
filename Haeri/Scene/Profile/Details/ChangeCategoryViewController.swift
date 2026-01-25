@@ -69,10 +69,10 @@ final class ChangeCategoryViewController: UIViewController {
     }
     
     private func setupUI() {
-        setupHeader()
-        setupTitleLabel()
         setupSaveButton()
         setupCategoryGameView()
+        setupHeader()
+        setupTitleLabel()
         setupLoadingView()
     }
     
@@ -102,9 +102,9 @@ final class ChangeCategoryViewController: UIViewController {
         view.addSubview(categoryGameView)
         
         NSLayoutConstraint.activate([
-            categoryGameView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 20),
-            categoryGameView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 24),
-            categoryGameView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -24),
+            categoryGameView.topAnchor.constraint(equalTo: view.topAnchor, constant: -40),
+            categoryGameView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            categoryGameView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             categoryGameView.bottomAnchor.constraint(equalTo: saveButton.topAnchor, constant: -20)
         ])
     }

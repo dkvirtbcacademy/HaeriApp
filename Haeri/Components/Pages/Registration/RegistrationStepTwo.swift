@@ -55,9 +55,9 @@ class RegistrationStepTwo: UIView {
         addSubview(categoryGameView)
         
         NSLayoutConstraint.activate([
-            categoryGameView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 20),
-            categoryGameView.leadingAnchor.constraint(equalTo: leadingAnchor),
-            categoryGameView.trailingAnchor.constraint(equalTo: trailingAnchor),
+            categoryGameView.topAnchor.constraint(equalTo: topAnchor, constant: -200),
+            categoryGameView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: -20),
+            categoryGameView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: 20),
             categoryGameView.bottomAnchor.constraint(equalTo: bottomAnchor)
         ])
     }
