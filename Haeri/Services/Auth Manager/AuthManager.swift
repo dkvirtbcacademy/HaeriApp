@@ -1,10 +1,3 @@
-//
-//  AuthManager.swift
-//  Haeri
-//
-//  Created by kv on 05.01.26.
-//
-
 import Foundation
 import Combine
 import FirebaseAuth
@@ -74,6 +67,7 @@ final class AuthManager: ObservableObject, AlertHandler {
             let userId = authResult.user.uid
             
             let newUser = UserModel(
+                id: userId,
                 name: name,
                 avatar: avatar,
                 email: email,
@@ -82,19 +76,26 @@ final class AuthManager: ObservableObject, AlertHandler {
             
             try await saveUserToFirestore(user: newUser, userId: userId)
             
+            self.currentUser = newUser
+            self.isLoggedIn = true
+            
+            try await Task.sleep(nanoseconds: 500_000_000)
             await fetchUserData(userId: userId)
             
         } catch let error as AuthError {
             handleAuthError(error)
             self.authError = error
+            self.isLoggedIn = false
         } catch let error as NSError {
             let authError = mapAuthError(error)
             handleAuthError(authError)
             self.authError = authError
+            self.isLoggedIn = false
         } catch {
             let authError = AuthError.unknown(error.localizedDescription)
             handleAuthError(authError)
             self.authError = authError
+            self.isLoggedIn = false
         }
     }
     
@@ -112,6 +113,7 @@ final class AuthManager: ObservableObject, AlertHandler {
             let authError = mapAuthError(error)
             handleAuthError(authError)
             self.authError = authError
+            self.isLoggedIn = false
         }
     }
     
@@ -162,7 +164,6 @@ final class AuthManager: ObservableObject, AlertHandler {
             ])
             
             var updatedUser = user
-            let mirror = Mirror(reflecting: updatedUser)
             updatedUser = UserModel(
                 id: userId,
                 name: name,

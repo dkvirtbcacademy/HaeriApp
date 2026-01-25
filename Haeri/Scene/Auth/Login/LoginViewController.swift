@@ -201,7 +201,7 @@ class LoginViewController: UIViewController, UIKitAlertHandler {
                 guard self.captureUserData() else { return }
                 
                 Task { @MainActor in
-                    await self.viewModel.loginUser()
+                    await self.viewModel.handleButtonTap()
                 }
             }
         }, for: .touchUpInside)

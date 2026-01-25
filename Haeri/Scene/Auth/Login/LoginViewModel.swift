@@ -13,8 +13,6 @@ import CoreLocation
 final class LoginViewModel: ObservableObject {
     let coordinator: LoginCoordinator
     let authManager: AuthManager
-    private let locationManager: LocationManager
-    private var cancellables = Set<AnyCancellable>()
     
     @Published private(set) var currentStep: Int = 1
     @Published private(set) var buttonTitle: String = "დაწყება"
@@ -24,6 +22,10 @@ final class LoginViewModel: ObservableObject {
     
     let maxSteps = 2
     
+    private let locationManager: LocationManager
+    private var cancellables = Set<AnyCancellable>()
+    private var isWaitingForLocationPermission = false
+    
     init(
         coordinator: LoginCoordinator,
         authManager: AuthManager,
@@ -32,8 +34,7 @@ final class LoginViewModel: ObservableObject {
         self.coordinator = coordinator
         self.authManager = authManager
         self.locationManager = locationManager
-        
-        observeAuthorizationStatus()
+        observeLocationPermission()
     }
     
     func moveToNextStep() {
@@ -43,34 +44,52 @@ final class LoginViewModel: ObservableObject {
         }
     }
     
+    func handleButtonTap() async {
+        if currentStep == maxSteps {
+            await login()
+        }
+    }
+    
+    func navigateToRegister() {
+        authManager.authError = nil
+        coordinator.navigate(to: .register)
+    }
+    
+    
     private func updateButtonTitle() {
         buttonTitle = currentStep == 2 ? "გაგრძელება" : "დაწყება"
     }
     
-    func loginUser() async {
+    private func login() async {
         let status = locationManager.authorizationStatus
         
         switch status {
-        case .authorizedWhenInUse, .authorizedAlways, .denied:
-            await authManager.login(email: userEmail, password: userPassword)
+        case .authorizedWhenInUse, .authorizedAlways, .denied, .restricted:
+            await performLogin()
         case .notDetermined:
+            isWaitingForLocationPermission = true
             locationManager.requestAuthorization()
-        default:
+        @unknown default:
             break
         }
     }
     
-    private func observeAuthorizationStatus() {
+    private func performLogin() async {
+        await authManager.login(email: userEmail, password: userPassword)
+    }
+    
+    private func observeLocationPermission() {
         locationManager.$authorizationStatus
             .removeDuplicates()
             .dropFirst()
             .sink { [weak self] status in
-                guard let self = self else { return }
+                guard let self = self, self.isWaitingForLocationPermission else { return }
                 
                 switch status {
                 case .authorizedWhenInUse, .authorizedAlways, .denied, .restricted:
+                    self.isWaitingForLocationPermission = false
                     Task { @MainActor in
-                        await self.authManager.login(email: self.userEmail, password: self.userPassword)
+                        await self.performLogin()
                     }
                 case .notDetermined:
                     break
@@ -79,10 +98,5 @@ final class LoginViewModel: ObservableObject {
                 }
             }
             .store(in: &cancellables)
-    }
-    
-    func navigateToRegister() {
-        authManager.authError = nil
-        coordinator.navigate(to: .register)
     }
 }
