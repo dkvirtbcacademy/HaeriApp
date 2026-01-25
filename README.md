@@ -6,6 +6,10 @@
   <i align="center">ჰაერის ხარისხი მნიშვნელოვანია!</i>
 </p>
 
+<p align="center">
+    <img src="./.github/poster.png" alt="haeri poster"/>
+</p>
+
 ## შესავალი
 
 `Haeri` არის აპლიკაცია, რომელიც გვაწვდის ინფორმაციას ჰაერის დაბინძურების შესახებ და გვაძლევს პერსონალიზებულ რჩევებს ჩვენი ჯანმრთელობის დასაცავად.
@@ -16,3 +20,25 @@
 
 `Haeri`-ის მომხმარებლები AI მხარდაჭერის საშუალებით იღებენ მყისიერ, მნიშვნელოვან ინფორმაციას დაბინძურების საფრთხეებზე. ის აერთიანებენ
 ადამიანებს, რომლებიიც ზრუნავენ საკუთარი და გარშემომყოფების ჯანმრთელობაზე.
+
+<details open>
+<summary>
+ Features
+</summary> <br />
+
+<p align="center">
+    <img width="49%" src="./.github/feature-01" alt="haeri feature"/>
+&nbsp;
+    <img width="49%" src="./.github/feature-02" alt="haeri feature"/>
+</p>
+
+<p align="center">
+    <img width="49%" src="./.github/feature-03" alt="haeri feature"/>
+&nbsp;
+    <img width="49%" src="./.github/feature-04" alt="haeri feature"/>
+</p> 
+
+</details>
+
+
+## Development
