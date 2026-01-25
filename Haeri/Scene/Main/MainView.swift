@@ -42,7 +42,7 @@ struct MainView: View {
                 aiRecommendationManager: dependencies.aiRecommendationManager
             )
             .tabItem {
-                Label("Home", systemImage: "house")
+                Label("მთავარი", systemImage: "house")
             }
             .tag(MainTabCoordinator.Tab.home)
             
@@ -53,7 +53,7 @@ struct MainView: View {
             )
             .ignoresSafeArea()
             .tabItem {
-                Label("Dashboard", systemImage: "list.dash.header.rectangle.fill")
+                Label("ქალაქები", systemImage: "list.dash.header.rectangle.fill")
             }
             .tag(MainTabCoordinator.Tab.dashboard)
             
@@ -63,7 +63,7 @@ struct MainView: View {
                 authManager: dependencies.authManager
             )
             .tabItem {
-                Label("Community", systemImage: "person.3.fill")
+                Label("პოსტები", systemImage: "person.3.fill")
             }
             .tag(MainTabCoordinator.Tab.community)
             
@@ -73,7 +73,7 @@ struct MainView: View {
             )
             .ignoresSafeArea()
             .tabItem {
-                Label("Profile", systemImage: "person.circle")
+                Label("პროფილი", systemImage: "person.circle")
             }
             .tag(MainTabCoordinator.Tab.profile)
         }
