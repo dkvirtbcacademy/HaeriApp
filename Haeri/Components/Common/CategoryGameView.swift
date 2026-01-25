@@ -179,11 +179,11 @@ class CategoryGameScene: SKScene {
         
         sprite.physicsBody = SKPhysicsBody(rectangleOf: imageInactive.size)
         sprite.physicsBody?.isDynamic = true
-        sprite.physicsBody?.restitution = 0.4
-        sprite.physicsBody?.linearDamping = 0.5
-        sprite.physicsBody?.mass = 1.0
+        sprite.physicsBody?.restitution = 0.0
+        sprite.physicsBody?.linearDamping = 0.0
+        sprite.physicsBody?.mass = 2.0
         sprite.physicsBody?.allowsRotation = true
-        sprite.physicsBody?.angularDamping = 0.3
+        sprite.physicsBody?.angularDamping = 0.1
         sprite.physicsBody?.angularVelocity = CGFloat.random(in: -3...3)
         
         addChild(sprite)
@@ -191,7 +191,7 @@ class CategoryGameScene: SKScene {
         currentCategoryIndex += 1
         
         if currentCategoryIndex < categories.count {
-            run(SKAction.wait(forDuration: 0.5)) { [weak self] in
+            run(SKAction.wait(forDuration: 0.35)) { [weak self] in
                 self?.dropNextCategory()
             }
         }
