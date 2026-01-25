@@ -502,4 +502,42 @@ final class CommunityService: ObservableObject, AlertHandler {
             currentPostComments.removeAll { $0.id == comment.id }
         }
     }
+    
+    func refreshPosts() async {
+        guard checkNetworkConnection() else { return }
+
+        lastDocument = nil
+        hasMorePosts = true
+        allPosts = []
+
+        await MainActor.run {
+            isLoading = true
+        }
+
+        do {
+            let snapshot = try await db.collection("posts")
+                .order(by: "date", descending: true)
+                .limit(to: pageSize)
+                .getDocuments()
+
+            allPosts = snapshot.documents.compactMap {
+                try? $0.data(as: PostModel.self)
+            }
+
+            lastDocument = snapshot.documents.last
+            hasMorePosts = snapshot.documents.count == pageSize
+
+            let authorIds = allPosts.map { $0.authorId }
+            await fetchUsers(userIds: authorIds)
+
+            updateCurrentPostIfNeeded()
+        } catch {
+            handleCommunityError(.loadingFailed)
+        }
+
+        await MainActor.run {
+            isLoading = false
+        }
+    }
+
 }

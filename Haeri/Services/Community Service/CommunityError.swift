@@ -74,7 +74,7 @@ struct CommunityAlertContext {
     
     static let commentFailed = AlertItem(
         title: Text("კომენტარის დამატება ვერ მოხერხდა"),
-        message: Text("კომენტარის დამატება ვერ მოხერხდა. გთხოვთ სცადოთ თავიდან."),
+        message: Text("პოსტი უკვე წაშლილია"),
         dismissButton: .default(Text("OK"))
     )
     

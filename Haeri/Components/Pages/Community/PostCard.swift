@@ -18,7 +18,7 @@ struct PostCard: View {
                     Image(author?.avatar ?? "Avatar 1")
                         .resizable()
                         .frame(maxWidth: 20, maxHeight: 20)
-                    Text(author?.name ?? "User")
+                    Text(author?.name ?? "Anonymous")
                         .font(.firago(.xsmall))
                         .foregroundColor(.secondaryDarkText)
                 }

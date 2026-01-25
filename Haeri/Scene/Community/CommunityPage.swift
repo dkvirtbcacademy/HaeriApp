@@ -68,8 +68,11 @@ struct CommunityPage: View {
                 .padding(.bottom, 100)
                 .background(scrollOffsetReader)
             }
-            .coordinateSpace(name: "scrollView")
-            
+            .refreshable {
+                await communityService.refreshPosts()
+            }
+            .scrollDismissesKeyboard(.immediately)
+
             VStack(spacing: 10) {
                 SearchBar(searchText: $communityService.searchText)
                 FilterView(selectedFilter: $communityService.selectedFilter)
