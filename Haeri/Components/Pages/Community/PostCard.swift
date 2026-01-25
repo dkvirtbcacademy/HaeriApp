@@ -29,7 +29,7 @@ struct PostCard: View {
             }
             
             Text(post.title)
-                .font(.firagoMedium(.xmedium))
+                .font(.firagoMedium(.medium))
                 .foregroundColor(.darkText.opacity(0.9))
             
             Text(post.content)
