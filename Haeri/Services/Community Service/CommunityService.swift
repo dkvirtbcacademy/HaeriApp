@@ -54,6 +54,7 @@ final class CommunityService: ObservableObject, AlertHandler {
     private var hasMorePosts: Bool = true
     private let pageSize: Int = 10
     private var isSearchMode: Bool { !searchText.isEmpty }
+    private var isInitialLoad: Bool = true
 
     private var commentsListener: ListenerRegistration?
     private var cancellables = Set<AnyCancellable>()
@@ -66,7 +67,7 @@ final class CommunityService: ObservableObject, AlertHandler {
         self.authManager = authManager
         setupNetworkMonitoring()
         setupSearchDebounce()
-        loadInitialPosts()
+        setupAuthListener()
     }
 
     deinit {
@@ -76,6 +77,16 @@ final class CommunityService: ObservableObject, AlertHandler {
     }
 
     // MARK: - Setup
+
+    private func setupAuthListener() {
+        authManager.$currentUser
+            .compactMap { $0 }
+            .first()
+            .sink { [weak self] _ in
+                self?.loadInitialPosts()
+            }
+            .store(in: &cancellables)
+    }
 
     private func fetchUsers(userIds: [String]) async {
         let uncachedIds = userIds.filter { userCache[$0] == nil }
@@ -158,10 +169,14 @@ final class CommunityService: ObservableObject, AlertHandler {
                 await fetchUsers(userIds: authorIds)
 
                 updateCurrentPostIfNeeded()
+                isInitialLoad = false
                 isLoading = false
             } catch {
                 print("Error loading initial posts: \(error)")
-                handleCommunityError(.loadingFailed)
+                if !isInitialLoad {
+                    handleCommunityError(.loadingFailed)
+                }
+                isInitialLoad = false
                 isLoading = false
             }
         }
@@ -245,18 +260,14 @@ final class CommunityService: ObservableObject, AlertHandler {
             allPosts = Array(results.values)
                 .filter { post in
                     post.title.localizedCaseInsensitiveContains(searchQuery)
-                        || post.content.localizedCaseInsensitiveContains(
-                            searchQuery
-                        )
+                        || post.content.localizedCaseInsensitiveContains(searchQuery)
                         || post.titleKeywords.contains {
                             $0.localizedCaseInsensitiveContains(searchQuery)
                         }
                 }
                 .sorted { post1, post2 in
-                    let title1Match = post1.title
-                        .localizedCaseInsensitiveContains(searchQuery)
-                    let title2Match = post2.title
-                        .localizedCaseInsensitiveContains(searchQuery)
+                    let title1Match = post1.title.localizedCaseInsensitiveContains(searchQuery)
+                    let title2Match = post2.title.localizedCaseInsensitiveContains(searchQuery)
 
                     if title1Match != title2Match {
                         return title1Match
@@ -417,7 +428,7 @@ final class CommunityService: ObservableObject, AlertHandler {
 
     func addPost(_ post: PostModel) async {
         guard checkNetworkConnection() else { return }
-        
+
         syncCurrentUserToCache()
 
         do {
@@ -469,7 +480,7 @@ final class CommunityService: ObservableObject, AlertHandler {
 
     func addComment(_ comment: CommentModel) async {
         guard checkNetworkConnection() else { return }
-        
+
         syncCurrentUserToCache()
 
         guard let postId = currentPost?.id else {
@@ -502,7 +513,7 @@ final class CommunityService: ObservableObject, AlertHandler {
             currentPostComments.removeAll { $0.id == comment.id }
         }
     }
-    
+
     func refreshPosts() async {
         guard checkNetworkConnection() else { return }
 
@@ -539,5 +550,4 @@ final class CommunityService: ObservableObject, AlertHandler {
             isLoading = false
         }
     }
-
 }
