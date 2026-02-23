@@ -63,6 +63,7 @@
 - **Swift** — SwiftUI & UIKit
 - **Combine** — state management და async ნაკადები
 - **CoreLocation** — ლოკაციის მონაცემების დამუშავება
+- **SpriteKit** — გრავიტაციული სისტემა და ინტერაქტიული ანიმაციები
 
 #### ☁️ Backend / Services
 - **Firebase** — authentication, მონაცემების შენახვა და სერვისები
@@ -85,10 +86,21 @@
 - Xcode 15+
 - iOS 17.6 deployment target
 
+## API Keys Setup
+
+### Groq API Key-ის დამატება:
+
+1. გადადით [Groq Console](https://console.groq.com/keys) და შექმენით ახალი API key
+2. გახსენით `Secrets.xcconfig` ფაილი პროექტში
+3. შეცვალეთ `AI_API_KEY` თქვენი რეალური key-ით:
+```xcconfig
+POLLUTION_API_KEY = 0d42305cce9b217d3a28f376eb166e2d
+AI_API_KEY = თქვენი_groq_api_key_აქ
+```
 
 ## ინსტალაცია
 1. დააკლონეთ რეპოზიტორი
-2. გახსენით `Haeri.xcodeproj`
-3. აირჩიეთ სიმულატორი
-4. გაუშვით აპლიკაცია (⌘R)
-
+2. შეცვალეთ `AI_API_KEY` ფაილში `Secrets.xcconfig` (იხ. ზემოთ)
+3. გახსენით `Haeri.xcodeproj`
+4. აირჩიეთ სიმულატორი
+5. გაუშვით აპლიკაცია (⌘R)
